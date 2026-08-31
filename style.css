@@ -1,0 +1,499 @@
+/* ==========================================================================
+   Bible Plan — style.css
+   A quiet, book-like calendar: parchment reading cards laid on a dusk-
+   indigo page. Brass marks what needs attention, sage marks what's
+   already been read, and a soft rust marks the "didn't get to it" action.
+   ========================================================================== */
+
+:root {
+  --night: #16222C;
+  --night-2: #1E303C;
+  --night-line: #2E4150;
+  --paper: #F1E7D2;
+  --paper-dim: #E3D5B8;
+  --ink: #2B2013;
+  --ink-soft: #6C5C45;
+  --gold: #B3862E;
+  --gold-bright: #DBB558;
+  --sage: #55684F;
+  --sage-bg: #D9E1CE;
+  --rust: #8A4436;
+  --rust-bg: #E7D5CC;
+  --cream: #EDE4D0;
+  --shadow: rgba(8, 6, 3, 0.32);
+
+  --font-display: "Spectral", Georgia, "Times New Roman", serif;
+  --font-body: "Karla", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--night);
+  background-image: radial-gradient(circle at 18% -10%, var(--night-2), var(--night) 55%);
+  color: var(--cream);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  animation: page-in 0.5s ease both;
+}
+
+@keyframes page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.app {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 30px 20px 110px;
+}
+
+/* ---------------------------------------------------------------- header */
+
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 22px;
+  margin-bottom: 26px;
+  border-bottom: 1px solid var(--night-line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cross-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--gold-bright);
+  flex-shrink: 0;
+}
+
+.brand h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 25px;
+  color: var(--cream);
+}
+
+.clock {
+  text-align: right;
+  line-height: 1.45;
+  padding-top: 2px;
+}
+
+.clock-date {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  color: var(--cream);
+}
+
+.clock-time {
+  font-size: 12.5px;
+  color: var(--gold-bright);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------- quote */
+
+.quote-banner {
+  max-width: 480px;
+  margin: 0 auto 26px;
+  padding: 0 10px;
+  text-align: center;
+}
+
+.quote-text {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 16.5px;
+  line-height: 1.55;
+  color: var(--cream);
+}
+
+.quote-source {
+  margin: 0;
+  min-height: 1em;
+  font-size: 12.5px;
+  color: var(--gold-bright);
+}
+
+/* ------------------------------------------------------------- progress */
+
+.progress-section {
+  margin-bottom: 30px;
+}
+
+.progress-stats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--cream);
+  opacity: 0.8;
+  margin-bottom: 7px;
+}
+
+.progress-track {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--night-line);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--sage), var(--gold-bright));
+  transition: width 0.4s ease;
+}
+
+/* -------------------------------------------------------------- listing */
+
+.plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.month-label {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  color: var(--gold-bright);
+  margin: 22px 2px 2px;
+}
+
+.month-label:first-child {
+  margin-top: 0;
+}
+
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--paper);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  padding: 13px 13px 13px 9px;
+  box-shadow: 0 1px 2px var(--shadow);
+}
+
+.card.is-today {
+  border-left: 4px solid var(--gold);
+  padding-left: 9px;
+  box-shadow: 0 3px 12px var(--shadow);
+}
+
+.card.is-missed {
+  background: var(--paper-dim);
+  filter: grayscale(50%);
+  opacity: 0.72;
+}
+
+.card.is-read {
+  background: var(--sage-bg);
+}
+
+.card.is-read.is-missed {
+  filter: none;
+  opacity: 1;
+}
+
+.drag-handle {
+  width: 18px;
+  height: 18px;
+  margin-top: 5px;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  opacity: 0.45;
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.card-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 42px;
+  flex-shrink: 0;
+  padding-top: 1px;
+  font-family: var(--font-display);
+  color: var(--ink);
+}
+
+.date-dow {
+  font-size: 10.5px;
+  color: var(--ink-soft);
+}
+
+.date-day {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.today-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-top: 1px;
+}
+
+.card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.card-body {
+  flex: 1;
+  min-width: 180px;
+}
+
+.passage {
+  margin: 0 0 4px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+.verses-badge {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.card-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.card-actions button {
+  width: 33px;
+  height: 33px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  background: rgba(255, 255, 255, 0.35);
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.card-actions button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-read:hover {
+  border-color: var(--sage);
+  color: var(--sage);
+}
+
+.btn-read[aria-pressed="true"] {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: #fff;
+}
+
+.btn-skip:hover,
+.btn-skip[aria-expanded="true"] {
+  border-color: var(--rust);
+  color: var(--rust);
+}
+
+button:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+}
+
+.skip-panel {
+  flex-basis: 100%;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.16);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.skip-panel[hidden] {
+  display: none;
+}
+
+.skip-panel button {
+  border: 1px solid var(--rust);
+  color: var(--rust);
+  background: transparent;
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 12.5px;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.skip-panel button:hover {
+  background: var(--rust-bg);
+}
+
+.skip-panel button.cancel {
+  border-color: transparent;
+  color: var(--ink-soft);
+  text-decoration: underline;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+/* ------------------------------------------------------------- rest day */
+
+.card.rest-card {
+  background: transparent;
+  border: 1px dashed rgba(237, 228, 208, 0.28);
+  box-shadow: none;
+  align-items: center;
+}
+
+.rest-card .drag-handle {
+  color: var(--cream);
+  opacity: 0.35;
+}
+
+.rest-card .date-dow,
+.rest-card .date-day {
+  color: var(--cream);
+  opacity: 0.6;
+}
+
+.rest-label {
+  flex: 1;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--cream);
+  opacity: 0.55;
+}
+
+.btn-remove-rest {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--cream);
+  opacity: 0.45;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-remove-rest:hover {
+  opacity: 0.9;
+}
+
+.btn-remove-rest svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* --------------------------------------------------------- drag states */
+
+.sortable-ghost {
+  opacity: 0.35;
+}
+
+.sortable-chosen {
+  box-shadow: 0 8px 22px var(--shadow);
+}
+
+.sortable-drag {
+  cursor: grabbing;
+}
+
+/* -------------------------------------------------------- jump-to-today */
+
+.jump-today {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  padding: 12px 18px;
+  border: none;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #241a08;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 4px 16px var(--shadow);
+  cursor: pointer;
+}
+
+.jump-today:hover {
+  background: var(--gold-bright);
+}
+
+/* -------------------------------------------------------------- mobile */
+
+@media (max-width: 480px) {
+  .app {
+    padding: 22px 14px 100px;
+  }
+
+  .app-header {
+    flex-direction: column;
+  }
+
+  .clock {
+    text-align: left;
+  }
+
+  .card {
+    padding: 11px 10px 11px 7px;
+    gap: 8px;
+  }
+
+  .card-date {
+    min-width: 34px;
+  }
+
+  .card-body {
+    min-width: 140px;
+  }
+
+  .card-actions button {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

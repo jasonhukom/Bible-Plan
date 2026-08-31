@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bible Plan</title>
+<meta name="description" content="A daily Bible reading calendar with drag-to-reorder days and a check or skip for each one.">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <header class="app-header">
+    <div class="brand">
+      <svg class="cross-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <line x1="12" y1="2" x2="12" y2="22"/>
+        <line x1="5" y1="8" x2="19" y2="8"/>
+      </svg>
+      <h1>Bible Plan</h1>
+    </div>
+    <div class="clock">
+      <div class="clock-date" id="clockDate">&nbsp;</div>
+      <div class="clock-time" id="clockTime">&nbsp;</div>
+    </div>
+  </header>
+
+  <section class="quote-banner" aria-live="polite">
+    <p class="quote-text" id="quoteText"></p>
+    <p class="quote-source" id="quoteSource"></p>
+  </section>
+
+  <section class="progress-section" aria-label="Reading progress">
+    <div class="progress-stats">
+      <span id="progressCount">0 / 0 days read</span>
+      <span id="progressVerses">0 verses read</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </section>
+
+  <main class="plan-list" id="planList" aria-label="Daily readings">
+    <!-- rendered by script.js -->
+  </main>
+
+</div>
+
+<button type="button" class="jump-today" id="jumpToday">Today</button>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
+<script src="readings-data.js"></script>
+<script src="quotes-data.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
