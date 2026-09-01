@@ -37,6 +37,16 @@
     <p class="quote-source" id="quoteSource"></p>
   </section>
 
+  <main>
+    <div class="calendar-wrapper">
+        <div class="days-header">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+            </div>
+    </div>
+</main>
+
   <section class="progress-section" aria-label="Reading progress">
     <div class="progress-stats">
       <span id="progressCount">0 / 0 days read</span>
@@ -54,15 +64,7 @@
 </div>
 
 <button type="button" class="jump-today" id="jumpToday">Today</button>
-<main>
-    <div class="calendar-wrapper">
-        <div class="days-header">
-            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-        </div>
-        <div class="calendar-grid" id="calendarGrid">
-            </div>
-    </div>
-</main>
+
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
 <script src="readings-data.js"></script>
 <script src="quotes-data.js"></script>
