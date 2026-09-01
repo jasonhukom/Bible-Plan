@@ -3,17 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#16222C">
-  <meta name="description" content="A polished Bible reading calendar with book and chapter level progress and drag-and-drop scheduling.">
+
   <title>Bible Plan</title>
+  <meta
+    name="description"
+    content="A daily Bible reading calendar with drag-to-reorder days and progress tracking."
+  >
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;500;600;700&family=Karla:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <div class="app-shell">
+
+  <div class="app">
+
+    <!-- HEADER -->
     <header class="app-header">
+
       <div class="brand">
         <svg class="cross-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <line x1="12" y1="2" x2="12" y2="22"></line>
@@ -21,57 +37,48 @@
         </svg>
         <div>
           <h1>Bible Plan</h1>
-          <p>by Jason Christopher Hukom</p>
+          <h4>by Jason Christopher Hukom</h4>
         </div>
       </div>
 
-      <div class="header-clock" aria-live="polite">
-        <div id="clockDate">&nbsp;</div>
-        <div id="clockTime">&nbsp;</div>
+      <div class="clock">
+        <div class="clock-date" id="clockDate">&nbsp;</div>
+        <div class="clock-time" id="clockTime">&nbsp;</div>
       </div>
+
     </header>
 
+
+    <!-- QUOTE -->
     <section class="quote-banner" aria-live="polite">
-      <p id="quoteText"></p>
-      <p id="quoteSource"></p>
+      <p class="quote-text" id="quoteText"></p>
+      <p class="quote-source" id="quoteSource"></p>
     </section>
 
-    <section class="toolbar" aria-label="Calendar controls">
-      <div class="toolbar-group calendar-nav">
-        <button type="button" class="icon-button" id="prevMonth" aria-label="Previous month">←</button>
-        <button type="button" class="today-button" id="todayButton">Today</button>
-        <button type="button" class="icon-button" id="nextMonth" aria-label="Next month">→</button>
-        <h2 id="monthTitle">September 2026</h2>
-      </div>
 
-      <div class="toolbar-group toolbar-actions">
-        <label class="start-date">
-          <span>Start</span>
-          <input id="planStart" type="date" value="2026-09-01">
-        </label>
-        <label class="upload-button">
-          <span>Import CSV</span>
-          <input id="csvInput" type="file" accept=".csv,text/csv">
-        </label>
-        <button type="button" class="ghost-button" id="exportButton">Export</button>
-        <button type="button" class="ghost-button danger" id="resetButton">Reset</button>
-      </div>
-    </section>
-
+    <!-- PROGRESS -->
     <section class="progress-section" aria-label="Reading progress">
+
       <div class="progress-stats">
-        <span id="progressCount">0 / 0 chapters read</span>
-        <span id="progressVerses">0 verses</span>
+        <span id="progressCount">0 / 0 days read</span>
+        <span id="progressVerses">0 verses read</span>
       </div>
-      <div class="progress-track" aria-hidden="true">
+
+      <div class="progress-track">
         <div class="progress-fill" id="progressFill"></div>
       </div>
+
     </section>
 
-    <main class="calendar-container">
+
+    <!-- CALENDAR -->
+    <main class="calendar-section">
+
       <div class="calendar-scroll">
-        <section class="calendar" aria-label="Bible reading calendar">
-          <div class="weekdays" aria-hidden="true">
+
+        <div class="calendar">
+
+          <div class="calendar-weekdays">
             <div>Sun</div>
             <div>Mon</div>
             <div>Tue</div>
@@ -80,41 +87,33 @@
             <div>Fri</div>
             <div>Sat</div>
           </div>
+
           <div id="calendarGrid" class="calendar-grid"></div>
-        </section>
+
+        </div>
+
       </div>
+
     </main>
+
   </div>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <div id="moveDialog" class="dialog-backdrop" hidden>
-    <section class="move-dialog" role="dialog" aria-modal="true" aria-labelledby="moveDialogTitle">
-      <button type="button" class="dialog-close" id="closeMoveDialog" aria-label="Close">×</button>
-      <h2 id="moveDialogTitle">Move reading</h2>
-      <p id="moveDialogDescription"></p>
-      <label class="dialog-field">
-        <span>Move to date</span>
-        <input type="date" id="moveDateInput">
-      </label>
-      <div class="dialog-actions">
-        <button type="button" class="ghost-button" id="cancelMove">Cancel</button>
-        <button type="button" class="primary-button" id="confirmMove">Move</button>
-      </div>
-    </section>
-  </div>
+  <!-- JUMP TO TODAY -->
+  <button
+    type="button"
+    class="jump-today"
+    id="jumpToday"
+  >
+    Today
+  </button>
 
-  <template id="chapterTemplate">
-    <div class="chapter-row">
-      <label class="chapter-check">
-        <input type="checkbox">
-        <span class="custom-check" aria-hidden="true"></span>
-        <span class="chapter-label"></span>
-      </label>
-      <button type="button" class="mini-move" title="Move chapter" aria-label="Move chapter">↗</button>
-    </div>
-  </template>
+
+  <!-- DATA -->
+  <script src="readings-data.js"></script>
+  <script src="quotes-data.js"></script>
 
   <script src="script.js"></script>
+
 </body>
 </html>
