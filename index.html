@@ -4,57 +4,66 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bible Plan</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
-  <!-- Load a clean, modern font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Load display and body fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=Karla:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="app-container">
+  <div class="app">
     
-    <!-- Top Header -->
-    <header class="top-bar">
-      <div class="logo">
-        <span class="icon">✝</span>
-        <h1>Bible Plan</h1>
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="brand">
+        <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+          <rect width="32" height="32" rx="7" fill="#16222C" style="opacity:0"/>
+          <line x1="16" y1="6" x2="16" y2="27" stroke="#DBB558" stroke-width="3" stroke-linecap="round"/>
+          <line x1="7" y1="13" x2="25" y2="13" stroke="#DBB558" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <h1>Bible Plan</h1>
+          <h4>Read through Scripture</h4>
+        </div>
       </div>
-      <div class="quote-container" id="quoteContainer">
-        <!-- Motivational quote injected here -->
-      </div>
-      <div class="clock" id="clock">
-        <div id="clockTime" class="time">--:--</div>
-        <div id="clockDate" class="date">--</div>
+      <div class="clock">
+        <div class="clock-date" id="clockDate">--</div>
+        <div class="clock-time" id="clockTime">--:--</div>
       </div>
     </header>
 
-    <!-- Controls Toolbar -->
-    <section class="toolbar">
-      <div class="month-nav">
-        <h2 id="currentMonthLabel">Bible Reading Plan</h2>
-        <button id="todayBtn">Today</button>
+    <!-- Quote Section -->
+    <section class="quote-banner">
+      <p class="quote-text" id="quoteText">--</p>
+      <p class="quote-source" id="quoteSource"></p>
+    </section>
+
+    <!-- Progress Section -->
+    <section class="progress-section">
+      <div class="progress-stats">
+        <span id="progressDays">0 / 0 days</span>
+        <span id="progressVerses">0 verses</span>
       </div>
-      <div class="actions">
-        <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
-        <button id="importBtn" class="btn-secondary">Import CSV</button>
-        <button id="exportBtn" class="btn-secondary">Export Backup</button>
-        <button id="resetBtn" class="btn-danger">Reset Plan</button>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
       </div>
     </section>
 
-    <!-- Calendar Grid View -->
-    <main class="calendar-wrapper">
-      <!-- Weekday Headers -->
-      <div class="calendar-headers">
-        <div>SUN</div>
-        <div>MON</div>
-        <div>TUE</div>
-        <div>WED</div>
-        <div>THU</div>
-        <div>FRI</div>
-        <div>SAT</div>
+    <!-- Calendar Section -->
+    <section class="calendar-section">
+      <div class="calendar">
+        <div class="calendar-weekdays">
+          <div>SUN</div>
+          <div>MON</div>
+          <div>TUE</div>
+          <div>WED</div>
+          <div>THU</div>
+          <div>FRI</div>
+          <div>SAT</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
       </div>
-      <!-- Days Grid -->
-      <div id="calendarGrid" class="calendar-grid"></div>
-    </main>
+    </section>
+
   </div>
 
   <!-- Load data files first, then the app script -->

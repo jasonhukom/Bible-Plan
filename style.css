@@ -885,6 +885,30 @@ button:focus-visible {
 
 
 /* --------------------------------------------------------------------------
+   PASSAGE BUTTON
+   -------------------------------------------------------------------------- */
+
+.passage-btn {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.passage-btn:hover {
+  color: var(--gold-bright);
+  text-decoration: underline;
+}
+
+.passage-btn:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+}
+
+/* --------------------------------------------------------------------------
    RESPONSIVE
    -------------------------------------------------------------------------- */
 
