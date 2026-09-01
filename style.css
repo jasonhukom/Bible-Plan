@@ -229,7 +229,12 @@ button:focus-visible {
    -------------------------------------------------------------------------- */
 
 .progress-section {
-  width: min(1000px, 100%);
+  width: min(1800px, 100%);
+
+  margin:
+    0
+    auto
+    28px;
 }
 
 .progress-stats {
