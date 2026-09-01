@@ -24,6 +24,7 @@
         <line x1="5" y1="8" x2="19" y2="8"/>
       </svg>
       <h1>Bible Plan</h1>
+      <h4>by Jason Christopher Hukom</h4>
     </div>
     <div class="clock">
       <div class="clock-date" id="clockDate">&nbsp;</div>
@@ -53,7 +54,15 @@
 </div>
 
 <button type="button" class="jump-today" id="jumpToday">Today</button>
-
+<main>
+    <div class="calendar-wrapper">
+        <div class="days-header">
+            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+        </div>
+        <div class="calendar-grid" id="calendarGrid">
+            </div>
+    </div>
+</main>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
 <script src="readings-data.js"></script>
 <script src="quotes-data.js"></script>
