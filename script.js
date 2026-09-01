@@ -130,7 +130,6 @@
     saveState();
     renderCalendar();
   }
-  
   function renderCalendar() {
   const grid = document.getElementById('calendarGrid');
   grid.innerHTML = '';
