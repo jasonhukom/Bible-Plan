@@ -163,6 +163,14 @@ body {
 }
 
 /* -------------------------------------------------------------- listing */
+main { flex-grow: 1; padding: 20px; overflow-y: auto; width: 100%; }
+.calendar-wrapper { max-width: 100%; margin: 0 auto; background: #fff; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }        
+
+.days-header { display: grid; grid-template-columns: repeat(7, 1fr); background: #f1f3f4; border-bottom: 1px solid #ddd; }
+.days-header div { padding: 10px; text-align: center; font-weight: 600; color: #3c4043; border-right: 1px solid #ddd; }
+.days-header div:last-child { border-right: none; }
+
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); background: #ddd; gap: 1px; }
 
 .plan-list {
   display: flex;
