@@ -126,9 +126,11 @@ button:focus-visible {
 }
 
 .cross-icon {
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
+
   color: var(--gold-bright);
+
   flex-shrink: 0;
 }
 
@@ -229,7 +231,7 @@ button:focus-visible {
    -------------------------------------------------------------------------- */
 
 .progress-section {
-  width: min(1800px, 100%);
+  width: min(1000px, 100%);
 
   margin:
     0
