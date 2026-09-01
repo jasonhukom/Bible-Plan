@@ -1,407 +1,731 @@
 /* ==========================================================================
-   Bible Plan — script.js
-   Complete application logic with calendar rendering and progress tracking
+   Bible Plan — Complete Application
+   Vanilla JS, Calendar-based Bible reading tracker with D&D support
    ========================================================================== */
 
 (function () {
   "use strict";
 
-  var STORAGE_KEY = "biblePlan.v1";
+  const STORAGE_KEY = "biblePlan.state.v1";
+  const INDONESIA_TZ = "Asia/Jakarta";
 
-  const bookNames = {
-    "Gen": "Genesis",
-    "Ex": "Exodus",
-    "Lev": "Leviticus",
-    "Num": "Numbers",
-    "Deut": "Deuteronomy",
-
-    "Jos": "Joshua",
-    "Judg": "Judges",
-    "Ruth": "Ruth",
-
-    "1 Sa": "1 Samuel",
-    "2 Sa": "2 Samuel",
-
-    "1 Ki": "1 Kings",
-    "2 Ki": "2 Kings",
-
-    "1 Ch": "1 Chronicles",
-    "2 Ch": "2 Chronicles",
-
-    "Ezr": "Ezra",
-    "Neh": "Nehemiah",
-    "Est": "Esther",
-
-    "Job": "Job",
-    "Ps": "Psalms",
-    "Pro": "Proverbs",
-
-    "Ecc": "Ecclesiastes",
-    "Song": "Song of Solomon",
-
-    "Isa": "Isaiah",
-    "Jer": "Jeremiah",
-    "Lam": "Lamentations",
-    "Eze": "Ezekiel",
-
-    "Dan": "Daniel",
-    "Hos": "Hosea",
-    "Joel": "Joel",
-    "Am": "Amos",
-    "Ob": "Obadiah",
-
-    "Jon": "Jonah",
-    "Mic": "Micah",
-    "Nah": "Nahum",
-    "Hab": "Habakkuk",
-    "Zep": "Zephaniah",
-
-    "Hag": "Haggai",
-    "Zec": "Zechariah",
-    "Mal": "Malachi",
-
-    "Mat": "Matthew",
-    "Mk": "Mark",
-    "Lk": "Luke",
-    "Jn": "John",
-
-    "Act": "Acts",
-    "Rom": "Romans",
-
-    "1 Co": "1 Corinthians",
-    "2 Co": "2 Corinthians",
-
-    "Gal": "Galatians",
-    "Eph": "Ephesians",
-    "Php": "Philippians",
-
-    "Col": "Colossians",
-
-    "1 Th": "1 Thessalonians",
-    "2 Th": "2 Thessalonians",
-
-    "1 Ti": "1 Timothy",
-    "2 Ti": "2 Timothy",
-
-    "Tit": "Titus",
-    "Phm": "Philemon",
-
-    "Heb": "Hebrews",
-    "Jam": "James",
-
-    "1 Pe": "1 Peter",
-    "2 Pe": "2 Peter",
-
-    "1 Jn": "1 John",
-    "2 Jn": "2 John",
-    "3 Jn": "3 John",
-
-    "Jude": "Jude",
-    "Rev": "Revelation"
+  /* Book name mapping */
+  const BOOK_NAMES = {
+    "Gen": "Genesis", "Ex": "Exodus", "Lev": "Leviticus", "Num": "Numbers", "Deut": "Deuteronomy",
+    "Jos": "Joshua", "Judg": "Judges", "Ruth": "Ruth", "1 Sa": "1 Samuel", "2 Sa": "2 Samuel",
+    "1 Ki": "1 Kings", "2 Ki": "2 Kings", "1 Ch": "1 Chronicles", "2 Ch": "2 Chronicles",
+    "Ezr": "Ezra", "Neh": "Nehemiah", "Est": "Esther", "Job": "Job", "Ps": "Psalms", "Pro": "Proverbs",
+    "Ecc": "Ecclesiastes", "Song": "Song of Solomon", "Isa": "Isaiah", "Jer": "Jeremiah", "Lam": "Lamentations",
+    "Eze": "Ezekiel", "Dan": "Daniel", "Hos": "Hosea", "Joel": "Joel", "Am": "Amos", "Ob": "Obadiah",
+    "Jon": "Jonah", "Mic": "Micah", "Nah": "Nahum", "Hab": "Habakkuk", "Zep": "Zephaniah",
+    "Hag": "Haggai", "Zec": "Zechariah", "Mal": "Malachi", "Mat": "Matthew", "Mk": "Mark",
+    "Lk": "Luke", "Jn": "John", "Act": "Acts", "Rom": "Romans", "1 Co": "1 Corinthians",
+    "2 Co": "2 Corinthians", "Gal": "Galatians", "Eph": "Ephesians", "Php": "Philippians",
+    "Col": "Colossians", "1 Th": "1 Thessalonians", "2 Th": "2 Thessalonians", "1 Ti": "1 Timothy",
+    "2 Ti": "2 Timothy", "Tit": "Titus", "Phm": "Philemon", "Heb": "Hebrews", "Jam": "James",
+    "1 Pe": "1 Peter", "2 Pe": "2 Peter", "1 Jn": "1 John", "2 Jn": "2 John", "3 Jn": "3 John",
+    "Jude": "Jude", "Rev": "Revelation"
   };
-  /* ================================================================
-     Date Helpers
-     ================================================================ */
 
-  function parseISODate(s) {
-    var parts = s.split("-").map(Number);
-    return new Date(parts[0], parts[1] - 1, parts[2]);
-  }
-
-  function toISODate(date) {
-    var y = date.getFullYear();
-    var m = String(date.getMonth() + 1).padStart(2, "0");
-    var d = String(date.getDate()).padStart(2, "0");
-    return y + "-" + m + "-" + d;
-  }
-
-  function startOfDay(date) {
-    var d = new Date(date.getTime());
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
-
-  function isSameDay(a, b) {
-    return toISODate(a) === toISODate(b);
-  }
-
-  function addDays(date, n) {
-    var d = new Date(date.getTime());
-    d.setDate(d.getDate() + n);
-    return d;
-  }
-
-  /* ================================================================
-     State Management
-     ================================================================ */
-
-  var PLAN_START = typeof READINGS !== "undefined" && READINGS.length > 0 
-    ? parseISODate(READINGS[0].date) 
-    : new Date();
-
-  function defaultState() {
-    return {
-      readStatus: {},
+  let state = {
+    calendarDays: [],
+    settings: {
       quoteIndex: -1
-    };
+    }
+  };
+
+  let currentDate = getIndonesiaToday();
+
+  /* ================================================================
+     Date Utilities (Indonesia timezone aware)
+     ================================================================ */
+
+  function getIndonesiaToday() {
+    const now = new Date();
+    const jakartaTime = new Date(now.toLocaleString("en-US", { timeZone: INDONESIA_TZ }));
+    jakartaTime.setHours(0, 0, 0, 0);
+    return jakartaTime;
+  }
+
+  function dateToISO(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  function parseISO(dateStr) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    date.setHours(0, 0, 0, 0);
+    return date;
+  }
+
+  function addMonths(date, count) {
+    const result = new Date(date);
+    result.setMonth(result.getMonth() + count);
+    return result;
+  }
+
+  function getDaysInMonth(year, month) {
+    return new Date(year, month + 1, 0).getDate();
+  }
+
+  function getFirstDayOfMonth(year, month) {
+    return new Date(year, month, 1).getDay();
+  }
+
+  /* ================================================================
+     Data Structure & Initialization
+     ================================================================ */
+
+  function parsePassageString(passageStr) {
+    if (!passageStr) return [];
+
+    const books = [];
+    const bookStrings = passageStr.split(";").map(s => s.trim());
+
+    bookStrings.forEach((bookStr) => {
+      const match = bookStr.match(/^([A-Za-z0-9\s]+?)\s+(.+)$/);
+      if (!match) return;
+
+      const abbr = match[1].trim();
+      const fullName = BOOK_NAMES[abbr] || abbr;
+      const chaptersStr = match[2].trim();
+
+      const chapters = [];
+      const ranges = chaptersStr.split(",").map(s => s.trim());
+
+      ranges.forEach((range) => {
+        if (range.includes("-")) {
+          const [start, end] = range.split("-").map(Number);
+          for (let i = start; i <= end; i++) {
+            chapters.push(i);
+          }
+        } else {
+          chapters.push(Number(range));
+        }
+      });
+
+      books.push({
+        id: `book-${abbr}-${Date.now()}-${Math.random()}`,
+        abbreviation: abbr,
+        fullName: fullName,
+        chapters: chapters.map((num) => ({
+          id: `ch-${abbr}-${num}-${Date.now()}-${Math.random()}`,
+          number: num,
+          completed: false
+        }))
+      });
+    });
+
+    return books;
+  }
+
+  function initializeCalendarData() {
+    if (!window.READINGS || READINGS.length === 0) return;
+
+    state.calendarDays = READINGS.map((reading) => ({
+      id: `day-${reading.idx}`,
+      date: reading.date,
+      dayIndex: reading.idx,
+      metadata: reading.verses || "",
+      books: parsePassageString(reading.passage)
+    }));
+  }
+
+  /* ================================================================
+     State Persistence
+     ================================================================ */
+
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn("Failed to save state:", e);
+    }
   }
 
   function loadState() {
     try {
-      var raw = window.localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      var parsed = JSON.parse(raw);
-      return parsed && typeof parsed.readStatus === "object" ? parsed : null;
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.calendarDays && Array.isArray(parsed.calendarDays)) {
+          state = parsed;
+          return true;
+        }
+      }
     } catch (e) {
-      return null;
+      console.warn("Failed to load state:", e);
     }
+    return false;
   }
 
-  var state = loadState() || defaultState();
-  var storageAvailable = true;
-
-  function saveState() {
-    try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-      storageAvailable = false;
-    }
+  function resetPlan() {
+    if (!confirm("Clear all reading progress? This cannot be undone.")) return;
+    state = {
+      calendarDays: [],
+      settings: { quoteIndex: -1 }
+    };
+    initializeCalendarData();
+    saveState();
+    render();
   }
 
   /* ================================================================
-     Actions
+     CSV Import
      ================================================================ */
 
-  function toggleRead(idx) {
-    var key = String(idx);
-    state.readStatus[key] = !state.readStatus[key];
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], field = "", inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQuotes) {
+        if (c === '"' && text[i + 1] === '"') {
+          field += '"';
+          i++;
+        } else if (c === '"') {
+          inQuotes = false;
+        } else {
+          field += c;
+        }
+      } else if (c === '"') {
+        inQuotes = true;
+      } else if (c === ",") {
+        row.push(field);
+        field = "";
+      } else if (c === "\n" || c === "\r") {
+        if (c === "\r" && text[i + 1] === "\n") i++;
+        row.push(field);
+        field = "";
+        if (row.length > 1 || row[0] !== "") rows.push(row);
+        row = [];
+      } else {
+        field += c;
+      }
+    }
+    if (field.length || row.length) {
+      row.push(field);
+      rows.push(row);
+    }
+    return rows;
+  }
+
+  function importCSV(csvText) {
+    const rows = parseCSV(csvText);
+    if (rows.length === 0) {
+      alert("Empty CSV file");
+      return;
+    }
+
+    const firstRow = rows[0];
+    const isHeader = firstRow[0] && (firstRow[0].toLowerCase().includes("date") || 
+                     firstRow[0].toLowerCase().includes("passage") ||
+                     firstRow[0].startsWith('"Date'));
+    const dataRows = isHeader ? rows.slice(1) : rows;
+
+    state.calendarDays = dataRows
+      .map((row, idx) => {
+        const dateStr = row[0]?.replace(/"/g, "").trim();
+        const passageStr = row[1]?.replace(/"/g, "").trim();
+        const metadata = row[2]?.replace(/"/g, "").trim() || "";
+
+        if (!dateStr || !passageStr) return null;
+
+        return {
+          id: `day-imported-${idx}-${Date.now()}`,
+          date: dateStr,
+          dayIndex: idx,
+          metadata: metadata,
+          books: parsePassageString(passageStr)
+        };
+      })
+      .filter(Boolean);
+
     saveState();
-    renderCalendar();
-    updateProgress();
+    render();
+    alert(`Imported ${state.calendarDays.length} days of readings`);
+  }
+
+  function exportPlan() {
+    const data = JSON.stringify(state, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `bible-plan-${dateToISO(new Date())}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /* ================================================================
+     Completion Logic
+     ================================================================ */
+
+  function toggleChapterCompletion(dayId, bookId, chapterId) {
+    const day = state.calendarDays.find(d => d.id === dayId);
+    if (!day) return;
+
+    const book = day.books.find(b => b.id === bookId);
+    if (!book) return;
+
+    const chapter = book.chapters.find(c => c.id === chapterId);
+    if (!chapter) return;
+
+    chapter.completed = !chapter.completed;
+    saveState();
+    render();
+  }
+
+  function toggleBookCompletion(dayId, bookId) {
+    const day = state.calendarDays.find(d => d.id === dayId);
+    if (!day) return;
+
+    const book = day.books.find(b => b.id === bookId);
+    if (!book) return;
+
+    const allCompleted = book.chapters.every(c => c.completed);
+    const newState = !allCompleted;
+
+    book.chapters.forEach(c => {
+      c.completed = newState;
+    });
+
+    saveState();
+    render();
+  }
+
+  function getBookCompletionState(book) {
+    const total = book.chapters.length;
+    const completed = book.chapters.filter(c => c.completed).length;
+
+    if (completed === 0) return "unchecked";
+    if (completed === total) return "checked";
+    return "indeterminate";
+  }
+
+  /* ================================================================
+     Drag and Drop
+     ================================================================ */
+
+  let draggedElement = null;
+  let dragData = null;
+
+  function initDragAndDrop() {
+    document.addEventListener("dragstart", (e) => {
+      const chapterEl = e.target.closest("[data-chapter-id]");
+      const bookEl = e.target.closest("[data-book-id]");
+      const dayEl = e.target.closest("[data-day-id]");
+
+      if (chapterEl) {
+        draggedElement = chapterEl;
+        dragData = {
+          type: "chapter",
+          dayId: dayEl?.dataset.dayId,
+          bookId: bookEl?.dataset.bookId,
+          chapterId: chapterEl.dataset.chapterId
+        };
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        chapterEl.classList.add("dragging");
+      } else if (bookEl) {
+        draggedElement = bookEl;
+        dragData = {
+          type: "book",
+          dayId: dayEl?.dataset.dayId,
+          bookId: bookEl.dataset.bookId
+        };
+        e.dataTransfer.effectAllowed = "move";
+        e.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+        bookEl.classList.add("dragging");
+      }
+    });
+
+    document.addEventListener("dragend", (e) => {
+      if (draggedElement) {
+        draggedElement.classList.remove("dragging");
+        draggedElement = null;
+        dragData = null;
+      }
+    });
+
+    document.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "move";
+
+      const dayEl = e.target.closest("[data-day-id]");
+      if (dayEl && dragData) {
+        dayEl.classList.add("drop-target");
+      }
+    });
+
+    document.addEventListener("dragleave", (e) => {
+      const dayEl = e.target.closest("[data-day-id]");
+      if (dayEl) {
+        dayEl.classList.remove("drop-target");
+      }
+    });
+
+    document.addEventListener("drop", (e) => {
+      e.preventDefault();
+      const dayEl = e.target.closest("[data-day-id]");
+
+      if (!dayEl || !dragData) return;
+
+      const targetDayId = dayEl.dataset.dayId;
+      const sourceDayId = dragData.dayId;
+
+      if (dragData.type === "chapter") {
+        moveChapter(sourceDayId, dragData.bookId, dragData.chapterId, targetDayId);
+      } else if (dragData.type === "book") {
+        moveBook(sourceDayId, dragData.bookId, targetDayId);
+      }
+
+      dayEl.classList.remove("drop-target");
+    });
+  }
+
+  function moveChapter(fromDayId, fromBookId, chapterId, toDayId) {
+    const fromDay = state.calendarDays.find(d => d.id === fromDayId);
+    const toDay = state.calendarDays.find(d => d.id === toDayId);
+
+    if (!fromDay || !toDay) return;
+
+    const fromBook = fromDay.books.find(b => b.id === fromBookId);
+    if (!fromBook) return;
+
+    const chapter = fromBook.chapters.find(c => c.id === chapterId);
+    if (!chapter) return;
+
+    fromBook.chapters = fromBook.chapters.filter(c => c.id !== chapterId);
+
+    if (fromBook.chapters.length === 0) {
+      fromDay.books = fromDay.books.filter(b => b.id !== fromBookId);
+    }
+
+    let targetBook = toDay.books.find(b => b.abbreviation === fromBook.abbreviation);
+    if (!targetBook) {
+      targetBook = {
+        id: `book-${fromBook.abbreviation}-${Date.now()}-${Math.random()}`,
+        abbreviation: fromBook.abbreviation,
+        fullName: fromBook.fullName,
+        chapters: []
+      };
+      toDay.books.push(targetBook);
+    }
+
+    targetBook.chapters.push(chapter);
+    targetBook.chapters.sort((a, b) => a.number - b.number);
+
+    saveState();
+    render();
+  }
+
+  function moveBook(fromDayId, bookId, toDayId) {
+    const fromDay = state.calendarDays.find(d => d.id === fromDayId);
+    const toDay = state.calendarDays.find(d => d.id === toDayId);
+
+    if (!fromDay || !toDay) return;
+
+    const book = fromDay.books.find(b => b.id === bookId);
+    if (!book) return;
+
+    fromDay.books = fromDay.books.filter(b => b.id !== bookId);
+
+    const existingBook = toDay.books.find(b => b.abbreviation === book.abbreviation);
+    if (existingBook) {
+      const existingIds = new Set(existingBook.chapters.map(c => c.id));
+      const newChapters = book.chapters.filter(c => !existingIds.has(c.id));
+      existingBook.chapters.push(...newChapters);
+      existingBook.chapters.sort((a, b) => a.number - b.number);
+    } else {
+      toDay.books.push(book);
+    }
+
+    saveState();
+    render();
   }
 
   /* ================================================================
      Rendering
      ================================================================ */
 
-  function parseReadingPassages(passageStr) {
-    // Split by semicolon to get books, then parse each book with its chapters
-    var books = passageStr.split(";").map(function (s) { return s.trim(); });
-    
-    return books.map(function (bookStr) {
-      var match = bookStr.match(/^([A-Za-z0-9\s]+?)\s+(.+)$/);
-      if (!match) return { title: bookStr, chapters: [] };
-
-      var bookCode = match[1].trim();
-      var chaptersStr = match[2].trim();
-
-      // Expand chapter ranges: "1-7" becomes ["1", "2", "3", ...]
-      var chapters = [];
-      var ranges = chaptersStr.split(",").map(function (s) { return s.trim(); });
-      
-      ranges.forEach(function (range) {
-        if (range.indexOf("-") > -1) {
-          var parts = range.split("-").map(Number);
-          for (var i = parts[0]; i <= parts[1]; i++) {
-            chapters.push(String(i));
-          }
-        } else {
-          chapters.push(range);
-        }
-      });
-
-      return {
-        title: bookCode,
-        chapters: chapters
-      };
-    });
-  }
-
   function renderCalendar() {
-    var grid = document.getElementById("calendarGrid");
-    if (!grid || typeof READINGS === "undefined") return;
-
+    const grid = document.getElementById("calendarGrid");
     grid.innerHTML = "";
-    var today = startOfDay(new Date());
-    var lastMonthKey = null;
 
-    READINGS.forEach(function (reading, dayIndex) {
-      var readingDate = parseISODate(reading.date);
-      var monthKey = readingDate.getFullYear() + "-" + readingDate.getMonth();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
 
-      // Insert month label if this is a new month
-      if (monthKey !== lastMonthKey) {
-        var monthDiv = document.createElement("div");
-        monthDiv.className = "month-label";
-        var monthNames = [
-          "January", "February", "March", "April", "May", "June",
-          "July", "August", "September", "October", "November", "December"
-        ];
-        monthDiv.textContent = monthNames[readingDate.getMonth()] + " " + readingDate.getFullYear();
-        grid.appendChild(monthDiv);
-        lastMonthKey = monthKey;
+    const firstDay = getFirstDayOfMonth(year, month);
+    const daysInMonth = getDaysInMonth(year, month);
+
+    const today = getIndonesiaToday();
+
+    for (let i = firstDay - 1; i >= 0; i--) {
+      const date = new Date(year, month, -i);
+      const cell = createDayCell(null, date);
+      cell.classList.add("other-month");
+      grid.appendChild(cell);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      const dateStr = dateToISO(date);
+      const calendarDay = state.calendarDays.find(d => d.date === dateStr);
+      const cell = createDayCell(calendarDay, date);
+
+      if (dateToISO(date) === dateToISO(today)) {
+        cell.classList.add("today");
       }
 
-      var isToday = isSameDay(readingDate, today);
-      var isRead = !!state.readStatus[String(reading.idx)];
-      var isMissed = readingDate < today && !isRead;
-
-      var cell = document.createElement("div");
-      cell.className = "day-cell";
-      if (isToday) cell.classList.add("is-today");
-      if (isRead) cell.classList.add("is-read");
-      if (isMissed) cell.classList.add("is-missed");
-
-      // Date row with day name and number
-      var dateRow = document.createElement("div");
-      dateRow.className = "date-row";
-
-      var dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-      var dayWeekday = document.createElement("div");
-      dayWeekday.className = "date-weekday";
-      dayWeekday.textContent = dayNames[readingDate.getDay()];
-      dateRow.appendChild(dayWeekday);
-
-      var dateNum = document.createElement("div");
-      dateNum.className = "date-number";
-      dateNum.textContent = readingDate.getDate();
-      dateRow.appendChild(dateNum);
-
-      if (isToday) {
-        var todayLabel = document.createElement("div");
-        todayLabel.className = "today-label";
-        todayLabel.textContent = "TODAY";
-        dateRow.appendChild(todayLabel);
-      }
-
-      cell.appendChild(dateRow);
-
-      // Parse and display passages
-      var bookBlocks = parseReadingPassages(reading.passage);
-      bookBlocks.forEach(function (book) {
-        var passage = document.createElement("div");
-        passage.className = "passage";
-        passage.textContent = book.title;
-
-        var passageBtn = document.createElement("button");
-        passageBtn.className = "passage-btn";
-        passageBtn.innerHTML = passage.outerHTML;
-        passageBtn.setAttribute("data-idx", reading.idx);
-        passageBtn.addEventListener("click", function (e) {
-          e.preventDefault();
-          toggleRead(reading.idx);
-        });
-
-        cell.appendChild(passageBtn);
-      });
-
-      // Verses badge
-      if (reading.verses) {
-        var versesBadge = document.createElement("div");
-        versesBadge.className = "verses-badge";
-        versesBadge.textContent = reading.verses + " v";
-        cell.appendChild(versesBadge);
+      if (date < today && calendarDay) {
+        const hasIncomplete = calendarDay.books.some(b =>
+          b.chapters.some(c => !c.completed)
+        );
+        if (hasIncomplete) {
+          cell.classList.add("missed");
+        }
       }
 
       grid.appendChild(cell);
-    });
+    }
+
+    const totalCells = firstDay + daysInMonth;
+    const remainingCells = Math.ceil(totalCells / 7) * 7 - totalCells;
+    for (let i = 1; i <= remainingCells; i++) {
+      const date = new Date(year, month + 1, i);
+      const cell = createDayCell(null, date);
+      cell.classList.add("other-month");
+      grid.appendChild(cell);
+    }
   }
 
-  function updateProgress() {
-    var readCount = 0;
-    var totalVerses = 0;
-    var readVerses = 0;
+  function createDayCell(calendarDay, date) {
+    const cell = document.createElement("div");
+    cell.className = "day-cell";
 
-    if (typeof READINGS !== "undefined") {
-      READINGS.forEach(function (reading) {
-        if (state.readStatus[String(reading.idx)]) {
-          readCount++;
-          if (reading.verses) readVerses += reading.verses;
-        }
-        if (reading.verses) totalVerses += reading.verses;
+    if (calendarDay) {
+      cell.dataset.dayId = calendarDay.id;
+      cell.draggable = true;
+    }
+
+    const dateHeader = document.createElement("div");
+    dateHeader.className = "date-header";
+    const dayName = document.createElement("div");
+    dayName.className = "day-name";
+    dayName.textContent = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+    const dayNumber = document.createElement("div");
+    dayNumber.className = "day-number";
+    dayNumber.textContent = date.getDate();
+    dateHeader.appendChild(dayName);
+    dateHeader.appendChild(dayNumber);
+    cell.appendChild(dateHeader);
+
+    if (calendarDay && calendarDay.books.length > 0) {
+      const booksContainer = document.createElement("div");
+      booksContainer.className = "books-container";
+
+      calendarDay.books.forEach((book) => {
+        const bookEl = createBookElement(calendarDay.id, book);
+        booksContainer.appendChild(bookEl);
       });
+
+      cell.appendChild(booksContainer);
+    } else if (!calendarDay) {
+      cell.classList.add("empty");
     }
 
-    var total = typeof READINGS !== "undefined" ? READINGS.length : 0;
-    var progressDaysEl = document.getElementById("progressDays");
-    var progressVersesEl = document.getElementById("progressVerses");
-    var progressFillEl = document.getElementById("progressFill");
-
-    if (progressDaysEl) progressDaysEl.textContent = readCount + " / " + total + " days";
-    if (progressVersesEl) progressVersesEl.textContent = readVerses.toLocaleString() + " verses";
-    if (progressFillEl) {
-      progressFillEl.style.width = (total > 0 ? (readCount / total) * 100 : 0) + "%";
-    }
+    return cell;
   }
 
-  /* ================================================================
-     Clock & Quote
-     ================================================================ */
+  function createBookElement(dayId, book) {
+    const bookEl = document.createElement("div");
+    bookEl.className = "book";
+    bookEl.dataset.dayId = dayId;
+    bookEl.dataset.bookId = book.id;
+    bookEl.draggable = true;
 
-  function tickClock() {
-    var clockDateEl = document.getElementById("clockDate");
-    var clockTimeEl = document.getElementById("clockTime");
+    const header = document.createElement("div");
+    header.className = "book-header";
 
-    if (!clockDateEl || !clockTimeEl) return;
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "book-checkbox";
+    const compState = getBookCompletionState(book);
+    checkbox.checked = compState === "checked";
+    checkbox.indeterminate = compState === "indeterminate";
+    checkbox.addEventListener("change", () => toggleBookCompletion(dayId, book.id));
 
-    var now = new Date();
-    var dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    var monthNames = [
+    const title = document.createElement("label");
+    title.className = "book-title";
+    title.textContent = book.fullName;
+
+    const progress = document.createElement("div");
+    progress.className = "book-progress";
+    const completed = book.chapters.filter(c => c.completed).length;
+    progress.textContent = `${completed}/${book.chapters.length}`;
+
+    header.appendChild(checkbox);
+    header.appendChild(title);
+    header.appendChild(progress);
+    bookEl.appendChild(header);
+
+    const chaptersContainer = document.createElement("div");
+    chaptersContainer.className = "chapters-container";
+    book.chapters.forEach((chapter) => {
+      const chapterEl = createChapterElement(dayId, book.id, chapter);
+      chaptersContainer.appendChild(chapterEl);
+    });
+    bookEl.appendChild(chaptersContainer);
+
+    return bookEl;
+  }
+
+  function createChapterElement(dayId, bookId, chapter) {
+    const chapterEl = document.createElement("div");
+    chapterEl.className = "chapter";
+    chapterEl.dataset.dayId = dayId;
+    chapterEl.dataset.bookId = bookId;
+    chapterEl.dataset.chapterId = chapter.id;
+    chapterEl.draggable = true;
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "chapter-checkbox";
+    checkbox.checked = chapter.completed;
+    checkbox.addEventListener("change", () => toggleChapterCompletion(dayId, bookId, chapter.id));
+
+    const label = document.createElement("label");
+    label.className = "chapter-label";
+    label.textContent = `${chapter.number}`;
+    if (chapter.completed) label.classList.add("completed");
+
+    chapterEl.appendChild(checkbox);
+    chapterEl.appendChild(label);
+
+    return chapterEl;
+  }
+
+  function updateMonthLabel() {
+    const monthNames = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
-
-    clockDateEl.textContent =
-      dayNames[now.getDay()] + ", " +
-      monthNames[now.getMonth()] + " " +
-      now.getDate();
-
-    var hours = String(now.getHours()).padStart(2, "0");
-    var minutes = String(now.getMinutes()).padStart(2, "0");
-    var seconds = String(now.getSeconds()).padStart(2, "0");
-    clockTimeEl.textContent = hours + ":" + minutes + ":" + seconds;
+    const label = document.getElementById("monthLabel");
+    label.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
   }
 
-  function showNextQuote() {
-    if (typeof QUOTES === "undefined" || QUOTES.length === 0) return;
+  function updateClock() {
+    const now = new Date();
+    const jakartaTime = new Date(now.toLocaleString("en-US", { timeZone: INDONESIA_TZ }));
 
-    state.quoteIndex = (state.quoteIndex + 1) % QUOTES.length;
+    const dateEl = document.getElementById("clockDate");
+    const timeEl = document.getElementById("clockTime");
+
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"];
+
+    dateEl.textContent = `${dayNames[jakartaTime.getDay()]}, ${monthNames[jakartaTime.getMonth()]} ${jakartaTime.getDate()}`;
+
+    const h = String(jakartaTime.getHours()).padStart(2, "0");
+    const m = String(jakartaTime.getMinutes()).padStart(2, "0");
+    const s = String(jakartaTime.getSeconds()).padStart(2, "0");
+    timeEl.textContent = `${h}:${m}:${s}`;
+  }
+
+  function updateQuote() {
+    if (!window.QUOTES || QUOTES.length === 0) return;
+
+    state.settings.quoteIndex = (state.settings.quoteIndex + 1) % QUOTES.length;
     saveState();
 
-    var q = QUOTES[state.quoteIndex];
-    var quoteTextEl = document.getElementById("quoteText");
-    var quoteSourceEl = document.getElementById("quoteSource");
+    const q = QUOTES[state.settings.quoteIndex];
+    document.getElementById("quoteText").textContent = q.text;
+    document.getElementById("quoteSource").textContent = q.source ? `— ${q.source}` : "";
+  }
 
-    if (quoteTextEl) quoteTextEl.textContent = q.text;
-    if (quoteSourceEl) {
-      quoteSourceEl.textContent = q.source ? "— " + q.source : "";
-    }
+  function render() {
+    renderCalendar();
+    updateMonthLabel();
   }
 
   /* ================================================================
-     Boot & Initialization
+     Event Handlers
      ================================================================ */
 
-  // Clock ticks
-  tickClock();
-  setInterval(tickClock, 1000);
+  function attachEventHandlers() {
+    document.getElementById("prevMonthBtn").addEventListener("click", () => {
+      currentDate = addMonths(currentDate, -1);
+      render();
+    });
 
-  // Show initial quote
-  showNextQuote();
+    document.getElementById("nextMonthBtn").addEventListener("click", () => {
+      currentDate = addMonths(currentDate, 1);
+      render();
+    });
 
-  // Allow clicking quote to cycle
-  var quoteSection = document.querySelector(".quote-banner");
-  if (quoteSection) {
-    quoteSection.style.cursor = "pointer";
-    quoteSection.addEventListener("click", showNextQuote);
+    document.getElementById("todayBtn").addEventListener("click", () => {
+      currentDate = getIndonesiaToday();
+      render();
+      const todayCell = document.querySelector(".day-cell.today");
+      if (todayCell) {
+        todayCell.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    });
+
+    document.getElementById("csvFileInput").addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          importCSV(evt.target.result);
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    document.querySelector(".file-label").addEventListener("click", (e) => {
+      if (e.target.tagName !== "INPUT") {
+        document.getElementById("csvFileInput").click();
+      }
+    });
+
+    document.getElementById("exportBtn").addEventListener("click", exportPlan);
+
+    document.getElementById("resetBtn").addEventListener("click", resetPlan);
+
+    document.getElementById("quoteBanner").addEventListener("click", updateQuote);
   }
 
-  // Render calendar and progress
-  renderCalendar();
-  updateProgress();
+  /* ================================================================
+     Initialization
+     ================================================================ */
 
-  // Storage warning
-  if (!storageAvailable) {
-    console.warn("Bible Plan: localStorage unavailable, progress will not be saved.");
+  function init() {
+    if (!loadState()) {
+      initializeCalendarData();
+      saveState();
+    }
+
+    currentDate = getIndonesiaToday();
+
+    attachEventHandlers();
+    initDragAndDrop();
+    render();
+    updateClock();
+    updateQuote();
+
+    setInterval(updateClock, 1000);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
   }
 })();

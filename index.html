@@ -6,23 +6,21 @@
   <title>Bible Plan</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
-  <!-- Load display and body fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&family=Karla:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="app">
     
-    <!-- App Header -->
+    <!-- Header -->
     <header class="app-header">
       <div class="brand">
         <svg class="cross-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-          <rect width="32" height="32" rx="7" fill="#16222C" style="opacity:0"/>
-          <line x1="16" y1="6" x2="16" y2="27" stroke="#DBB558" stroke-width="3" stroke-linecap="round"/>
-          <line x1="7" y1="13" x2="25" y2="13" stroke="#DBB558" stroke-width="3" stroke-linecap="round"/>
+          <line x1="16" y1="6" x2="16" y2="27" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <line x1="7" y1="13" x2="25" y2="13" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
         </svg>
         <div>
           <h1>Bible Plan</h1>
-          <h4>Read through Scripture</h4>
+          <h4>Read through Scripture daily</h4>
         </div>
       </div>
       <div class="clock">
@@ -31,42 +29,50 @@
       </div>
     </header>
 
-    <!-- Quote Section -->
-    <section class="quote-banner">
+    <!-- Quote Banner -->
+    <section class="quote-banner" id="quoteBanner">
       <p class="quote-text" id="quoteText">--</p>
       <p class="quote-source" id="quoteSource"></p>
     </section>
 
-    <!-- Progress Section -->
-    <section class="progress-section">
-      <div class="progress-stats">
-        <span id="progressDays">0 / 0 days</span>
-        <span id="progressVerses">0 verses</span>
+    <!-- Controls -->
+    <section class="controls">
+      <div class="month-nav">
+        <button class="nav-btn" id="prevMonthBtn" aria-label="Previous month">❮</button>
+        <h2 id="monthLabel">September 2026</h2>
+        <button class="nav-btn" id="nextMonthBtn" aria-label="Next month">❯</button>
+        <button class="nav-btn primary" id="todayBtn">Today</button>
       </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="progressFill"></div>
+      <div class="actions">
+        <label class="file-label">
+          <input type="file" id="csvFileInput" accept=".csv" style="display:none">
+          <span>Import CSV</span>
+        </label>
+        <button id="exportBtn">Export Backup</button>
+        <button id="resetBtn" class="danger">Reset Plan</button>
       </div>
     </section>
 
-    <!-- Calendar Section -->
+    <!-- Calendar -->
     <section class="calendar-section">
       <div class="calendar">
-        <div class="calendar-weekdays">
-          <div>SUN</div>
-          <div>MON</div>
-          <div>TUE</div>
-          <div>WED</div>
-          <div>THU</div>
-          <div>FRI</div>
-          <div>SAT</div>
+        <div class="calendar-header">
+          <div class="weekday-header">SUN</div>
+          <div class="weekday-header">MON</div>
+          <div class="weekday-header">TUE</div>
+          <div class="weekday-header">WED</div>
+          <div class="weekday-header">THU</div>
+          <div class="weekday-header">FRI</div>
+          <div class="weekday-header">SAT</div>
         </div>
-        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="calendar-grid" id="calendarGrid">
+          <!-- Dynamically populated by script.js -->
+        </div>
       </div>
     </section>
 
   </div>
 
-  <!-- Load data files first, then the app script -->
   <script src="readings-data.js"></script>
   <script src="quotes-data.js"></script>
   <script src="script.js"></script>
