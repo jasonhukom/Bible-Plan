@@ -31,7 +31,7 @@
             "1 Pe": "1 Peter", "2 Pe": "2 Peter", "1 Jn": "1 John", "2 Jn": "2 John", "3 Jn": "3 John",
             "Jude": "Jude", "Rev": "Revelation"
         };
-        
+
   /* ------------------------------------------------------------------ */
   /* 1. Date helpers                                                     */
   /* ------------------------------------------------------------------ */
@@ -105,6 +105,71 @@
    * no longer corresponds to a real row is dropped (rest days are always
    * kept either way). A no-op for a freshly-created default state.
    */
+
+  function renderCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+  if (planData.length === 0) return;
+
+  // Find first date to determine padding days
+  const firstDateStr = planData[0].date;
+  const firstDateObj = new Date(firstDateStr);
+  const startDayOfWeek = firstDateObj.getUTCDay(); // 0 = Sunday
+
+  // Fill empty cells before the first date
+  for (let i = 0; i < startDayOfWeek; i++) {
+      const emptyCell = document.createElement('div');
+      emptyCell.className = 'day-cell empty';
+      grid.appendChild(emptyCell);
+  }
+
+  // Create cells for data
+  planData.forEach((day, index) => {
+      const cell = document.createElement('div');
+      cell.className = `day-cell ${day.status}`;
+      
+      // Drop zone events
+      cell.ondragover = dragOver;
+      cell.ondrop = (e) => drop(e, index);
+
+      // Date Number
+      const dateNum = document.createElement('div');
+      dateNum.className = 'date-number';
+      dateNum.innerText = day.date; // E.g., "2026-09-01"
+      cell.appendChild(dateNum);
+
+      // Draggable Passage Block
+      const passageBlock = document.createElement('div');
+      passageBlock.className = 'passage';
+      passageBlock.draggable = true;
+      passageBlock.innerText = day.passage;
+      passageBlock.ondragstart = (e) => dragStart(e, index);
+      cell.appendChild(passageBlock);
+
+      // Action Buttons
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      
+      const btnCheck = document.createElement('button');
+      btnCheck.className = 'btn btn-check';
+      btnCheck.innerHTML = '✔';
+      btnCheck.title = "Mark Read";
+      btnCheck.onclick = () => markRead(index);
+
+      const btnX = document.createElement('button');
+      btnX.className = 'btn btn-x';
+      btnX.innerHTML = '✖';
+      btnX.title = "Missed (Shift Forward)";
+      btnX.onclick = () => markMissedAndShift(index);
+
+      actions.appendChild(btnCheck);
+      actions.appendChild(btnX);
+      cell.appendChild(actions);
+
+      grid.appendChild(cell);
+    });
+  }
+  
   function reconcileOrder(s) {
     var validIdx = {};
     READINGS.forEach(function (r) {
