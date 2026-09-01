@@ -1,167 +1,412 @@
-/* ==========================================================================
-   Bible Plan
-   Calendar renderer + reading state
-   ========================================================================== */
+/*
+===============================================================================
+Bible Plan - script.js
+-------------------------------------------------------------------------------
+Uses:
+  - readings-data.js -> READINGS
+  - quotes-data.js   -> QUOTES
 
-(function () {
+Main features:
+  - Real monthly calendar
+  - Separate Bible books inside every day
+  - Separate chapters inside every book
+  - Chapter-level completion
+  - Book-level checkbox with indeterminate state
+  - Drag books between dates
+  - Drag chapters between dates
+  - Drag chapters between books
+  - Reorder books inside a day
+  - Reorder chapters inside a book
+  - Mobile-friendly move buttons
+  - Missed days automatically turn gray
+  - No automatic shifting
+  - Late completion is supported
+  - Persistent localStorage state
+  - Live clock
+  - Rotating quotes from quotes-data.js
+  - Previous / next month navigation
+  - Jump to today
+===============================================================================
+*/
+
+(() => {
   "use strict";
 
+  /* ==========================================================================
+     CONFIG
+     ========================================================================== */
 
-  /* --------------------------------------------------------------------------
-     STORAGE
-     -------------------------------------------------------------------------- */
+  const STORAGE_KEY = "biblePlan.calendar.v4";
 
-  const STORAGE_KEY = "biblePlan.calendar.v2";
-
-
-  /* --------------------------------------------------------------------------
-     DATA
-     -------------------------------------------------------------------------- */
-
-  const FALLBACK_QUOTES = [
-    {
-      text: "Your word is a lamp for my feet, a light on my path.",
-      source: "Psalm 119:105"
-    },
-    {
-      text: "I have hidden your word in my heart that I might not sin against you.",
-      source: "Psalm 119:11"
-    },
-    {
-      text: "The grass withers and the flowers fall, but the word of our God endures forever.",
-      source: "Isaiah 40:8"
-    },
-    {
-      text: "All Scripture is God-breathed and is useful for teaching, rebuking, correcting and training in righteousness.",
-      source: "2 Timothy 3:16"
-    },
-    {
-      text: "For the word of God is alive and active.",
-      source: "Hebrews 4:12"
-    }
-  ];
+  /*
+    This is only used when the old app has never been initialized.
+    Your actual dates come from READINGS.
+  */
+  const FALLBACK_START_DATE = "2026-09-01";
 
 
-  const quotes =
-    typeof QUOTES !== "undefined" && Array.isArray(QUOTES)
-      ? QUOTES
-      : FALLBACK_QUOTES;
+  /* ==========================================================================
+     DOM
+     ========================================================================== */
+
+  const grid = document.getElementById("calendarGrid");
+  const monthTitle = document.getElementById("monthTitle");
+
+  const quoteText = document.getElementById("quoteText");
+  const quoteSource = document.getElementById("quoteSource");
+
+  const clockDate = document.getElementById("clockDate");
+  const clockTime = document.getElementById("clockTime");
+
+  const progressCount = document.getElementById("progressCount");
+  const progressVerses = document.getElementById("progressVerses");
+  const progressFill = document.getElementById("progressFill");
+
+  const planStartInput = document.getElementById("planStart");
+  const csvInput = document.getElementById("csvInput");
+
+  const toast = document.getElementById("toast");
+
+  const moveDialog = document.getElementById("moveDialog");
+  const moveDialogTitle = document.getElementById("moveDialogTitle");
+  const moveDialogDescription =
+    document.getElementById("moveDialogDescription");
+  const moveDateInput = document.getElementById("moveDateInput");
 
 
-  const readings =
-    typeof READINGS !== "undefined" && Array.isArray(READINGS)
-      ? READINGS
-      : [];
+  /* ==========================================================================
+     SAFETY
+     ========================================================================== */
+
+  if (!grid) {
+    console.error(
+      "Bible Plan: #calendarGrid was not found."
+    );
+    return;
+  }
+
+  if (
+    typeof READINGS === "undefined" ||
+    !Array.isArray(READINGS)
+  ) {
+    console.error(
+      "Bible Plan: readings-data.js did not load READINGS."
+    );
+    return;
+  }
+
+  if (
+    typeof QUOTES === "undefined" ||
+    !Array.isArray(QUOTES)
+  ) {
+    console.error(
+      "Bible Plan: quotes-data.js did not load QUOTES."
+    );
+    return;
+  }
 
 
-  /* --------------------------------------------------------------------------
-     BOOK NAME MAPPING
-     -------------------------------------------------------------------------- */
+  /* ==========================================================================
+     BIBLE BOOK NAME NORMALIZATION
+     ========================================================================== */
 
-  const bookNames = {
-    "Gen": "Genesis",
-    "Ex": "Exodus",
-    "Lev": "Leviticus",
-    "Num": "Numbers",
-    "Deut": "Deuteronomy",
+  /*
+    Your readings-data.js contains abbreviations such as:
 
-    "Jos": "Joshua",
-    "Judg": "Judges",
-    "Ruth": "Ruth",
+      Gen
+      Mat
+      Ps
+      Pro
+      Josh
+      Jdg
+      Rut
+      1 Sa
+      1 Kgs
+      John
+      Luk
+      Phil
+      Sos
+      Joe
+      Amo
+      Oba
 
-    "1 Sa": "1 Samuel",
-    "2 Sa": "2 Samuel",
+    This map deliberately supports both your existing abbreviations and
+    common alternatives.
+  */
 
-    "1 Ki": "1 Kings",
-    "2 Ki": "2 Kings",
+  const BOOK_ALIASES = {
+    "gen": "Genesis",
+    "genesis": "Genesis",
 
-    "1 Ch": "1 Chronicles",
-    "2 Ch": "2 Chronicles",
+    "ex": "Exodus",
+    "exod": "Exodus",
+    "exodus": "Exodus",
 
-    "Ezr": "Ezra",
-    "Neh": "Nehemiah",
-    "Est": "Esther",
+    "lev": "Leviticus",
+    "leviticus": "Leviticus",
 
-    "Job": "Job",
-    "Ps": "Psalms",
-    "Pro": "Proverbs",
+    "num": "Numbers",
+    "numbers": "Numbers",
 
-    "Ecc": "Ecclesiastes",
-    "Song": "Song of Solomon",
+    "deut": "Deuteronomy",
+    "deuteronomy": "Deuteronomy",
 
-    "Isa": "Isaiah",
-    "Jer": "Jeremiah",
-    "Lam": "Lamentations",
-    "Eze": "Ezekiel",
+    "jos": "Joshua",
+    "josh": "Joshua",
+    "joshua": "Joshua",
 
-    "Dan": "Daniel",
-    "Hos": "Hosea",
-    "Joel": "Joel",
-    "Am": "Amos",
-    "Ob": "Obadiah",
+    "judg": "Judges",
+    "jdg": "Judges",
+    "judges": "Judges",
 
-    "Jon": "Jonah",
-    "Mic": "Micah",
-    "Nah": "Nahum",
-    "Hab": "Habakkuk",
-    "Zep": "Zephaniah",
+    "ruth": "Ruth",
+    "rut": "Ruth",
 
-    "Hag": "Haggai",
-    "Zec": "Zechariah",
-    "Mal": "Malachi",
+    "1 sa": "1 Samuel",
+    "1 sam": "1 Samuel",
+    "1 samuel": "1 Samuel",
 
-    "Mat": "Matthew",
-    "Mk": "Mark",
-    "Lk": "Luke",
-    "Jn": "John",
+    "2 sa": "2 Samuel",
+    "2 sam": "2 Samuel",
+    "2 samuel": "2 Samuel",
 
-    "Act": "Acts",
-    "Rom": "Romans",
+    "1 ki": "1 Kings",
+    "1 kgs": "1 Kings",
+    "1 kings": "1 Kings",
 
-    "1 Co": "1 Corinthians",
-    "2 Co": "2 Corinthians",
+    "2 ki": "2 Kings",
+    "2 kgs": "2 Kings",
+    "2 kings": "2 Kings",
 
-    "Gal": "Galatians",
-    "Eph": "Ephesians",
-    "Php": "Philippians",
+    "1 ch": "1 Chronicles",
+    "1 chr": "1 Chronicles",
+    "1 chronicles": "1 Chronicles",
 
-    "Col": "Colossians",
+    "2 ch": "2 Chronicles",
+    "2 chr": "2 Chronicles",
+    "2 chronicles": "2 Chronicles",
 
-    "1 Th": "1 Thessalonians",
-    "2 Th": "2 Thessalonians",
+    "ezr": "Ezra",
+    "ezra": "Ezra",
 
-    "1 Ti": "1 Timothy",
-    "2 Ti": "2 Timothy",
+    "neh": "Nehemiah",
+    "nehemiah": "Nehemiah",
 
-    "Tit": "Titus",
-    "Phm": "Philemon",
+    "est": "Esther",
+    "esther": "Esther",
 
-    "Heb": "Hebrews",
-    "Jam": "James",
+    "job": "Job",
 
-    "1 Pe": "1 Peter",
-    "2 Pe": "2 Peter",
+    "ps": "Psalms",
+    "psalm": "Psalms",
+    "psalms": "Psalms",
 
-    "1 Jn": "1 John",
-    "2 Jn": "2 John",
-    "3 Jn": "3 John",
+    "pro": "Proverbs",
+    "prov": "Proverbs",
+    "proverbs": "Proverbs",
 
-    "Jude": "Jude",
-    "Rev": "Revelation"
+    "ecc": "Ecclesiastes",
+    "eccl": "Ecclesiastes",
+    "ecclesiastes": "Ecclesiastes",
+
+    "song": "Song of Solomon",
+    "sos": "Song of Solomon",
+    "song of solomon": "Song of Solomon",
+
+    "isa": "Isaiah",
+    "isaiah": "Isaiah",
+
+    "jer": "Jeremiah",
+    "jeremiah": "Jeremiah",
+
+    "lam": "Lamentations",
+    "lamentations": "Lamentations",
+
+    "eze": "Ezekiel",
+    "ezek": "Ezekiel",
+    "ezekiel": "Ezekiel",
+
+    "dan": "Daniel",
+    "daniel": "Daniel",
+
+    "hos": "Hosea",
+    "hosea": "Hosea",
+
+    "joe": "Joel",
+    "joel": "Joel",
+
+    "amo": "Amos",
+    "amos": "Amos",
+
+    "ob": "Obadiah",
+    "oba": "Obadiah",
+    "obadiah": "Obadiah",
+
+    "jon": "Jonah",
+    "jonah": "Jonah",
+
+    "mic": "Micah",
+    "micah": "Micah",
+
+    "nah": "Nahum",
+    "nahum": "Nahum",
+
+    "hab": "Habakkuk",
+    "habakkuk": "Habakkuk",
+
+    "zep": "Zephaniah",
+    "zeph": "Zephaniah",
+    "zephaniah": "Zephaniah",
+
+    "hag": "Haggai",
+    "haggai": "Haggai",
+
+    "zec": "Zechariah",
+    "zech": "Zechariah",
+    "zechariah": "Zechariah",
+
+    "mal": "Malachi",
+    "malachi": "Malachi",
+
+    "mat": "Matthew",
+    "matt": "Matthew",
+    "matthew": "Matthew",
+
+    "mk": "Mark",
+    "mar": "Mark",
+    "mark": "Mark",
+
+    "lk": "Luke",
+    "luk": "Luke",
+    "luke": "Luke",
+
+    "jn": "John",
+    "john": "John",
+
+    "act": "Acts",
+    "acts": "Acts",
+
+    "rom": "Romans",
+    "romans": "Romans",
+
+    "1 co": "1 Corinthians",
+    "1 cor": "1 Corinthians",
+    "1 corinthians": "1 Corinthians",
+
+    "2 co": "2 Corinthians",
+    "2 cor": "2 Corinthians",
+    "2 corinthians": "2 Corinthians",
+
+    "gal": "Galatians",
+    "galatians": "Galatians",
+
+    "eph": "Ephesians",
+    "ephesians": "Ephesians",
+
+    "php": "Philippians",
+    "phil": "Philippians",
+    "philippians": "Philippians",
+
+    "col": "Colossians",
+    "colossians": "Colossians",
+
+    "1 th": "1 Thessalonians",
+    "1 thes": "1 Thessalonians",
+    "1 thessalonians": "1 Thessalonians",
+
+    "2 th": "2 Thessalonians",
+    "2 thes": "2 Thessalonians",
+    "2 thessalonians": "2 Thessalonians",
+
+    "1 ti": "1 Timothy",
+    "1 tim": "1 Timothy",
+    "1 timothy": "1 Timothy",
+
+    "2 ti": "2 Timothy",
+    "2 tim": "2 Timothy",
+    "2 timothy": "2 Timothy",
+
+    "tit": "Titus",
+    "titus": "Titus",
+
+    "phm": "Philemon",
+    "philemon": "Philemon",
+
+    "heb": "Hebrews",
+    "hebrews": "Hebrews",
+
+    "jam": "James",
+    "jas": "James",
+    "james": "James",
+
+    "1 pe": "1 Peter",
+    "1 pet": "1 Peter",
+    "1 peter": "1 Peter",
+
+    "2 pe": "2 Peter",
+    "2 pet": "2 Peter",
+    "2 peter": "2 Peter",
+
+    "1 jn": "1 John",
+    "1 john": "1 John",
+
+    "2 jn": "2 John",
+    "2 john": "2 John",
+
+    "3 jn": "3 John",
+    "3 john": "3 John",
+
+    "jude": "Jude",
+
+    "rev": "Revelation",
+    "revelation": "Revelation"
   };
 
 
-  /* --------------------------------------------------------------------------
-     DATE HELPERS
-     -------------------------------------------------------------------------- */
+  /* ==========================================================================
+     HELPERS
+     ========================================================================== */
 
-  function parseISODate(value) {
-    if (!value) return new Date();
+  function uid(prefix) {
+    return (
+      prefix +
+      "-" +
+      Date.now().toString(36) +
+      "-" +
+      Math.random()
+        .toString(36)
+        .slice(2, 10)
+    );
+  }
 
-    const parts = String(value).split("-").map(Number);
 
-    if (parts.length !== 3 || parts.some(Number.isNaN)) {
-      return new Date(value);
+  function escapeHTML(value) {
+    return String(value ?? "").replace(
+      /[&<>"']/g,
+      character => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      })[character]
+    );
+  }
+
+
+  function localDateFromISO(iso) {
+    const parts =
+      String(iso)
+        .split("-")
+        .map(Number);
+
+    if (
+      parts.length !== 3 ||
+      parts.some(
+        number => Number.isNaN(number)
+      )
+    ) {
+      return new Date();
     }
 
     return new Date(
@@ -172,8 +417,47 @@
   }
 
 
+  function isoFromDate(date) {
+    const year =
+      date.getFullYear();
+
+    const month =
+      String(
+        date.getMonth() + 1
+      ).padStart(2, "0");
+
+    const day =
+      String(
+        date.getDate()
+      ).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+  }
+
+
+  function firstOfMonth(date) {
+    return new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      1
+    );
+  }
+
+
+  function lastOfMonth(date) {
+    return new Date(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      0
+    );
+  }
+
+
   function addDays(date, amount) {
-    const result = new Date(date.getTime());
+    const result =
+      new Date(
+        date.getTime()
+      );
 
     result.setDate(
       result.getDate() + amount
@@ -183,124 +467,398 @@
   }
 
 
-  function startOfDay(date) {
-    const result = new Date(date.getTime());
+  function startOfToday() {
+    const now = new Date();
 
-    result.setHours(0, 0, 0, 0);
-
-    return result;
-  }
-
-
-  function isSameDay(a, b) {
-    return (
-      a.getFullYear() === b.getFullYear() &&
-      a.getMonth() === b.getMonth() &&
-      a.getDate() === b.getDate()
+    return new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
     );
   }
 
 
-  function formatDate(date) {
-    return date.toISOString().slice(0, 10);
+  function isSameDate(a, b) {
+    return (
+      isoFromDate(a) ===
+      isoFromDate(b)
+    );
   }
 
 
-  /* --------------------------------------------------------------------------
-     BOOK EXPANSION
-     -------------------------------------------------------------------------- */
+  function isValidISODate(value) {
+    const parts =
+      String(value)
+        .split("-")
+        .map(Number);
 
-  function expandPassage(passage) {
-
-    let expanded = String(passage);
-
-    for (const [shortName, longName] of Object.entries(bookNames)) {
-
-      const escaped = shortName.replace(
-        /[.*+?^${}()|[\]\\]/g,
-        "\\$&"
-      );
-
-      const regex = new RegExp(
-        "\\b" + escaped + "\\b",
-        "g"
-      );
-
-      expanded = expanded.replace(
-        regex,
-        longName
-      );
+    if (
+      parts.length !== 3 ||
+      parts.some(
+        value => Number.isNaN(value)
+      )
+    ) {
+      return false;
     }
 
-    return expanded;
+    const date =
+      new Date(
+        parts[0],
+        parts[1] - 1,
+        parts[2]
+      );
+
+    return (
+      date.getFullYear() === parts[0] &&
+      date.getMonth() === parts[1] - 1 &&
+      date.getDate() === parts[2]
+    );
   }
 
 
-  /* --------------------------------------------------------------------------
-     STATE
-     -------------------------------------------------------------------------- */
+  function canonicalDate(value) {
+    return isValidISODate(value)
+      ? isoFromDate(
+          localDateFromISO(value)
+        )
+      : "";
+  }
 
-  const planStart =
-    readings.length > 0
-      ? parseISODate(readings[0].date)
-      : new Date();
 
+  function normalizeBookName(value) {
+    const original =
+      String(value).trim();
+
+    const normalized =
+      original.toLowerCase();
+
+    return (
+      BOOK_ALIASES[normalized] ||
+      original
+    );
+  }
+
+
+  /* ==========================================================================
+     READING PARSER
+     ========================================================================== */
+
+  function parsePassageParts(passage) {
+
+    return String(passage)
+      .split(";")
+      .map(
+        item => item.trim()
+      )
+      .filter(Boolean);
+  }
+
+
+  function parseBookAndRange(part) {
+
+    /*
+      Examples:
+
+        Gen 1-7
+        Mat 1-2
+        Ps 1
+        Pro 1
+        1 Sa 1-2
+        1 Kgs 1-8
+        Phlm
+        2 Jn
+        Jude
+    */
+
+    const text =
+      String(part).trim();
+
+
+    const match =
+      text.match(
+        /^(.*?)\s+(\d+)(?:\s*[-–]\s*(\d+))?$/
+      );
+
+
+    if (!match) {
+
+      /*
+        Some books may appear without an explicit
+        chapter because there is only one chapter.
+
+        Example:
+          Oba
+          Phlm
+          Jude
+          3 Jn
+
+        For those, treat them as chapter 1.
+      */
+
+      const book =
+        normalizeBookName(text);
+
+      if (!book) {
+        return null;
+      }
+
+      return {
+        book,
+        start: 1,
+        end: 1
+      };
+    }
+
+
+    const book =
+      normalizeBookName(
+        match[1]
+      );
+
+
+    let start =
+      Number(match[2]);
+
+    let end =
+      match[3]
+        ? Number(match[3])
+        : start;
+
+
+    if (
+      !book ||
+      !Number.isFinite(start) ||
+      !Number.isFinite(end)
+    ) {
+      return null;
+    }
+
+
+    if (end < start) {
+      [start, end] =
+        [end, start];
+    }
+
+
+    return {
+      book,
+      start,
+      end
+    };
+  }
+
+
+  /* ==========================================================================
+     CREATE STRUCTURED DAY
+     ========================================================================== */
+
+  function buildDayFromReading(reading) {
+
+    const day = {
+      date: reading.date,
+      metadata:
+        reading.verses ??
+        "",
+      books: []
+    };
+
+
+    const groups =
+      new Map();
+
+
+    for (
+      const part
+      of parsePassageParts(
+        reading.passage
+      )
+    ) {
+
+      const parsed =
+        parseBookAndRange(
+          part
+        );
+
+
+      if (!parsed) {
+        continue;
+      }
+
+
+      if (
+        !groups.has(
+          parsed.book
+        )
+      ) {
+        groups.set(
+          parsed.book,
+          []
+        );
+      }
+
+
+      const chapters =
+        groups.get(
+          parsed.book
+        );
+
+
+      for (
+        let number =
+          parsed.start;
+        number <=
+          parsed.end;
+        number++
+      ) {
+
+        if (
+          !chapters.includes(
+            number
+          )
+        ) {
+          chapters.push(
+            number
+          );
+        }
+      }
+    }
+
+
+    for (
+      const [
+        bookName,
+        chapterNumbers
+      ]
+      of groups.entries()
+    ) {
+
+      day.books.push({
+        id:
+          uid("book"),
+        book:
+          bookName,
+        expanded:
+          false,
+
+        chapters:
+          chapterNumbers.map(
+            number => ({
+              id:
+                uid("chapter"),
+              number,
+              completed:
+                false
+            })
+          )
+      });
+    }
+
+
+    return day;
+  }
+
+
+  /* ==========================================================================
+     DEFAULT STATE
+     ========================================================================== */
 
   function createDefaultState() {
 
+    const days = {};
+
+    for (
+      const reading
+      of READINGS
+    ) {
+
+      if (
+        !reading ||
+        !reading.date ||
+        !reading.passage
+      ) {
+        continue;
+      }
+
+
+      const date =
+        canonicalDate(
+          reading.date
+        );
+
+
+      if (!date) {
+        continue;
+      }
+
+
+      days[date] =
+        buildDayFromReading(
+          reading
+        );
+    }
+
+
     return {
-      order: readings.map(
-        (reading, index) =>
-          "r-" +
-          (
-            reading.idx !== undefined
-              ? reading.idx
-              : index
+      version: 4,
+
+      days,
+
+      quoteIndex:
+        Math.floor(
+          Math.random() *
+          Math.max(
+            1,
+            QUOTES.length
           )
-      ),
+        ),
 
-      readStatus: {},
-
-      restCounter: 0,
-
-      quoteIndex: -1
+      imported: false
     };
   }
+
+
+  /* ==========================================================================
+     LOAD STATE
+     ========================================================================== */
+
+  let state =
+    loadState();
 
 
   function loadState() {
 
     try {
 
-      const raw =
-        localStorage.getItem(STORAGE_KEY);
+      const saved =
+        localStorage.getItem(
+          STORAGE_KEY
+        );
 
-      if (!raw) {
+
+      if (!saved) {
         return createDefaultState();
       }
 
+
       const parsed =
-        JSON.parse(raw);
+        JSON.parse(
+          saved
+        );
+
 
       if (
         !parsed ||
-        !Array.isArray(parsed.order)
+        typeof parsed !== "object" ||
+        !parsed.days
       ) {
         return createDefaultState();
       }
 
-      if (
-        !parsed.readStatus ||
-        typeof parsed.readStatus !== "object"
-      ) {
-        parsed.readStatus = {};
-      }
 
-      if (
-        typeof parsed.restCounter !== "number"
-      ) {
-        parsed.restCounter = 0;
-      }
+      repairState(
+        parsed
+      );
+
 
       return parsed;
 
@@ -316,8 +874,142 @@
   }
 
 
-  let state = loadState();
+  /* ==========================================================================
+     REPAIR SAVED STATE
+     ========================================================================== */
 
+  function repairState(saved) {
+
+    saved.version = 4;
+
+
+    if (
+      typeof saved.days !== "object" ||
+      saved.days === null
+    ) {
+      saved.days = {};
+    }
+
+
+    for (
+      const [
+        date,
+        day
+      ]
+      of Object.entries(
+        saved.days
+      )
+    ) {
+
+      if (
+        !day ||
+        typeof day !== "object"
+      ) {
+        delete saved.days[date];
+        continue;
+      }
+
+
+      day.date =
+        date;
+
+
+      if (
+        !Array.isArray(
+          day.books
+        )
+      ) {
+        day.books = [];
+      }
+
+
+      day.books =
+        day.books.filter(
+          book =>
+            book &&
+            typeof book === "object"
+        );
+
+
+      for (
+        const book
+        of day.books
+      ) {
+
+        if (!book.id) {
+          book.id =
+            uid("book");
+        }
+
+
+        if (
+          typeof book.book !== "string"
+        ) {
+          book.book =
+            "Unknown";
+        }
+
+
+        book.book =
+          normalizeBookName(
+            book.book
+          );
+
+
+        book.expanded =
+          Boolean(
+            book.expanded
+          );
+
+
+        if (
+          !Array.isArray(
+            book.chapters
+          )
+        ) {
+          book.chapters = [];
+        }
+
+
+        for (
+          const chapter
+          of book.chapters
+        ) {
+
+          if (!chapter.id) {
+            chapter.id =
+              uid("chapter");
+          }
+
+
+          chapter.number =
+            Number(
+              chapter.number
+            ) || 1;
+
+
+          chapter.completed =
+            Boolean(
+              chapter.completed
+            );
+        }
+      }
+    }
+
+
+    if (
+      !Number.isInteger(
+        saved.quoteIndex
+      )
+    ) {
+      saved.quoteIndex = 0;
+    }
+  }
+
+
+  /* ==========================================================================
+     SAVE
+     ========================================================================== */
 
   function saveState() {
 
@@ -325,509 +1017,1811 @@
 
       localStorage.setItem(
         STORAGE_KEY,
-        JSON.stringify(state)
+        JSON.stringify(
+          state
+        )
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Bible Plan: failed to save state.",
+        error
+      );
+
+      showToast(
+        "Could not save changes."
+      );
+    }
+  }
+
+
+  /* ==========================================================================
+     DAY / BOOK / CHAPTER LOOKUPS
+     ========================================================================== */
+
+  function getDay(date) {
+    return state.days[date] || null;
+  }
+
+
+  function getBook(
+    date,
+    bookId
+  ) {
+
+    const day =
+      getDay(date);
+
+    if (!day) {
+      return null;
+    }
+
+
+    return (
+      day.books.find(
+        book =>
+          book.id ===
+          bookId
+      ) || null
+    );
+  }
+
+
+  function getChapter(
+    date,
+    bookId,
+    chapterId
+  ) {
+
+    const book =
+      getBook(
+        date,
+        bookId
+      );
+
+
+    if (!book) {
+      return null;
+    }
+
+
+    return (
+      book.chapters.find(
+        chapter =>
+          chapter.id ===
+          chapterId
+      ) || null
+    );
+  }
+
+
+  /* ==========================================================================
+     BOOK STATES
+     ========================================================================== */
+
+  function isBookComplete(book) {
+
+    return (
+      book.chapters.length > 0 &&
+      book.chapters.every(
+        chapter =>
+          chapter.completed
+      )
+    );
+  }
+
+
+  function isBookPartial(book) {
+
+    let completed = 0;
+
+
+    for (
+      const chapter
+      of book.chapters
+    ) {
+
+      if (
+        chapter.completed
+      ) {
+        completed++;
+      }
+    }
+
+
+    return (
+      completed > 0 &&
+      completed <
+        book.chapters.length
+    );
+  }
+
+
+  function isDayComplete(day) {
+
+    if (
+      !day ||
+      !day.books.length
+    ) {
+      return false;
+    }
+
+
+    return day.books.every(
+      book =>
+        isBookComplete(
+          book
+        )
+    );
+  }
+
+
+  function isDayMissed(
+    date,
+    day
+  ) {
+
+    if (
+      !day ||
+      !day.books.length
+    ) {
+      return false;
+    }
+
+
+    const dayDate =
+      localDateFromISO(
+        date
+      );
+
+
+    const today =
+      startOfToday();
+
+
+    if (
+      dayDate >= today
+    ) {
+      return false;
+    }
+
+
+    return !isDayComplete(
+      day
+    );
+  }
+
+
+  /* ==========================================================================
+     TOGGLE CHAPTER
+     ========================================================================== */
+
+  function toggleChapter(
+    date,
+    bookId,
+    chapterId
+  ) {
+
+    const chapter =
+      getChapter(
+        date,
+        bookId,
+        chapterId
+      );
+
+
+    if (!chapter) {
+      return;
+    }
+
+
+    chapter.completed =
+      !chapter.completed;
+
+
+    saveState();
+
+    render();
+  }
+
+
+  /* ==========================================================================
+     TOGGLE WHOLE BOOK
+     ========================================================================== */
+
+  function toggleBook(
+    date,
+    bookId
+  ) {
+
+    const book =
+      getBook(
+        date,
+        bookId
+      );
+
+
+    if (!book) {
+      return;
+    }
+
+
+    const shouldComplete =
+      !isBookComplete(
+        book
+      );
+
+
+    for (
+      const chapter
+      of book.chapters
+    ) {
+
+      chapter.completed =
+        shouldComplete;
+    }
+
+
+    saveState();
+
+    render();
+  }
+
+
+  /* ==========================================================================
+     EXPAND / COLLAPSE BOOK
+     ========================================================================== */
+
+  function toggleBookExpanded(
+    date,
+    bookId
+  ) {
+
+    const book =
+      getBook(
+        date,
+        bookId
+      );
+
+
+    if (!book) {
+      return;
+    }
+
+
+    book.expanded =
+      !book.expanded;
+
+
+    saveState();
+
+    render();
+  }
+
+
+  /* ==========================================================================
+     MOVE BOOK
+     ========================================================================== */
+
+  function moveBook(
+    sourceDate,
+    bookId,
+    targetDate,
+    targetBookId = null
+  ) {
+
+    const sourceDay =
+      getDay(
+        sourceDate
+      );
+
+
+    if (!sourceDay) {
+      return;
+    }
+
+
+    const sourceIndex =
+      sourceDay.books.findIndex(
+        book =>
+          book.id ===
+          bookId
+      );
+
+
+    if (
+      sourceIndex === -1
+    ) {
+      return;
+    }
+
+
+    const [
+      movedBook
+    ] =
+      sourceDay.books.splice(
+        sourceIndex,
+        1
+      );
+
+
+    const targetDay =
+      ensureDay(
+        targetDate
+      );
+
+
+    /*
+      If the user dropped a book on another book,
+      put it immediately after that book.
+    */
+
+    if (targetBookId) {
+
+      const targetIndex =
+        targetDay.books.findIndex(
+          book =>
+            book.id ===
+            targetBookId
+        );
+
+
+      if (
+        targetIndex >= 0 &&
+        targetDay !== sourceDay
+      ) {
+
+        targetDay.books.splice(
+          targetIndex + 1,
+          0,
+          movedBook
+        );
+
+      } else if (
+        targetIndex >= 0
+      ) {
+
+        /*
+          Same-day reorder.
+        */
+
+        targetDay.books.splice(
+          targetIndex,
+          0,
+          movedBook
+        );
+
+      } else {
+
+        targetDay.books.push(
+          movedBook
+        );
+      }
+
+    } else {
+
+      /*
+        If another copy of this Bible book already exists on the target day,
+        merge chapters instead of creating duplicate book cards.
+      */
+
+      const existingBook =
+        targetDay.books.find(
+          book =>
+            book.book ===
+            movedBook.book
+        );
+
+
+      if (
+        existingBook &&
+        existingBook.id !==
+          movedBook.id
+      ) {
+
+        for (
+          const chapter
+          of movedBook.chapters
+        ) {
+
+          const alreadyThere =
+            existingBook.chapters.some(
+              existing =>
+                Number(
+                  existing.number
+                ) ===
+                Number(
+                  chapter.number
+                )
+            );
+
+
+          if (!alreadyThere) {
+
+            existingBook.chapters.push(
+              chapter
+            );
+          }
+        }
+
+
+        existingBook.expanded =
+          existingBook.expanded ||
+          movedBook.expanded;
+
+      } else {
+
+        targetDay.books.push(
+          movedBook
+        );
+      }
+    }
+
+
+    cleanupEmptyDays();
+
+    saveState();
+
+    render();
+
+    showToast(
+      `${movedBook.book} moved to ${formatPrettyDate(targetDate)}.`
+    );
+  }
+
+
+  /* ==========================================================================
+     MOVE CHAPTER
+     ========================================================================== */
+
+  function moveChapter(
+    sourceDate,
+    sourceBookId,
+    chapterId,
+    targetDate,
+    targetBookId = null,
+    targetChapterId = null
+  ) {
+
+    const sourceDay =
+      getDay(
+        sourceDate
+      );
+
+
+    const sourceBook =
+      getBook(
+        sourceDate,
+        sourceBookId
+      );
+
+
+    if (
+      !sourceDay ||
+      !sourceBook
+    ) {
+      return;
+    }
+
+
+    const chapterIndex =
+      sourceBook.chapters.findIndex(
+        chapter =>
+          chapter.id ===
+          chapterId
+      );
+
+
+    if (
+      chapterIndex === -1
+    ) {
+      return;
+    }
+
+
+    const [
+      movedChapter
+    ] =
+      sourceBook.chapters.splice(
+        chapterIndex,
+        1
+      );
+
+
+    const targetDay =
+      ensureDay(
+        targetDate
+      );
+
+
+    /*
+      No target book selected:
+      find the same Bible book on the destination day,
+      otherwise create it.
+    */
+
+    let targetBook =
+      targetBookId
+        ? targetDay.books.find(
+            book =>
+              book.id ===
+              targetBookId
+          )
+        : targetDay.books.find(
+            book =>
+              book.book ===
+              sourceBook.book
+          );
+
+
+    if (!targetBook) {
+
+      targetBook = {
+        id:
+          uid("book"),
+
+        book:
+          sourceBook.book,
+
+        expanded:
+          true,
+
+        chapters: []
+      };
+
+
+      targetDay.books.push(
+        targetBook
+      );
+    }
+
+
+    /*
+      Prevent duplicate chapter numbers.
+    */
+
+    const duplicate =
+      targetBook.chapters.some(
+        chapter =>
+          Number(
+            chapter.number
+          ) ===
+          Number(
+            movedChapter.number
+          )
+      );
+
+
+    if (duplicate) {
+
+      /*
+        Put the chapter back.
+      */
+
+      sourceBook.chapters.splice(
+        chapterIndex,
+        0,
+        movedChapter
+      );
+
+
+      showToast(
+        `${sourceBook.book} ${movedChapter.number} is already there.`
+      );
+
+
+      return;
+    }
+
+
+    /*
+      Drop on a specific chapter:
+      insert immediately after it.
+    */
+
+    if (
+      targetChapterId
+    ) {
+
+      const targetIndex =
+        targetBook.chapters.findIndex(
+          chapter =>
+            chapter.id ===
+            targetChapterId
+        );
+
+
+      if (
+        targetIndex >= 0
+      ) {
+
+        targetBook.chapters.splice(
+          targetIndex + 1,
+          0,
+          movedChapter
+        );
+
+      } else {
+
+        targetBook.chapters.push(
+          movedChapter
+        );
+      }
+
+    } else {
+
+      targetBook.chapters.push(
+        movedChapter
+      );
+    }
+
+
+    targetBook.expanded =
+      true;
+
+
+    /*
+      If the source book became empty,
+      remove the empty book card.
+    */
+
+    if (
+      sourceBook.chapters.length === 0
+    ) {
+
+      sourceDay.books =
+        sourceDay.books.filter(
+          book =>
+            book.id !==
+            sourceBook.id
+        );
+    }
+
+
+    cleanupEmptyDays();
+
+    saveState();
+
+    render();
+
+    showToast(
+      `${sourceBook.book} ${movedChapter.number} moved.`
+    );
+  }
+
+
+  /* ==========================================================================
+     CLEANUP
+     ========================================================================== */
+
+  function cleanupEmptyDays() {
+
+    for (
+      const [
+        date,
+        day
+      ]
+      of Object.entries(
+        state.days
+      )
+    ) {
+
+      if (
+        !day.books ||
+        day.books.length === 0
+      ) {
+
+        delete state.days[
+          date
+        ];
+      }
+    }
+  }
+
+
+  /* ==========================================================================
+     DRAG STATE
+     ========================================================================== */
+
+  let draggedItem = null;
+
+
+  function setDragData(
+    event,
+    data
+  ) {
+
+    draggedItem =
+      data;
+
+
+    try {
+
+      event.dataTransfer.effectAllowed =
+        "move";
+
+      event.dataTransfer.setData(
+        "text/plain",
+        JSON.stringify(
+          data
+        )
       );
 
     } catch (error) {
 
       console.warn(
-        "Bible Plan: could not save state.",
+        "Bible Plan: drag data unavailable.",
         error
       );
     }
   }
 
 
-  /* --------------------------------------------------------------------------
-     RECONCILE STATE
-     -------------------------------------------------------------------------- */
+  function clearDrag() {
 
-  function reconcileState() {
+    draggedItem =
+      null;
 
-    const validReadingKeys =
-      new Set(
-        readings.map(
-          (reading, index) =>
-            "r-" +
-            (
-              reading.idx !== undefined
-                ? reading.idx
-                : index
-            )
-        )
-      );
-
-
-    state.order = state.order.filter(
-      key =>
-        key.startsWith("rest-") ||
-        validReadingKeys.has(key)
-    );
-
-
-    const present = new Set(state.order);
-
-
-    readings.forEach(
-      (reading, index) => {
-
-        const key =
-          "r-" +
-          (
-            reading.idx !== undefined
-              ? reading.idx
-              : index
-          );
-
-        if (!present.has(key)) {
-          state.order.push(key);
-        }
-      }
-    );
-  }
-
-
-  reconcileState();
-  saveState();
-
-
-  /* --------------------------------------------------------------------------
-     DOM
-     -------------------------------------------------------------------------- */
-
-  const calendarGrid =
-    document.getElementById("calendarGrid");
-
-  const clockDate =
-    document.getElementById("clockDate");
-
-  const clockTime =
-    document.getElementById("clockTime");
-
-  const quoteText =
-    document.getElementById("quoteText");
-
-  const quoteSource =
-    document.getElementById("quoteSource");
-
-  const progressCount =
-    document.getElementById("progressCount");
-
-  const progressVerses =
-    document.getElementById("progressVerses");
-
-  const progressFill =
-    document.getElementById("progressFill");
-
-  const jumpToday =
-    document.getElementById("jumpToday");
-
-
-  /* --------------------------------------------------------------------------
-     ICONS
-     -------------------------------------------------------------------------- */
-
-  const ICON_CHECK = `
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="4,13 9,18 20,6"/>
-    </svg>
-  `;
-
-
-  const ICON_X = `
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2.5"
-      stroke-linecap="round"
-      aria-hidden="true"
-    >
-      <line x1="5" y1="5" x2="19" y2="19"/>
-      <line x1="19" y1="5" x2="5" y2="19"/>
-    </svg>
-  `;
-
-
-  const ICON_TRASH = `
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      aria-hidden="true"
-    >
-      <line x1="5" y1="7" x2="19" y2="7"/>
-      <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
-      <path d="M7 7l1 12a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1l1-12"/>
-    </svg>
-  `;
-
-
-  /* --------------------------------------------------------------------------
-     ESCAPE HTML
-     -------------------------------------------------------------------------- */
-
-  function escapeHtml(value) {
-
-    return String(value).replace(
-      /[&<>"']/g,
-      character => ({
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;"
-      })[character]
-    );
-  }
-
-
-  /* --------------------------------------------------------------------------
-     FIND READING
-     -------------------------------------------------------------------------- */
-
-  function getReadingFromKey(key) {
-
-    if (!key.startsWith("r-")) {
-      return null;
-    }
-
-    const idx =
-      Number(key.slice(2));
-
-    return readings.find(
-      (reading, index) =>
-        (
-          reading.idx !== undefined
-            ? reading.idx
-            : index
-        ) === idx
-    ) || readings[idx] || null;
-  }
-
-
-  /* --------------------------------------------------------------------------
-     TOGGLE READ
-     -------------------------------------------------------------------------- */
-
-  function toggleRead(key) {
-
-    const reading =
-      getReadingFromKey(key);
-
-    if (!reading) return;
-
-    const idx =
-      reading.idx !== undefined
-        ? String(reading.idx)
-        : String(
-            readings.indexOf(reading)
-          );
-
-    state.readStatus[idx] =
-      !state.readStatus[idx];
-
-    saveState();
-    render();
-  }
-
-
-  /* --------------------------------------------------------------------------
-     PUSH READING FORWARD
-     -------------------------------------------------------------------------- */
-
-  function pushForward(key, days) {
-
-    const position =
-      state.order.indexOf(key);
-
-    if (position === -1) {
-      return;
-    }
-
-
-    const newRestDays = [];
-
-    for (
-      let i = 0;
-      i < days;
-      i++
-    ) {
-
-      state.restCounter++;
-
-      newRestDays.push(
-        "rest-" +
-        state.restCounter
-      );
-    }
-
-
-    state.order.splice(
-      position,
-      0,
-      ...newRestDays
-    );
-
-
-    saveState();
-
-    render();
-  }
-
-
-  /* --------------------------------------------------------------------------
-     REMOVE REST DAY
-     -------------------------------------------------------------------------- */
-
-  function removeRestDay(key) {
-
-    const position =
-      state.order.indexOf(key);
-
-    if (position === -1) {
-      return;
-    }
-
-    state.order.splice(
-      position,
-      1
-    );
-
-    saveState();
-
-    render();
-  }
-
-
-  /* --------------------------------------------------------------------------
-     DRAG AND DROP
-     -------------------------------------------------------------------------- */
-
-  let draggedKey = null;
-
-
-  function handleDragStart(event, key) {
-
-    draggedKey = key;
-
-    event.dataTransfer.effectAllowed = "move";
-
-    event.currentTarget
-      .closest(".day-cell")
-      ?.classList.add("dragging");
-  }
-
-
-  function handleDragEnd(event) {
-
-    event.currentTarget
-      .closest(".day-cell")
-      ?.classList.remove("dragging");
 
     document
-      .querySelectorAll(".day-cell.drag-over")
-      .forEach(cell =>
-        cell.classList.remove("drag-over")
+      .querySelectorAll(
+        ".drop-target"
+      )
+      .forEach(
+        element =>
+          element.classList.remove(
+            "drop-target"
+          )
       );
 
-    draggedKey = null;
+
+    document
+      .querySelectorAll(
+        ".dragging"
+      )
+      .forEach(
+        element =>
+          element.classList.remove(
+            "dragging"
+          )
+      );
   }
 
 
-  function handleDragOver(event) {
+  function canDrop(
+    source,
+    target
+  ) {
 
-    event.preventDefault();
-
-    event.currentTarget
-      .classList.add("drag-over");
-
-    event.dataTransfer.dropEffect = "move";
-  }
-
-
-  function handleDragLeave(event) {
-
-    event.currentTarget
-      .classList.remove("drag-over");
-  }
-
-
-  function handleDrop(event, targetKey) {
-
-    event.preventDefault();
-
-    event.currentTarget
-      .classList.remove("drag-over");
-
-    if (!draggedKey) {
-      return;
+    if (!source) {
+      return false;
     }
-
-    if (draggedKey === targetKey) {
-      return;
-    }
-
-
-    const oldIndex =
-      state.order.indexOf(draggedKey);
-
-    const newIndex =
-      state.order.indexOf(targetKey);
 
 
     if (
-      oldIndex === -1 ||
-      newIndex === -1
+      source.kind === "book"
+    ) {
+
+      if (
+        target.kind === "day"
+      ) {
+
+        return (
+          source.date !==
+          target.date
+        );
+      }
+
+
+      if (
+        target.kind === "book"
+      ) {
+
+        return (
+          source.bookId !==
+          target.bookId ||
+          source.date !==
+          target.date
+        );
+      }
+
+
+      return false;
+    }
+
+
+    if (
+      source.kind === "chapter"
+    ) {
+
+      if (
+        target.kind === "day"
+      ) {
+
+        return (
+          source.date !==
+          target.date
+        );
+      }
+
+
+      if (
+        target.kind === "book"
+      ) {
+
+        return (
+          source.bookId !==
+          target.bookId ||
+          source.date !==
+          target.date
+        );
+      }
+
+
+      if (
+        target.kind === "chapter"
+      ) {
+
+        return (
+          source.chapterId !==
+            target.chapterId
+        );
+      }
+    }
+
+
+    return false;
+  }
+
+
+  /* ==========================================================================
+     DROP HANDLERS
+     ========================================================================== */
+
+  function handleDragOver(
+    event,
+    target,
+    element
+  ) {
+
+    if (
+      !canDrop(
+        draggedItem,
+        target
+      )
     ) {
       return;
     }
 
 
-    const moved =
-      state.order.splice(
-        oldIndex,
-        1
-      )[0];
+    event.preventDefault();
 
 
-    state.order.splice(
-      newIndex,
-      0,
-      moved
+    try {
+      event.dataTransfer.dropEffect =
+        "move";
+    } catch (_) {}
+
+
+    clearDropTargetsOnly();
+
+
+    element.classList.add(
+      "drop-target"
     );
-
-
-    saveState();
-
-    render();
-
-    draggedKey = null;
   }
 
 
-  /* --------------------------------------------------------------------------
-     CREATE DAY CELL
-     -------------------------------------------------------------------------- */
+  function clearDropTargetsOnly() {
 
-  function createReadingCell(
-    key,
-    position,
-    date,
-    reading
+    document
+      .querySelectorAll(
+        ".drop-target"
+      )
+      .forEach(
+        element =>
+          element.classList.remove(
+            "drop-target"
+          )
+      );
+  }
+
+
+  function handleDrop(
+    event,
+    target
   ) {
 
-    const cell =
-      document.createElement("div");
+    event.preventDefault();
 
-    const today =
-      startOfDay(new Date());
+    event.stopPropagation();
 
-    const isToday =
-      isSameDay(
-        date,
-        today
+
+    if (
+      !canDrop(
+        draggedItem,
+        target
+      )
+    ) {
+      clearDrag();
+      return;
+    }
+
+
+    const source =
+      draggedItem;
+
+
+    /*
+      BOOK
+    */
+
+    if (
+      source.kind === "book"
+    ) {
+
+      moveBook(
+        source.date,
+        source.bookId,
+        target.date,
+        target.kind === "book"
+          ? target.bookId
+          : null
+      );
+    }
+
+
+    /*
+      CHAPTER
+    */
+
+    else if (
+      source.kind ===
+      "chapter"
+    ) {
+
+      moveChapter(
+        source.date,
+        source.bookId,
+        source.chapterId,
+        target.date,
+        target.kind === "book"
+          ? target.bookId
+          : target.kind ===
+            "chapter"
+            ? target.bookId
+            : null,
+        target.kind ===
+        "chapter"
+          ? target.chapterId
+          : null
+      );
+    }
+
+
+    clearDrag();
+  }
+
+
+  /* ==========================================================================
+     RENDER BOOK
+     ========================================================================== */
+
+  function renderBook(
+    date,
+    book
+  ) {
+
+    const card =
+      document.createElement(
+        "section"
       );
 
 
-    const readingIndex =
-      reading.idx !== undefined
-        ? String(reading.idx)
-        : String(
-            readings.indexOf(reading)
-          );
+    card.className =
+      "book-card";
 
 
-    const isRead =
-      !!state.readStatus[
-        readingIndex
-      ];
+    if (
+      book.expanded
+    ) {
+      card.classList.add(
+        "expanded"
+      );
+    }
 
 
-    const isMissed =
-      date < today &&
-      !isToday &&
-      !isRead;
+    card.dataset.bookId =
+      book.id;
 
 
-    cell.className =
-      "day-cell" +
-      (
-        isToday
-          ? " is-today"
-          : ""
-      ) +
-      (
-        isRead
-          ? " is-read"
-          : ""
-      ) +
-      (
-        isMissed
-          ? " is-missed"
-          : ""
+    /*
+      BOOK HEADER
+    */
+
+    const header =
+      document.createElement(
+        "div"
       );
 
 
-    cell.dataset.key = key;
+    header.className =
+      "book-header";
 
 
-    /* DROP EVENTS */
+    header.draggable =
+      true;
 
-    cell.addEventListener(
+
+    header.title =
+      `Drag ${book.book}`;
+
+
+    /*
+      Expand button
+    */
+
+    const expand =
+      document.createElement(
+        "button"
+      );
+
+
+    expand.type =
+      "button";
+
+
+    expand.className =
+      "book-chevron";
+
+
+    expand.setAttribute(
+      "aria-expanded",
+      book.expanded
+        ? "true"
+        : "false"
+    );
+
+
+    expand.setAttribute(
+      "aria-label",
+      book.expanded
+        ? `Collapse ${book.book}`
+        : `Expand ${book.book}`
+    );
+
+
+    expand.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+
+        toggleBookExpanded(
+          date,
+          book.id
+        );
+      }
+    );
+
+
+    /*
+      Book checkbox
+    */
+
+    const checkbox =
+      document.createElement(
+        "input"
+      );
+
+
+    checkbox.type =
+      "checkbox";
+
+
+    checkbox.className =
+      "book-check";
+
+
+    checkbox.checked =
+      isBookComplete(
+        book
+      );
+
+
+    checkbox.indeterminate =
+      isBookPartial(
+        book
+      );
+
+
+    checkbox.setAttribute(
+      "aria-label",
+      `Mark all ${book.book} chapters`
+    );
+
+
+    checkbox.addEventListener(
+      "click",
+      event =>
+        event.stopPropagation()
+    );
+
+
+    checkbox.addEventListener(
+      "change",
+      () => {
+
+        toggleBook(
+          date,
+          book.id
+        );
+      }
+    );
+
+
+    /*
+      Book title
+    */
+
+    const title =
+      document.createElement(
+        "div"
+      );
+
+
+    title.className =
+      "book-title";
+
+
+    title.textContent =
+      book.book;
+
+
+    /*
+      Progress count
+    */
+
+    const progress =
+      document.createElement(
+        "div"
+      );
+
+
+    progress.className =
+      "book-progress";
+
+
+    const completed =
+      book.chapters.filter(
+        chapter =>
+          chapter.completed
+      ).length;
+
+
+    progress.textContent =
+      `${completed}/${book.chapters.length}`;
+
+
+    /*
+      Move button
+    */
+
+    const move =
+      document.createElement(
+        "button"
+      );
+
+
+    move.type =
+      "button";
+
+
+    move.className =
+      "book-move";
+
+
+    move.textContent =
+      "↗";
+
+
+    move.title =
+      "Move book";
+
+
+    move.setAttribute(
+      "aria-label",
+      `Move ${book.book}`
+    );
+
+
+    move.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+
+        openMoveDialog({
+          kind: "book",
+          date,
+          bookId:
+            book.id
+        });
+      }
+    );
+
+
+    header.append(
+      expand,
+      checkbox,
+      title,
+      progress,
+      move
+    );
+
+
+    card.appendChild(
+      header
+    );
+
+
+    /*
+      DRAGGING BOOK
+    */
+
+    header.addEventListener(
+      "dragstart",
+      event => {
+
+        /*
+          Don't start dragging when the user is
+          interacting with a control.
+        */
+
+        if (
+          event.target.closest(
+            "button"
+          ) ||
+          event.target.closest(
+            "input"
+          )
+        ) {
+
+          event.preventDefault();
+
+          return;
+        }
+
+
+        card.classList.add(
+          "dragging"
+        );
+
+
+        setDragData(
+          event,
+          {
+            kind:
+              "book",
+
+            date,
+
+            bookId:
+              book.id
+          }
+        );
+      }
+    );
+
+
+    header.addEventListener(
+      "dragend",
+      clearDrag
+    );
+
+
+    /*
+      The book itself is also a destination.
+    */
+
+    card.addEventListener(
       "dragover",
-      handleDragOver
+      event =>
+        handleDragOver(
+          event,
+          {
+            kind:
+              "book",
+
+            date,
+
+            bookId:
+              book.id
+          },
+          card
+        )
     );
 
-    cell.addEventListener(
+
+    card.addEventListener(
       "dragleave",
-      handleDragLeave
+      event => {
+
+        if (
+          !card.contains(
+            event.relatedTarget
+          )
+        ) {
+
+          card.classList.remove(
+            "drop-target"
+          );
+        }
+      }
     );
 
-    cell.addEventListener(
+
+    card.addEventListener(
       "drop",
       event =>
         handleDrop(
           event,
-          key
+          {
+            kind:
+              "book",
+
+            date,
+
+            bookId:
+              book.id
+          }
         )
     );
 
 
-    /* DATE */
+    /*
+      CHAPTERS
+    */
+
+    const chapterContainer =
+      document.createElement(
+        "div"
+      );
+
+
+    chapterContainer.className =
+      "chapters";
+
+
+    for (
+      const chapter
+      of book.chapters
+    ) {
+
+      chapterContainer.appendChild(
+        renderChapter(
+          date,
+          book,
+          chapter
+        )
+      );
+    }
+
+
+    card.appendChild(
+      chapterContainer
+    );
+
+
+    return card;
+  }
+
+
+  /* ==========================================================================
+     RENDER CHAPTER
+     ========================================================================== */
+
+  function renderChapter(
+    date,
+    book,
+    chapter
+  ) {
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+
+    row.className =
+      "chapter-row";
+
+
+    row.draggable =
+      true;
+
+
+    row.dataset.chapterId =
+      chapter.id;
+
+
+    /*
+      LABEL
+    */
+
+    const label =
+      document.createElement(
+        "label"
+      );
+
+
+    label.className =
+      "chapter-check";
+
+
+    const checkbox =
+      document.createElement(
+        "input"
+      );
+
+
+    checkbox.type =
+      "checkbox";
+
+
+    checkbox.checked =
+      Boolean(
+        chapter.completed
+      );
+
+
+    const custom =
+      document.createElement(
+        "span"
+      );
+
+
+    custom.className =
+      "custom-check";
+
+
+    const text =
+      document.createElement(
+        "span"
+      );
+
+
+    text.className =
+      "chapter-label";
+
+
+    text.textContent =
+      `${book.book} ${chapter.number}`;
+
+
+    label.append(
+      checkbox,
+      custom,
+      text
+    );
+
+
+    checkbox.addEventListener(
+      "click",
+      event =>
+        event.stopPropagation()
+    );
+
+
+    checkbox.addEventListener(
+      "change",
+      () => {
+
+        toggleChapter(
+          date,
+          book.id,
+          chapter.id
+        );
+      }
+    );
+
+
+    /*
+      MOVE BUTTON
+    */
+
+    const move =
+      document.createElement(
+        "button"
+      );
+
+
+    move.type =
+      "button";
+
+
+    move.className =
+      "mini-move";
+
+
+    move.textContent =
+      "↗";
+
+
+    move.title =
+      "Move chapter";
+
+
+    move.setAttribute(
+      "aria-label",
+      `Move ${book.book} ${chapter.number}`
+    );
+
+
+    move.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+
+        openMoveDialog({
+          kind:
+            "chapter",
+
+          date,
+
+          bookId:
+            book.id,
+
+          chapterId:
+            chapter.id
+        });
+      }
+    );
+
+
+    row.append(
+      label,
+      move
+    );
+
+
+    /*
+      CHAPTER DRAG START
+    */
+
+    row.addEventListener(
+      "dragstart",
+      event => {
+
+        if (
+          event.target.closest(
+            "button"
+          ) ||
+          event.target.closest(
+            "input"
+          )
+        ) {
+
+          event.preventDefault();
+
+          return;
+        }
+
+
+        row.classList.add(
+          "dragging"
+        );
+
+
+        setDragData(
+          event,
+          {
+            kind:
+              "chapter",
+
+            date,
+
+            bookId:
+              book.id,
+
+            chapterId:
+              chapter.id
+          }
+        );
+      }
+    );
+
+
+    row.addEventListener(
+      "dragend",
+      clearDrag
+    );
+
+
+    /*
+      DROP ON CHAPTER
+    */
+
+    row.addEventListener(
+      "dragover",
+      event =>
+        handleDragOver(
+          event,
+          {
+            kind:
+              "chapter",
+
+            date,
+
+            bookId:
+              book.id,
+
+            chapterId:
+              chapter.id
+          },
+          row
+        )
+    );
+
+
+    row.addEventListener(
+      "dragleave",
+      event => {
+
+        if (
+          !row.contains(
+            event.relatedTarget
+          )
+        ) {
+
+          row.classList.remove(
+            "drop-target"
+          );
+        }
+      }
+    );
+
+
+    row.addEventListener(
+      "drop",
+      event =>
+        handleDrop(
+          event,
+          {
+            kind:
+              "chapter",
+
+            date,
+
+            bookId:
+              book.id,
+
+            chapterId:
+              chapter.id
+          }
+        )
+    );
+
+
+    return row;
+  }
+
+
+  /* ==========================================================================
+     RENDER DAY
+     ========================================================================== */
+
+  function renderDay(
+    date
+  ) {
+
+    const iso =
+      isoFromDate(
+        date
+      );
+
+
+    const day =
+      getDay(
+        iso
+      );
+
+
+    const cell =
+      document.createElement(
+        "article"
+      );
+
+
+    cell.className =
+      "day-cell";
+
+
+    if (
+      isSameDate(
+        date,
+        startOfToday()
+      )
+    ) {
+
+      cell.classList.add(
+        "today"
+      );
+
+
+      cell.id =
+        "calendar-today";
+    }
+
+
+    if (
+      day &&
+      isDayMissed(
+        iso,
+        day
+      )
+    ) {
+
+      cell.classList.add(
+        "missed"
+      );
+    }
+
+
+    if (
+      day &&
+      isDayComplete(
+        day
+      )
+    ) {
+
+      cell.classList.add(
+        "all-complete"
+      );
+    }
+
+
+    cell.dataset.date =
+      iso;
+
+
+    /*
+      DATE HEADER
+    */
 
     const dateRow =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
+
 
     dateRow.className =
       "date-row";
 
 
     const dateInfo =
-      document.createElement("div");
-
-    const weekday =
-      date.toLocaleDateString(
-        undefined,
-        { weekday: "short" }
+      document.createElement(
+        "div"
       );
 
 
     dateInfo.innerHTML =
       `
-        <div class="date-weekday">
-          ${escapeHtml(weekday)}
+        <div class="date-meta">
+          ${escapeHTML(
+            date.toLocaleDateString(
+              undefined,
+              {
+                weekday:
+                  "short"
+              }
+            )
+          )}
         </div>
 
         <div class="date-number">
@@ -836,24 +2830,32 @@
       `;
 
 
-    dateRow.appendChild(dateInfo);
-
-
-    if (isToday) {
-
-      const todayBadge =
-        document.createElement("span");
-
-      todayBadge.className =
-        "today-label";
-
-      todayBadge.textContent =
-        "Today";
-
-      dateRow.appendChild(
-        todayBadge
+    const dateRight =
+      document.createElement(
+        "div"
       );
+
+
+    if (
+      isSameDate(
+        date,
+        startOfToday()
+      )
+    ) {
+
+      dateRight.innerHTML =
+        `
+          <span class="today-pill">
+            Today
+          </span>
+        `;
     }
+
+
+    dateRow.append(
+      dateInfo,
+      dateRight
+    );
 
 
     cell.appendChild(
@@ -861,371 +2863,162 @@
     );
 
 
-    /* PASSAGE */
+    /*
+      READINGS
+    */
 
-    const passage =
-      document.createElement("div");
-
-    passage.className =
-      "passage";
-
-    passage.textContent =
-      expandPassage(
-        reading.passage ||
-        reading.text ||
-        ""
+    const readingsContainer =
+      document.createElement(
+        "div"
       );
 
-    passage.draggable = true;
+
+    readingsContainer.className =
+      "day-readings";
 
 
-    passage.addEventListener(
-      "dragstart",
-      event =>
-        handleDragStart(
-          event,
-          key
+    if (
+      !day ||
+      !day.books.length
+    ) {
+
+      const empty =
+        document.createElement(
+          "div"
+        );
+
+
+      empty.className =
+        "empty-reading-state";
+
+
+      empty.textContent =
+        day &&
+        isDayMissed(
+          iso,
+          day
         )
-    );
+          ? "Missed day"
+          : "No reading scheduled";
 
 
-    passage.addEventListener(
-      "dragend",
-      handleDragEnd
-    );
+      readingsContainer.appendChild(
+        empty
+      );
+
+    } else {
+
+      for (
+        const book
+        of day.books
+      ) {
+
+        readingsContainer.appendChild(
+          renderBook(
+            iso,
+            book
+          )
+        );
+      }
+    }
 
 
     cell.appendChild(
-      passage
+      readingsContainer
     );
 
 
-    /* VERSES */
+    /*
+      PRESERVED SECOND CSV FIELD / VERSES
+    */
 
-    if (reading.verses) {
+    if (
+      day &&
+      day.metadata !==
+        "" &&
+      day.metadata !==
+        null &&
+      day.metadata !==
+        undefined
+    ) {
 
-      const verses =
-        document.createElement("div");
+      const footer =
+        document.createElement(
+          "div"
+        );
 
-      verses.className =
-        "verses-badge";
 
-      verses.textContent =
-        reading.verses +
-        " verses";
+      footer.className =
+        "cell-footer";
+
+
+      footer.innerHTML =
+        `
+          <span class="cell-extra">
+            ${escapeHTML(
+              day.metadata
+            )}
+          </span>
+        `;
+
 
       cell.appendChild(
-        verses
+        footer
       );
     }
 
 
-    /* ACTIONS */
+    /*
+      DAY DROP TARGET
+    */
 
-    const actions =
-      document.createElement("div");
+    cell.addEventListener(
+      "dragover",
+      event =>
+        handleDragOver(
+          event,
+          {
+            kind:
+              "day",
 
-    actions.className =
-      "actions";
-
-
-    const checkButton =
-      document.createElement("button");
-
-    checkButton.type =
-      "button";
-
-    checkButton.className =
-      "btn-read";
-
-    checkButton.setAttribute(
-      "aria-pressed",
-      isRead
-        ? "true"
-        : "false"
-    );
-
-    checkButton.setAttribute(
-      "aria-label",
-      isRead
-        ? "Mark as unread"
-        : "Mark as read"
-    );
-
-    checkButton.innerHTML =
-      ICON_CHECK;
-
-    checkButton.addEventListener(
-      "click",
-      () => toggleRead(key)
+            date:
+              iso
+          },
+          cell
+        )
     );
 
 
-    const skipButton =
-      document.createElement("button");
+    cell.addEventListener(
+      "dragleave",
+      event => {
 
-    skipButton.type =
-      "button";
-
-    skipButton.className =
-      "btn-skip";
-
-    skipButton.setAttribute(
-      "aria-expanded",
-      "false"
-    );
-
-    skipButton.setAttribute(
-      "aria-label",
-      "Skip this reading"
-    );
-
-    skipButton.innerHTML =
-      ICON_X;
-
-
-    actions.appendChild(
-      checkButton
-    );
-
-    actions.appendChild(
-      skipButton
-    );
-
-    cell.appendChild(
-      actions
-    );
-
-
-    /* SKIP PANEL */
-
-    const skipPanel =
-      document.createElement("div");
-
-    skipPanel.className =
-      "skip-panel";
-
-    skipPanel.hidden = true;
-
-
-    const skipText =
-      document.createElement("span");
-
-    skipText.textContent =
-      "Push this reading forward by:";
-
-    skipPanel.appendChild(
-      skipText
-    );
-
-
-    [1, 2, 4].forEach(
-      days => {
-
-        const button =
-          document.createElement(
-            "button"
-          );
-
-        button.type =
-          "button";
-
-        button.textContent =
-          days +
-          (
-            days === 1
-              ? " day"
-              : " days"
-          );
-
-
-        button.addEventListener(
-          "click",
-          () =>
-            pushForward(
-              key,
-              days
-            )
-        );
-
-
-        skipPanel.appendChild(
-          button
-        );
-      }
-    );
-
-
-    const cancel =
-      document.createElement(
-        "button"
-      );
-
-    cancel.type =
-      "button";
-
-    cancel.className =
-      "cancel";
-
-    cancel.textContent =
-      "Cancel";
-
-
-    cancel.addEventListener(
-      "click",
-      () => {
-
-        skipPanel.hidden =
-          true;
-
-        skipButton.setAttribute(
-          "aria-expanded",
-          "false"
-        );
-      }
-    );
-
-
-    skipPanel.appendChild(
-      cancel
-    );
-
-
-    skipButton.addEventListener(
-      "click",
-      () => {
-
-        const shouldOpen =
-          skipPanel.hidden;
-
-        document
-          .querySelectorAll(
-            ".skip-panel"
+        if (
+          !cell.contains(
+            event.relatedTarget
           )
-          .forEach(panel => {
-            panel.hidden = true;
-          });
+        ) {
 
-
-        document
-          .querySelectorAll(
-            ".btn-skip"
-          )
-          .forEach(button => {
-            button.setAttribute(
-              "aria-expanded",
-              "false"
-            );
-          });
-
-
-        if (shouldOpen) {
-
-          skipPanel.hidden =
-            false;
-
-          skipButton.setAttribute(
-            "aria-expanded",
-            "true"
+          cell.classList.remove(
+            "drop-target"
           );
         }
       }
     );
 
-
-    cell.appendChild(
-      skipPanel
-    );
-
-
-    return cell;
-  }
-
-
-  /* --------------------------------------------------------------------------
-     CREATE REST CELL
-     -------------------------------------------------------------------------- */
-
-  function createRestCell(
-    key,
-    date
-  ) {
-
-    const cell =
-      document.createElement("div");
-
-    cell.className =
-      "day-cell rest-day";
-
-    cell.dataset.key =
-      key;
-
-
-    cell.innerHTML =
-      `
-        <div class="date-row">
-
-          <div>
-            <div class="date-weekday">
-              ${escapeHtml(
-                date.toLocaleDateString(
-                  undefined,
-                  { weekday: "short" }
-                )
-              )}
-            </div>
-
-            <div class="date-number">
-              ${date.getDate()}
-            </div>
-          </div>
-
-          <button
-            type="button"
-            class="btn-remove-rest"
-            aria-label="Remove rest day"
-            title="Remove rest day"
-          >
-            ${ICON_TRASH}
-          </button>
-
-        </div>
-
-        <div class="rest-content">
-          <div class="rest-label">
-            Rest day
-          </div>
-        </div>
-      `;
-
-
-    cell
-      .querySelector(
-        ".btn-remove-rest"
-      )
-      .addEventListener(
-        "click",
-        () =>
-          removeRestDay(key)
-      );
-
-
-    cell.addEventListener(
-      "dragover",
-      handleDragOver
-    );
-
-    cell.addEventListener(
-      "dragleave",
-      handleDragLeave
-    );
 
     cell.addEventListener(
       "drop",
       event =>
         handleDrop(
           event,
-          key
+          {
+            kind:
+              "day",
+
+            date:
+              iso
+          }
         )
     );
 
@@ -1234,252 +3027,269 @@
   }
 
 
-  /* --------------------------------------------------------------------------
+  /* ==========================================================================
      RENDER CALENDAR
-     -------------------------------------------------------------------------- */
+     ========================================================================== */
 
-  function render() {
+  function renderCalendar() {
 
-    calendarGrid.innerHTML = "";
+    grid.innerHTML =
+      "";
 
 
-    if (readings.length === 0) {
+    const year =
+      currentMonth.getFullYear();
 
-      const empty =
-        document.createElement("div");
+    const month =
+      currentMonth.getMonth();
 
-      empty.className =
-        "month-label";
 
-      empty.textContent =
-        "No reading data found. Make sure readings-data.js is loaded.";
+    monthTitle.textContent =
+      currentMonth.toLocaleDateString(
+        undefined,
+        {
+          month:
+            "long",
 
-      calendarGrid.appendChild(
-        empty
+          year:
+            "numeric"
+        }
       );
 
-      updateProgress();
 
-      return;
-    }
-
-
-    const today =
-      startOfDay(new Date());
-
-
-    let previousMonth =
-      null;
+    const firstDay =
+      new Date(
+        year,
+        month,
+        1
+      ).getDay();
 
 
-    state.order.forEach(
-      (key, position) => {
+    const daysInMonth =
+      lastOfMonth(
+        currentMonth
+      ).getDate();
 
-        const date =
-          addDays(
-            planStart,
-            position
+
+    const totalCells =
+      Math.ceil(
+        (
+          firstDay +
+          daysInMonth
+        ) / 7
+      ) * 7;
+
+
+    for (
+      let index = 0;
+      index < totalCells;
+      index++
+    ) {
+
+      const dayNumber =
+        index -
+        firstDay +
+        1;
+
+
+      if (
+        dayNumber < 1 ||
+        dayNumber >
+          daysInMonth
+      ) {
+
+        const empty =
+          document.createElement(
+            "div"
           );
 
 
-        const monthKey =
-          date.getFullYear() +
-          "-" +
-          date.getMonth();
+        empty.className =
+          "day-cell empty";
 
 
-        if (
-          monthKey !==
-          previousMonth
-        ) {
-
-          const monthLabel =
-            document.createElement(
-              "div"
-            );
-
-          monthLabel.className =
-            "month-label";
-
-          monthLabel.textContent =
-            date.toLocaleDateString(
-              undefined,
-              {
-                month: "long",
-                year: "numeric"
-              }
-            );
-
-
-          calendarGrid.appendChild(
-            monthLabel
-          );
-
-
-          previousMonth =
-            monthKey;
-        }
-
-
-        let cell;
-
-
-        if (
-          key.startsWith(
-            "rest-"
-          )
-        ) {
-
-          cell =
-            createRestCell(
-              key,
-              date
-            );
-
-        } else {
-
-          const reading =
-            getReadingFromKey(
-              key
-            );
-
-          if (!reading) {
-            return;
-          }
-
-          cell =
-            createReadingCell(
-              key,
-              position,
-              date,
-              reading
-            );
-        }
-
-
-        cell.dataset.date =
-          formatDate(date);
-
-        cell.dataset.position =
-          String(position);
-
-
-        if (
-          isSameDay(
-            date,
-            today
-          )
-        ) {
-          cell.id =
-            "calendar-today";
-        }
-
-
-        calendarGrid.appendChild(
-          cell
+        grid.appendChild(
+          empty
         );
+
+
+        continue;
       }
-    );
 
 
-    updateProgress();
+      const date =
+        new Date(
+          year,
+          month,
+          dayNumber
+        );
+
+
+      grid.appendChild(
+        renderDay(
+          date
+        )
+      );
+    }
   }
 
 
-  /* --------------------------------------------------------------------------
+  /* ==========================================================================
      PROGRESS
-     -------------------------------------------------------------------------- */
+     ========================================================================== */
 
-  function updateProgress() {
+  function getProgress() {
 
-    let readCount = 0;
+    let totalChapters =
+      0;
 
-    let verseCount = 0;
+    let completedChapters =
+      0;
+
+    let totalVerses =
+      0;
+
+    let completedVerses =
+      0;
 
 
-    readings.forEach(
-      (reading, index) => {
+    for (
+      const day
+      of Object.values(
+        state.days
+      )
+    ) {
 
-        const readingIndex =
-          reading.idx !== undefined
-            ? String(reading.idx)
-            : String(index);
+      for (
+        const book
+        of day.books
+      ) {
+
+        for (
+          const chapter
+          of book.chapters
+        ) {
+
+          totalChapters++;
+
+
+          /*
+            The original readings-data.js stores the day's
+            verse total, not individual per-chapter verse totals.
+
+            Therefore the progress bar counts chapters exactly,
+            while the displayed verse total uses the daily source
+            metadata proportionally.
+          */
+
+          if (
+            chapter.completed
+          ) {
+
+            completedChapters++;
+          }
+        }
+      }
+    }
+
+
+    /*
+      Sum the verse totals supplied by READINGS.
+
+      This keeps your original CSV data intact.
+    */
+
+    for (
+      const reading
+      of READINGS
+    ) {
+
+      const verseCount =
+        Number(
+          reading.verses
+        );
+
+
+      if (
+        Number.isFinite(
+          verseCount
+        )
+      ) {
+
+        totalVerses +=
+          verseCount;
+
+
+        const day =
+          state.days[
+            canonicalDate(
+              reading.date
+            )
+          ];
 
 
         if (
-          state.readStatus[
-            readingIndex
-          ]
+          day &&
+          isDayComplete(
+            day
+          )
         ) {
 
-          readCount++;
-
-          verseCount +=
-            Number(
-              reading.verses
-            ) || 0;
+          completedVerses +=
+            verseCount;
         }
       }
-    );
+    }
 
 
-    const total =
-      readings.length;
+    return {
+      totalChapters,
+      completedChapters,
+      totalVerses,
+      completedVerses
+    };
+  }
+
+
+  function renderProgress() {
+
+    const progress =
+      getProgress();
 
 
     progressCount.textContent =
-      readCount +
-      " / " +
-      total +
-      " days read";
+      `${progress.completedChapters.toLocaleString()} / ${progress.totalChapters.toLocaleString()} chapters read`;
 
 
     progressVerses.textContent =
-      verseCount.toLocaleString() +
-      " verses read";
+      `${progress.completedVerses.toLocaleString()} / ${progress.totalVerses.toLocaleString()} verses read`;
+
+
+    const percent =
+      progress.totalChapters
+        ? (
+            progress.completedChapters /
+            progress.totalChapters
+          ) * 100
+        : 0;
 
 
     progressFill.style.width =
-      (
-        total > 0
-          ? (readCount / total) * 100
-          : 0
-      ) +
-      "%";
+      `${percent}%`;
   }
 
 
-  /* --------------------------------------------------------------------------
-     QUOTES
-     -------------------------------------------------------------------------- */
+  /* ==========================================================================
+     QUOTE
+     ========================================================================== */
 
-  function showNextQuote() {
-
-    if (!quotes.length) {
-      return;
-    }
-
-
-    state.quoteIndex =
-      (
-        state.quoteIndex + 1
-      ) %
-      quotes.length;
-
-
-    saveState();
-
-
-    const quote =
-      quotes[state.quoteIndex];
-
+  function renderQuote() {
 
     if (
-      typeof quote === "string"
+      !QUOTES.length
     ) {
-
       quoteText.textContent =
-        quote;
+        "";
 
       quoteSource.textContent =
         "";
@@ -1488,22 +3298,41 @@
     }
 
 
+    /*
+      QUOTES can be:
+        { text, source }
+
+      exactly as your quotes-data.js provides.
+    */
+
+    const quote =
+      QUOTES[
+        Math.max(
+          0,
+          Math.min(
+            state.quoteIndex,
+            QUOTES.length - 1
+          )
+        )
+      ];
+
+
     quoteText.textContent =
-      quote.text || "";
+      `“${quote.text || ""}”`;
 
 
     quoteSource.textContent =
       quote.source
-        ? "— " + quote.source
+        ? `— ${quote.source}`
         : "";
   }
 
 
-  /* --------------------------------------------------------------------------
+  /* ==========================================================================
      CLOCK
-     -------------------------------------------------------------------------- */
+     ========================================================================== */
 
-  function tickClock() {
+  function updateClock() {
 
     const now =
       new Date();
@@ -1513,10 +3342,17 @@
       now.toLocaleDateString(
         undefined,
         {
-          weekday: "long",
-          month: "long",
-          day: "numeric",
-          year: "numeric"
+          weekday:
+            "long",
+
+          month:
+            "long",
+
+          day:
+            "numeric",
+
+          year:
+            "numeric"
         }
       );
 
@@ -1525,75 +3361,1162 @@
       now.toLocaleTimeString(
         undefined,
         {
-          hour: "numeric",
-          minute: "2-digit",
-          second: "2-digit"
+          hour:
+            "numeric",
+
+          minute:
+            "2-digit",
+
+          second:
+            "2-digit"
         }
       );
   }
 
 
-  /* --------------------------------------------------------------------------
-     TODAY BUTTON
-     -------------------------------------------------------------------------- */
+  /* ==========================================================================
+     PRETTY DATE
+     ========================================================================== */
 
-  jumpToday.addEventListener(
-    "click",
-    () => {
+  function formatPrettyDate(
+    iso
+  ) {
 
-      const today =
-        document.getElementById(
-          "calendar-today"
+    return localDateFromISO(
+      iso
+    ).toLocaleDateString(
+      undefined,
+      {
+        month:
+          "long",
+
+        day:
+          "numeric",
+
+        year:
+          "numeric"
+      }
+    );
+  }
+
+
+  /* ==========================================================================
+     TOAST
+     ========================================================================== */
+
+  function showToast(
+    message
+  ) {
+
+    if (!toast) {
+      return;
+    }
+
+
+    clearTimeout(
+      toastTimer
+    );
+
+
+    toast.textContent =
+      message;
+
+
+    toast.classList.add(
+      "show"
+    );
+
+
+    toastTimer =
+      setTimeout(
+        () => {
+
+          toast.classList.remove(
+            "show"
+          );
+
+        },
+        2400
+      );
+  }
+
+
+  /* ==========================================================================
+     MOVE DIALOG
+     ========================================================================== */
+
+  let moveTarget =
+    null;
+
+  let toastTimer =
+    null;
+
+
+  function openMoveDialog(
+    target
+  ) {
+
+    moveTarget =
+      target;
+
+
+    if (
+      target.kind ===
+      "book"
+    ) {
+
+      const book =
+        getBook(
+          target.date,
+          target.bookId
         );
 
-      if (!today) {
+
+      moveDialogTitle.textContent =
+        "Move book";
+
+
+      moveDialogDescription.textContent =
+        `Move ${book?.book || "this reading"} to another calendar day.`;
+    }
+
+
+    else {
+
+      const book =
+        getBook(
+          target.date,
+          target.bookId
+        );
+
+
+      const chapter =
+        getChapter(
+          target.date,
+          target.bookId,
+          target.chapterId
+        );
+
+
+      moveDialogTitle.textContent =
+        "Move chapter";
+
+
+      moveDialogDescription.textContent =
+        `Move ${book?.book || "Bible"} ${chapter?.number || ""} to another calendar day.`;
+    }
+
+
+    moveDateInput.value =
+      target.date;
+
+
+    moveDialog.hidden =
+      false;
+
+
+    requestAnimationFrame(
+      () =>
+        moveDateInput.focus()
+    );
+  }
+
+
+  function closeMoveDialog() {
+
+    moveDialog.hidden =
+      true;
+
+
+    moveTarget =
+      null;
+  }
+
+
+  function confirmMoveDialog() {
+
+    if (!moveTarget) {
+      return;
+    }
+
+
+    const targetDate =
+      canonicalDate(
+        moveDateInput.value
+      );
+
+
+    if (!targetDate) {
+
+      showToast(
+        "Please choose a valid date."
+      );
+
+
+      return;
+    }
+
+
+    if (
+      moveTarget.kind ===
+      "book"
+    ) {
+
+      moveBook(
+        moveTarget.date,
+        moveTarget.bookId,
+        targetDate
+      );
+
+    } else {
+
+      moveChapter(
+        moveTarget.date,
+        moveTarget.bookId,
+        moveTarget.chapterId,
+        targetDate
+      );
+    }
+
+
+    closeMoveDialog();
+  }
+
+
+  /* ==========================================================================
+     NAVIGATION
+     ========================================================================== */
+
+  document
+    .getElementById(
+      "prevMonth"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+
+        currentMonth =
+          new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth() - 1,
+            1
+          );
+
+
+        renderCalendar();
+      }
+    );
+
+
+  document
+    .getElementById(
+      "nextMonth"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+
+        currentMonth =
+          new Date(
+            currentMonth.getFullYear(),
+            currentMonth.getMonth() + 1,
+            1
+          );
+
+
+        renderCalendar();
+      }
+    );
+
+
+  document
+    .getElementById(
+      "todayButton"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+
+        currentMonth =
+          firstOfMonth(
+            new Date()
+          );
+
+
+        renderCalendar();
+
+
+        requestAnimationFrame(
+          () => {
+
+            document
+              .getElementById(
+                "calendar-today"
+              )
+              ?.scrollIntoView({
+                behavior:
+                  "smooth",
+
+                block:
+                  "center"
+              });
+          }
+        );
+      }
+    );
+
+
+  /* ==========================================================================
+     IMPORT CSV
+     ========================================================================== */
+
+  function importCSVFile(
+    file
+  ) {
+
+    if (!file) {
+      return;
+    }
+
+
+    const reader =
+      new FileReader();
+
+
+    reader.onload =
+      event => {
+
+        try {
+
+          const imported =
+            parseImportedCSV(
+              event.target.result
+            );
+
+
+          state.days =
+            imported;
+
+
+          state.imported =
+            true;
+
+
+          const firstDate =
+            Object.keys(
+              imported
+            ).sort()[0];
+
+
+          if (firstDate) {
+
+            currentMonth =
+              firstOfMonth(
+                localDateFromISO(
+                  firstDate
+                )
+              );
+          }
+
+
+          saveState();
+
+          render();
+
+          showToast(
+            `Imported ${Object.keys(imported).length} reading days.`
+          );
+
+        } catch (error) {
+
+          console.error(
+            "Bible Plan CSV import error:",
+            error
+          );
+
+
+          showToast(
+            error.message ||
+            "Could not import CSV."
+          );
+
+        } finally {
+
+          csvInput.value =
+            "";
+        }
+      };
+
+
+    reader.onerror =
+      () => {
+
+        showToast(
+          "Could not read that file."
+        );
+
+
+        csvInput.value =
+          "";
+      };
+
+
+    reader.readAsText(
+      file
+    );
+  }
+
+
+  function parseCSVLine(
+    line
+  ) {
+
+    const cells = [];
+
+    let current =
+      "";
+
+    let quoted =
+      false;
+
+
+    for (
+      let i = 0;
+      i < line.length;
+      i++
+    ) {
+
+      const char =
+        line[i];
+
+
+      if (
+        char ===
+        '"'
+      ) {
+
+        if (
+          quoted &&
+          line[i + 1] ===
+            '"'
+        ) {
+
+          current +=
+            '"';
+
+          i++;
+
+        } else {
+
+          quoted =
+            !quoted;
+        }
+
+
+        continue;
+      }
+
+
+      if (
+        char === "," &&
+        !quoted
+      ) {
+
+        cells.push(
+          current.trim()
+        );
+
+        current =
+          "";
+
+        continue;
+      }
+
+
+      current +=
+        char;
+    }
+
+
+    cells.push(
+      current.trim()
+    );
+
+
+    return cells;
+  }
+
+
+  function parseImportedCSV(
+    text
+  ) {
+
+    const lines =
+      String(text)
+        .replace(/^\uFEFF/, "")
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .split("\n")
+        .filter(
+          line =>
+            line.trim() !== ""
+        );
+
+
+    if (!lines.length) {
+
+      throw new Error(
+        "The CSV file is empty."
+      );
+    }
+
+
+    const rows =
+      lines.map(
+        parseCSVLine
+      );
+
+
+    /*
+      Two common formats:
+
+      1.
+        "Gen 1-7; Mat 1-2; Ps 1; Pro 1","232"
+
+        Uses the Start date from the interface.
+
+      2.
+        "2026-09-01","Gen 1-7; Mat 1-2; Ps 1; Pro 1","232"
+
+        Uses explicit dates.
+    */
+
+
+    const firstRow =
+      rows[0].map(
+        cell =>
+          cell.toLowerCase()
+      );
+
+
+    const hasHeader =
+      firstRow.some(
+        value =>
+          /date|passage|reading|verses|plan|metadata/
+            .test(value)
+      );
+
+
+    const firstDataRow =
+      hasHeader
+        ? 1
+        : 0;
+
+
+    const imported = {};
+
+
+    let sequentialDate =
+      localDateFromISO(
+        canonicalDate(
+          planStartInput?.value ||
+          FALLBACK_START
+        ) ||
+        FALLBACK_START
+      );
+
+
+    let validRows =
+      0;
+
+
+    for (
+      let i =
+        firstDataRow;
+      i <
+        rows.length;
+      i++
+    ) {
+
+      const row =
+        rows[i];
+
+
+      if (
+        row.length < 2
+      ) {
+        continue;
+      }
+
+
+      let date =
+        "";
+
+      let passage =
+        "";
+
+      let metadata =
+        "";
+
+
+      const firstDate =
+        canonicalDate(
+          row[0]
+        );
+
+
+      const secondDate =
+        canonicalDate(
+          row[1]
+        );
+
+
+      if (firstDate) {
+
+        /*
+          date, passage, metadata
+        */
+
+        date =
+          firstDate;
+
+        passage =
+          row[1];
+
+        metadata =
+          row[2] ??
+          "";
+
+      }
+
+      else if (secondDate) {
+
+        /*
+          passage, date, metadata
+        */
+
+        date =
+          secondDate;
+
+        passage =
+          row[0];
+
+        metadata =
+          row[2] ??
+          "";
+
+      }
+
+      else {
+
+        /*
+          passage, metadata
+          sequential dates
+        */
+
+        date =
+          isoFromDate(
+            sequentialDate
+          );
+
+
+        sequentialDate =
+          addDays(
+            sequentialDate,
+            1
+          );
+
+
+        passage =
+          row[0];
+
+        metadata =
+          row[1] ??
+          "";
+      }
+
+
+      if (
+        !date ||
+        !passage.trim()
+      ) {
+
+        continue;
+      }
+
+
+      const fakeReading = {
+        date,
+
+        passage:
+          passage.trim(),
+
+        verses:
+          metadata.trim()
+      };
+
+
+      if (
+        !imported[date]
+      ) {
+
+        imported[date] =
+          buildDayFromReading(
+            fakeReading
+          );
+
+      } else {
+
+        /*
+          Merge duplicate date rows.
+        */
+
+        const newDay =
+          buildDayFromReading(
+            fakeReading
+          );
+
+
+        imported[date].books.push(
+          ...newDay.books
+        );
+      }
+
+
+      imported[date].metadata =
+        metadata;
+
+
+      validRows++;
+    }
+
+
+    if (
+      !validRows
+    ) {
+
+      throw new Error(
+        'No valid reading rows were found. Example: "Gen 1-7; Mat 1-2; Ps 1; Pro 1","232"'
+      );
+    }
+
+
+    return imported;
+  }
+
+
+  csvInput?.addEventListener(
+    "change",
+    event => {
+
+      const file =
+        event.target.files?.[0];
+
+
+      if (file) {
+        importCSVFile(
+          file
+        );
+      }
+    }
+  );
+
+
+  /* ==========================================================================
+     EXPORT
+     ========================================================================== */
+
+  document
+    .getElementById(
+      "exportButton"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+
+        const blob =
+          new Blob(
+            [
+              JSON.stringify(
+                state,
+                null,
+                2
+              )
+            ],
+            {
+              type:
+                "application/json"
+            }
+          );
+
+
+        const url =
+          URL.createObjectURL(
+            blob
+          );
+
+
+        const link =
+          document.createElement(
+            "a"
+          );
+
+
+        link.href =
+          url;
+
+
+        link.download =
+          "bible-plan-backup.json";
+
+
+        document.body.appendChild(
+          link
+        );
+
+
+        link.click();
+
+
+        link.remove();
+
+
+        URL.revokeObjectURL(
+          url
+        );
+
+
+        showToast(
+          "Bible plan backup exported."
+        );
+      }
+    );
+
+
+  /* ==========================================================================
+     RESET
+     ========================================================================== */
+
+  document
+    .getElementById(
+      "resetButton"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+
+        const confirmed =
+          window.confirm(
+            "Reset your saved Bible Plan progress and all custom moves?"
+          );
+
+
+        if (!confirmed) {
+          return;
+        }
+
+
+        localStorage.removeItem(
+          STORAGE_KEY
+        );
+
+
+        state.version =
+          4;
+
+        state.days =
+          createDefaultState().days;
+
+        state.quoteIndex =
+          Math.floor(
+            Math.random() *
+            Math.max(
+              1,
+              QUOTES.length
+            )
+          );
+
+        state.imported =
+          false;
+
+
+        currentMonth =
+          firstOfMonth(
+            localDateFromISO(
+              READINGS[0]?.date ||
+              FALLBACK_START
+            )
+          );
+
+
+        if (
+          planStartInput
+        ) {
+
+          planStartInput.value =
+            READINGS[0]?.date ||
+            FALLBACK_START;
+        }
+
+
+        saveState();
+
+        render();
+
+        showToast(
+          "Bible Plan reset."
+        );
+      }
+    );
+
+
+  /* ==========================================================================
+     MOVE DIALOG CONTROLS
+     ========================================================================== */
+
+  document
+    .getElementById(
+      "closeMoveDialog"
+    )
+    ?.addEventListener(
+      "click",
+      closeMoveDialog
+    );
+
+
+  document
+    .getElementById(
+      "cancelMove"
+    )
+    ?.addEventListener(
+      "click",
+      closeMoveDialog
+    );
+
+
+  document
+    .getElementById(
+      "confirmMove"
+    )
+    ?.addEventListener(
+      "click",
+      confirmMoveDialog
+    );
+
+
+  moveDialog?.addEventListener(
+    "click",
+    event => {
+
+      if (
+        event.target ===
+        moveDialog
+      ) {
+
+        closeMoveDialog();
+      }
+    }
+  );
+
+
+  document.addEventListener(
+    "keydown",
+    event => {
+
+      if (
+        event.key ===
+          "Escape" &&
+        moveDialog &&
+        !moveDialog.hidden
+      ) {
+
+        closeMoveDialog();
+      }
+    }
+  );
+
+
+  /* ==========================================================================
+     JUMP TO TODAY
+     ========================================================================== */
+
+  document
+    .getElementById(
+      "jumpToday"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+
+        currentMonth =
+          firstOfMonth(
+            new Date()
+          );
+
+
+        renderCalendar();
+
+
+        requestAnimationFrame(
+          () => {
+
+            document
+              .getElementById(
+                "calendar-today"
+              )
+              ?.scrollIntoView({
+                behavior:
+                  "smooth",
+
+                block:
+                  "center"
+              });
+          }
+        );
+      }
+    );
+
+
+  /* ==========================================================================
+     PLAN START DATE
+     ========================================================================== */
+
+  planStartInput?.addEventListener(
+    "change",
+    () => {
+
+      const date =
+        canonicalDate(
+          planStartInput.value
+        );
+
+
+      if (!date) {
+
+        planStartInput.value =
+          FALLBACK_START;
+
+
+        showToast(
+          "Invalid start date."
+        );
+
+
+        return;
+      }
+    }
+  );
+
+
+  /* ==========================================================================
+     STORAGE SYNCHRONIZATION
+     ========================================================================== */
+
+  window.addEventListener(
+    "storage",
+    event => {
+
+      if (
+        event.key !==
+        STORAGE_KEY
+      ) {
         return;
       }
 
-      today.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-      });
+
+      const fresh =
+        loadState();
+
+
+      state.version =
+        fresh.version;
+
+      state.days =
+        fresh.days;
+
+      state.quoteIndex =
+        fresh.quoteIndex;
+
+      state.imported =
+        fresh.imported;
+
+
+      render();
     }
   );
 
 
-  /* --------------------------------------------------------------------------
-     BOOT
-     -------------------------------------------------------------------------- */
+  window.addEventListener(
+    "beforeunload",
+    saveState
+  );
 
-  render();
 
-  showNextQuote();
+  /* ==========================================================================
+     INITIALIZATION
+     ========================================================================== */
 
-  tickClock();
+  /*
+    Your existing readings-data.js is dated from September 1, 2026 onward,
+    so open on the first actual plan date rather than today's date if the
+    calendar has not been customized.
+  */
+
+  const firstReadingDate =
+    READINGS[0]?.date;
+
+
+  if (
+    firstReadingDate &&
+    !state.imported &&
+    Object.keys(
+      state.days
+    ).length
+  ) {
+
+    currentMonth =
+      firstOfMonth(
+        localDateFromISO(
+          firstReadingDate
+        )
+      );
+
+
+    if (
+      planStartInput
+    ) {
+
+      planStartInput.value =
+        firstReadingDate;
+    }
+  }
+
+
+  /*
+    Pick a new quote on every fresh page load.
+    The saved quoteIndex still exists so the state remains serializable.
+  */
+
+  if (
+    QUOTES.length
+  ) {
+
+    state.quoteIndex =
+      Math.floor(
+        Math.random() *
+        QUOTES.length
+      );
+  }
+
+
+  saveState();
+
+  updateClock();
 
   setInterval(
-    tickClock,
+    updateClock,
     1000
   );
 
-
-  /* --------------------------------------------------------------------------
-     INITIAL TODAY POSITION
-     -------------------------------------------------------------------------- */
-
-  window.requestAnimationFrame(
-    () => {
-
-      const today =
-        document.getElementById(
-          "calendar-today"
-        );
-
-      if (today) {
-
-        today.scrollIntoView({
-          behavior: "auto",
-          block: "center"
-        });
-      }
-    }
-  );
-
+  render();
 })();
