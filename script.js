@@ -106,6 +106,31 @@
    * kept either way). A no-op for a freshly-created default state.
    */
 
+  function processCSV(csvText) {
+    const lines = csvText.split('\n').filter(line => line.trim() !== '');
+    planData = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+        // Regex to handle CSV parsing with quotes
+        const matches = lines[i].match(/(?:"([^"]*)")|([^,]+)/g);
+        if (matches && matches.length >= 2) {
+            const date = matches[0].replace(/"/g, '');
+            const passageRaw = matches[1].replace(/"/g, '');
+            
+            if (date && passageRaw) {
+                planData.push({
+                    id: 'reading-' + i,
+                    date: date,
+                    passage: expandPassage(passageRaw),
+                    status: 'pending' // 'pending', 'read', 'missed'
+                });
+            }
+        }
+    }
+    saveState();
+    renderCalendar();
+  }
+  
   function renderCalendar() {
   const grid = document.getElementById('calendarGrid');
   grid.innerHTML = '';
