@@ -1297,7 +1297,17 @@ button:focus-visible {
 }
 
 .sidebar.collapsed {
-  width: 64px;
+  width: 0;
+  border-right: 0;
+}
+
+.sidebar.collapsed .sidebar-toggle {
+  position: fixed;
+  left: 8px;
+  top: 12px;
+  z-index: 100;
+  background: var(--night-2);
+  border: 1px solid var(--night-line);
 }
 
 
@@ -1599,7 +1609,7 @@ button:focus-visible {
   }
 
   .sidebar.collapsed {
-    width: 56px;
+    width: 0;
   }
 
 }
@@ -1640,4 +1650,227 @@ button:focus-visible {
 body.is-resizing {
   user-select: none;
   cursor: ew-resize;
+}
+
+.sidebar-nav-btn.active {
+  background: rgba(219, 181, 88, 0.14);
+  color: var(--gold-bright);
+}
+
+.sidebar-panel,
+.account-popover {
+  margin: 4px 10px;
+  padding: 10px;
+  border: 1px solid var(--night-line);
+  background: var(--night);
+  color: var(--cream);
+  font-size: 11px;
+}
+
+.sidebar-panel[hidden],
+.account-popover[hidden] {
+  display: none;
+}
+
+.panel-title {
+  margin: 6px 0 7px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--night-line);
+  color: var(--gold-bright);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
+
+.sidebar-panel label,
+.account-popover label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+}
+
+.sidebar-panel input[type="date"],
+.sidebar-panel input[type="number"],
+.sidebar-panel select,
+.account-popover input {
+  width: 100%;
+  min-width: 0;
+  padding: 4px 5px;
+  border: 1px solid var(--night-line);
+  border-radius: 2px;
+  background: var(--night-2);
+  color: var(--cream);
+  font-size: 11px;
+}
+
+.sidebar-panel label:has(input[type="date"]),
+.sidebar-panel label:has(input[type="number"]),
+.sidebar-panel label:has(select),
+.account-popover label {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.weekday-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.weekday-options label {
+  min-height: 22px;
+}
+
+.add-book {
+  margin-left: auto;
+  padding: 0 5px;
+  border: 1px solid var(--night-line);
+  background: transparent;
+  color: var(--gold-bright);
+  cursor: pointer;
+}
+
+.panel-actions {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.panel-actions button,
+.panel-button,
+.account-popover form button,
+.oauth-button,
+.save-page button {
+  flex: 1;
+  padding: 5px 6px;
+  border: 1px solid var(--night-line);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--cream);
+  cursor: pointer;
+  font-size: 10px;
+  text-align: center;
+}
+
+.panel-button input {
+  display: none;
+}
+
+.account-popover {
+  position: fixed;
+  bottom: 12px;
+  left: 260px;
+  width: 220px;
+  z-index: 20;
+  box-shadow: 0 8px 20px var(--shadow);
+}
+
+.account-popover form {
+  display: grid;
+  gap: 5px;
+}
+
+.account-divider,
+.account-popover small {
+  display: block;
+  margin: 8px 0 5px;
+  color: var(--ink-soft);
+  font-size: 10px;
+  text-align: center;
+}
+
+.oauth-button {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.app-page {
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.page-heading span {
+  color: var(--gold-bright);
+  font-size: 10px;
+  letter-spacing: .12em;
+}
+
+.page-heading h2 {
+  margin: 5px 0 18px;
+  font-family: var(--font-display);
+  color: var(--cream);
+}
+
+.bible-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 6px;
+}
+
+.bible-list details {
+  border: 1px solid var(--night-line);
+  background: rgba(30, 48, 60, .5);
+}
+
+.bible-list summary {
+  padding: 9px;
+  cursor: pointer;
+  color: var(--cream);
+  font-family: var(--font-display);
+}
+
+.chapter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 8px 8px;
+}
+
+.chapter-list button {
+  width: 27px;
+  height: 27px;
+  border: 1px solid var(--night-line);
+  background: var(--night);
+  color: var(--gold-bright);
+  cursor: pointer;
+}
+
+.save-page p {
+  color: var(--cream);
+  opacity: .75;
+}
+
+.reset-dialog {
+  position: fixed;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  width: min(320px, calc(100vw - 32px));
+  border: 1px solid var(--night-line);
+  background: var(--night-2);
+  color: var(--cream);
+  box-shadow: 0 12px 32px var(--shadow);
+}
+
+.reset-dialog p {
+  font-size: 12px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.dialog-actions button {
+  padding: 6px 10px;
+  border: 1px solid var(--night-line);
+  background: transparent;
+  color: var(--cream);
+  cursor: pointer;
+}
+
+.dialog-actions .danger {
+  border-color: var(--rust);
+  color: var(--rust-bg);
 }
