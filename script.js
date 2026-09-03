@@ -655,6 +655,85 @@
   }
 
   /* ================================================================
+     Account UI Update
+     ================================================================ */
+  function updateAccountUI(userProfile) {
+    const iconContainer = document.getElementById("accountIconContainer");
+    const accountLabel = document.getElementById("accountLabel");
+
+    if (userProfile && userProfile.isLoggedIn) {
+      // User WITH a profile (custom avatar image and username)
+      accountLabel.textContent = userProfile.name;
+      
+      if (userProfile.avatarUrl) {
+        iconContainer.innerHTML = `<img src="${userProfile.avatarUrl}" alt="Profile" style="width: 18px; height: 18px; border-radius: 50%; object-fit: cover;">`;
+      }
+    } else {
+      // User WITHOUT a profile (Default guest state)
+      accountLabel.textContent = "Account";
+      iconContainer.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" id="accountSvgIcon" style="width: 18px; height: 18px;">
+          <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.7"/>
+          <path d="M20 19.5C20 19.78 19.78 20 19.5 20H4.5C4.22 20 4 19.78 4 19.5V16H20V19.5Z" stroke="currentColor" stroke-width="1.7"/>
+        </svg>
+      `;
+    }
+  }
+
+/* ================================================================
+    Sidebar Resizing Functionality
+    ================================================================ */
+  function initSidebarResize() {
+    const sidebar = document.getElementById('sidebar');
+    const resizeHandle = document.getElementById('sidebarResizeHandle');
+    if (!sidebar || !resizeHandle) return;
+
+    let isResizing = false;
+
+    // Minimum collapsed width (matches your .sidebar.collapsed width)
+    const minCollapsedWidth = 64; 
+    // Point at which text labels begin to overlap/crowd, triggering a snap-close
+    const snapCloseThreshold = 140; 
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      document.body.classList.add('is-resizing');
+      sidebar.style.transition = 'none'; // Disable transition while dragging for instant tracking
+      e.preventDefault();
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+
+      const screenWidth = window.innerWidth;
+      const maxAllowedWidth = screenWidth / 3; // 1/3 of the screen width max limit
+      let newWidth = e.clientX;
+
+      // Check if dragged past the snap-close threshold
+      if (newWidth < snapCloseThreshold) {
+        sidebar.classList.add('collapsed');
+        sidebar.style.width = '';
+        return;
+      }
+
+      // Ensure it stays within bounds (Collapsed size up to 1/3 of screen width)
+      if (newWidth > maxAllowedWidth) {
+        newWidth = maxAllowedWidth;
+      }
+
+      sidebar.classList.remove('collapsed');
+      sidebar.style.width = `${newWidth}px`;
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isResizing) return;
+      isResizing = false;
+      document.body.classList.remove('is-resizing');
+      sidebar.style.transition = ''; // Restore smooth CSS transition
+    });
+  }
+
+  /* ================================================================
      Event Handlers
      ================================================================ */
 
@@ -716,6 +795,7 @@
 
     attachEventHandlers();
     initDragAndDrop();
+    initSidebarResize();
     render();
     updateClock();
     updateQuote();

@@ -1497,6 +1497,96 @@ button:focus-visible {
   min-width: 0;
 }
 
+/* --------------------------------------------------------------------------
+   SIDEBAR FOOTER
+   -------------------------------------------------------------------------- */
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 10px;
+  border-top: 1px solid var(--night-line); /* Optional: adds a clean line above the footer */
+}
+
+.sidebar.collapsed .sidebar-footer {
+  padding: 10px 8px;
+}
+
+/* If you want the footer button to shrink to an icon-only button like your nav buttons */
+.sidebar.collapsed .sidebar-footer .sidebar-nav-btn {
+  width: 40px;
+  justify-content: center;
+  padding: 9px;
+}
+
+.sidebar.collapsed .sidebar-footer .sidebar-nav-label {
+  max-width: 0;
+  opacity: 0;
+}
+
+/* Push the settings icon to the far right inside the button */
+.sidebar-nav-btn .sidebar-action-icon {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Hide the settings icon when the sidebar is collapsed */
+.sidebar.collapsed .sidebar-nav-btn .sidebar-action-icon {
+  display: none;
+}
+
+.sidebar-footer-inner {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sidebar-footer-inner .sidebar-nav-btn {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Standalone Settings Icon Button Styling */
+.sidebar-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+  color: var(--cream);
+
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sidebar-icon-btn:hover {
+  background: rgba(219, 181, 88, 0.08);
+  color: var(--gold-bright);
+}
+
+.sidebar-icon-btn:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 2px;
+}
+
+.sidebar-icon-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* When the sidebar collapses, hide the separate settings button to save space */
+.sidebar.collapsed .sidebar-icon-btn {
+  display: none;
+}
 
 /* --------------------------------------------------------------------------
    SIDEBAR — RESPONSIVE
@@ -1512,4 +1602,42 @@ button:focus-visible {
     width: 56px;
   }
 
+}
+
+/* account pfp */
+.account-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.account-icon-wrapper img {
+  display: block;
+}
+
+/* Sidebar Resize Handle */
+.sidebar-resize-handle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  cursor: ew-resize;
+  background: transparent;
+  z-index: 10;
+  transition: background 0.2s ease;
+}
+
+.sidebar-resize-handle:hover,
+.sidebar.resizing .sidebar-resize-handle {
+  background: var(--gold-bright);
+}
+
+/* Disable text selection globally while dragging the sidebar */
+body.is-resizing {
+  user-select: none;
+  cursor: ew-resize;
 }
