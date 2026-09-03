@@ -173,7 +173,7 @@ function parseCSV(text) {
  * pushed around on the calendar -- read status is tracked against
  * `idx`, not against a date.
  */
-const READINGS = parseCSV(READINGS_CSV_RAW.trim())
+window.READINGS = parseCSV(READINGS_CSV_RAW.trim())
   .slice(1) // drop header row
   .map((r, i) => ({
     idx: i,
