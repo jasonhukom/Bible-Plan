@@ -30,7 +30,12 @@
   let state = {
     calendarDays: [],
     settings: {
-      quoteIndex: -1
+      quoteIndex: -1,
+      startDate: dateToISO(new Date(Date.now() + 86400000)),
+      days: 121,
+      weekdays: [0, 1, 2, 3, 4, 5, 6],
+      showVerses: true,
+      order: "traditional"
     }
   };
 
@@ -125,13 +130,25 @@
   function initializeCalendarData() {
     if (!window.READINGS || READINGS.length === 0) return;
 
-    state.calendarDays = READINGS.map((reading) => ({
+    state.calendarDays = READINGS.slice(0, state.settings.days || 121).map((reading) => ({
       id: `day-${reading.idx}`,
       date: reading.date,
       dayIndex: reading.idx,
       metadata: reading.verses || "",
       books: parsePassageString(reading.passage)
     }));
+    scheduleCalendarDays();
+  }
+
+  function scheduleCalendarDays() {
+    const startDate = parseISO(state.settings.startDate || dateToISO(new Date(Date.now() + 86400000)));
+    const weekdays = state.settings.weekdays || [0, 1, 2, 3, 4, 5, 6];
+    let date = startDate;
+    state.calendarDays.forEach((day) => {
+      while (!weekdays.includes(date.getDay())) date.setDate(date.getDate() + 1);
+      day.date = dateToISO(date);
+      date.setDate(date.getDate() + 1);
+    });
   }
 
   /* ================================================================
@@ -151,8 +168,9 @@
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (parsed.calendarDays && Array.isArray(parsed.calendarDays)) {
+        if (parsed.calendarDays && Array.isArray(parsed.calendarDays) && parsed.calendarDays.length > 0) {
           state = parsed;
+          state.settings = { ...state.settings, startDate: dateToISO(new Date(Date.now() + 86400000)), days: state.calendarDays.length || 121, weekdays: [0, 1, 2, 3, 4, 5, 6], showVerses: true, order: "traditional" };
           return true;
         }
       }
@@ -162,11 +180,15 @@
     return false;
   }
 
-  function resetPlan() {
-    if (!confirm("Clear all reading progress? This cannot be undone.")) return;
+  function resetPlan(force = false) {
+    if (!force) {
+      const dialog = document.getElementById("resetDialog");
+      if (dialog) dialog.hidden = false;
+      return;
+    }
     state = {
       calendarDays: [],
-      settings: { quoteIndex: -1 }
+      settings: { quoteIndex: -1, startDate: dateToISO(new Date(Date.now() + 86400000)), days: 121, weekdays: [0, 1, 2, 3, 4, 5, 6], showVerses: true, order: "traditional" }
     };
     initializeCalendarData();
     saveState();
@@ -654,6 +676,72 @@
     updateMonthLabel();
   }
 
+  const BIBLE_BOOKS = [
+    ["Genesis", 50], ["Exodus", 40], ["Leviticus", 27], ["Numbers", 36], ["Deuteronomy", 34],
+    ["Joshua", 24], ["Judges", 21], ["Ruth", 4], ["1 Samuel", 31], ["2 Samuel", 24], ["1 Kings", 22], ["2 Kings", 25],
+    ["1 Chronicles", 29], ["2 Chronicles", 36], ["Ezra", 10], ["Nehemiah", 13], ["Esther", 10], ["Job", 42], ["Psalms", 150], ["Proverbs", 31],
+    ["Ecclesiastes", 12], ["Song of Solomon", 8], ["Isaiah", 66], ["Jeremiah", 52], ["Lamentations", 5], ["Ezekiel", 48], ["Daniel", 14],
+    ["Hosea", 14], ["Joel", 3], ["Amos", 9], ["Obadiah", 1], ["Jonah", 4], ["Micah", 7], ["Nahum", 3], ["Habakkuk", 3], ["Zephaniah", 3], ["Haggai", 2], ["Zechariah", 14], ["Malachi", 4],
+    ["Matthew", 28], ["Mark", 16], ["Luke", 24], ["John", 21], ["Acts", 28], ["Romans", 16], ["1 Corinthians", 16], ["2 Corinthians", 13], ["Galatians", 6], ["Ephesians", 6], ["Philippians", 4], ["Colossians", 4], ["1 Thessalonians", 5], ["2 Thessalonians", 3], ["1 Timothy", 6], ["2 Timothy", 4], ["Titus", 3], ["Philemon", 1], ["Hebrews", 13], ["James", 5], ["1 Peter", 5], ["2 Peter", 3], ["1 John", 5], ["2 John", 1], ["3 John", 1], ["Jude", 1], ["Revelation", 22],
+    ["Tobit", 14], ["Judith", 16], ["Wisdom", 19], ["Sirach", 51], ["Baruch", 6], ["1 Maccabees", 16], ["2 Maccabees", 15]
+  ];
+
+  function renderBiblePage() {
+    const list = document.getElementById("bibleList");
+    if (!list || list.childElementCount) return;
+    BIBLE_BOOKS.forEach(([name, chapters]) => {
+      const row = document.createElement("details");
+      const summary = document.createElement("summary");
+      summary.textContent = name;
+      row.appendChild(summary);
+      const chapterList = document.createElement("div");
+      chapterList.className = "chapter-list";
+      for (let chapter = 1; chapter <= chapters; chapter++) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = chapter;
+        button.title = `${name} ${chapter}`;
+        chapterList.appendChild(button);
+      }
+      row.appendChild(chapterList);
+      list.appendChild(row);
+    });
+  }
+
+  function showPage(page) {
+    document.querySelectorAll("[data-page]").forEach((button) => button.classList.toggle("active", button.dataset.page === page));
+    document.querySelector(".quote-banner").hidden = page !== "calendar";
+    document.querySelector(".controls").hidden = page !== "calendar";
+    document.querySelector(".calendar-section").hidden = page !== "calendar";
+    document.getElementById("biblePage").hidden = page !== "bible";
+    document.getElementById("savePage").hidden = page !== "save";
+    if (page === "bible") renderBiblePage();
+  }
+
+  function updatePlanFromPanel() {
+    state.settings.startDate = document.getElementById("planStartDate").value;
+    state.settings.days = Number(document.getElementById("planDays").value) || 121;
+    state.settings.weekdays = [...document.querySelectorAll(".weekday-options input:checked")].map((input) => Number(input.value));
+    state.calendarDays = READINGS.slice(0, state.settings.days).map((reading, index) => {
+      const oldDay = state.calendarDays[index];
+      return oldDay || { id: `day-${reading.idx}`, dayIndex: reading.idx, metadata: reading.verses || "", books: parsePassageString(reading.passage) };
+    });
+    scheduleCalendarDays();
+    saveState();
+    render();
+  }
+
+  function initializePlanPanel() {
+    const tomorrow = new Date(getIndonesiaToday());
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    document.getElementById("planStartDate").value = state.settings.startDate || dateToISO(tomorrow);
+    document.getElementById("planDays").value = state.settings.days || state.calendarDays.length || 121;
+    (state.settings.weekdays || [0, 1, 2, 3, 4, 5, 6]).forEach((day) => {
+      const input = document.querySelector(`.weekday-options input[value="${day}"]`);
+      if (input) input.checked = true;
+    });
+  }
+
   /* ================================================================
      Account UI Update
      ================================================================ */
@@ -738,6 +826,54 @@
      ================================================================ */
 
   function attachEventHandlers() {
+    document.querySelectorAll("[data-page]").forEach((button) => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+
+    document.getElementById("accountBtn").addEventListener("click", () => {
+      const popover = document.getElementById("accountPopover");
+      popover.hidden = !popover.hidden;
+    });
+
+    document.getElementById("accountForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      alert("Account sign-in will be connected when the authentication service is configured.");
+    });
+
+    document.querySelectorAll(".oauth-button").forEach((button) => {
+      button.addEventListener("click", () => alert(`${button.dataset.provider} sign-in needs its OAuth callback configuration.`));
+    });
+
+    document.getElementById("readingPlansBtn").addEventListener("click", () => {
+      const panel = document.getElementById("readingPlanPanel");
+      panel.hidden = !panel.hidden;
+      if (!panel.hidden) initializePlanPanel();
+    });
+
+    document.querySelectorAll("#planStartDate, #planDays, .weekday-options input").forEach((input) => {
+      input.addEventListener("change", updatePlanFromPanel);
+    });
+
+    document.getElementById("showVerses").addEventListener("change", (event) => {
+      state.settings.showVerses = event.target.checked;
+      saveState();
+    });
+    document.getElementById("panelExportBtn").addEventListener("click", exportPlan);
+    document.getElementById("panelResetBtn").addEventListener("click", () => resetPlan());
+    document.getElementById("cancelResetBtn").addEventListener("click", () => { document.getElementById("resetDialog").hidden = true; });
+    document.getElementById("confirmResetBtn").addEventListener("click", () => {
+      document.getElementById("resetDialog").hidden = true;
+      resetPlan(true);
+    });
+    document.getElementById("panelCsvInput").addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => importCSV(loadEvent.target.result);
+      reader.readAsText(file);
+    });
+    document.getElementById("goToBibleBtn").addEventListener("click", () => showPage("bible"));
+
     document.getElementById("prevMonthBtn").addEventListener("click", () => {
       currentDate = addMonths(currentDate, -1);
       render();
@@ -776,7 +912,7 @@
 
     document.getElementById("exportBtn").addEventListener("click", exportPlan);
 
-    document.getElementById("resetBtn").addEventListener("click", resetPlan);
+    document.getElementById("resetBtn").addEventListener("click", () => resetPlan());
 
     document.getElementById("quoteBanner").addEventListener("click", updateQuote);
   }
@@ -789,9 +925,14 @@
     if (!loadState()) {
       initializeCalendarData();
       saveState();
+    } else {
+      scheduleCalendarDays();
+      saveState();
     }
 
     currentDate = getIndonesiaToday();
+
+    initializePlanPanel();
 
     attachEventHandlers();
     initDragAndDrop();
@@ -799,6 +940,7 @@
     render();
     updateClock();
     updateQuote();
+    showPage("calendar");
 
     setInterval(updateClock, 1000);
   }
