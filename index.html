@@ -35,7 +35,7 @@
       </div>
 
       <nav class="sidebar-nav">
-        <button class="sidebar-nav-btn" type="button" title="Calendar">
+        <button class="sidebar-nav-btn" type="button" title="Calendar" data-page="calendar">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
             <rect x="3.5" y="5" width="17" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/>
             <line x1="3.5" y1="9.5" x2="20.5" y2="9.5" stroke="currentColor" stroke-width="1.7"/>
@@ -45,7 +45,7 @@
           <span class="sidebar-nav-label">Calendar</span>
         </button>
 
-        <button class="sidebar-nav-btn" type="button" title="Bible">
+        <button class="sidebar-nav-btn" type="button" title="Bible" data-page="bible">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
             <path d="M4 5.5C4 4.67 4.67 4 5.5 4H12V20H5.5C4.67 20 4 19.33 4 18.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
             <path d="M20 5.5C20 4.67 19.33 4 18.5 4H12V20H18.5C19.33 20 20 19.33 20 18.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
@@ -54,7 +54,7 @@
           <span class="sidebar-nav-label">Bible</span>
         </button>
 
-        <button class="sidebar-nav-btn" type="button" title="Save">
+        <button class="sidebar-nav-btn" type="button" title="Save" data-page="save">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
             <path d="M5 4.5C5 4.22 5.22 4 5.5 4H15.5L19 7.5V19.5C19 19.78 18.78 20 18.5 20H5.5C5.22 20 5 19.78 5 19.5V4.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
             <rect x="7.5" y="4" width="7" height="5" stroke="currentColor" stroke-width="1.7"/>
@@ -63,7 +63,7 @@
           <span class="sidebar-nav-label">Save</span>
         </button>
 
-        <button class="sidebar-nav-btn" type="button" title="Reading Plans">
+        <button class="sidebar-nav-btn" type="button" title="Reading Plans" id="readingPlansBtn">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
             <rect x="4" y="15.3" width="16" height="3.4" rx="1" stroke="currentColor" stroke-width="1.7"/>
             <rect x="4.8" y="10.6" width="14.4" height="3.4" rx="1" stroke="currentColor" stroke-width="1.7"/>
@@ -72,6 +72,55 @@
           <span class="sidebar-nav-label">Reading Plans</span>
         </button>
       </nav>
+
+      <section class="sidebar-panel plan-panel" id="readingPlanPanel" hidden>
+        <div class="panel-title">TIME FRAME</div>
+        <label>Start date<input type="date" id="planStartDate"></label>
+        <label>Days<input type="number" id="planDays" min="1" max="730" value="121"></label>
+
+        <div class="panel-title">BIBLE BOOKS</div>
+        <label><input type="radio" name="planOrder" value="traditional" checked> Traditional</label>
+        <label><input type="radio" name="planOrder" value="deuterocanonical"> Deuterocanonical</label>
+        <label><input type="radio" name="planOrder" value="chronological"> Chronological</label>
+        <label><input type="radio" name="planOrder" value="psalms"> Daily Psalms <button type="button" class="add-book">+</button></label>
+        <label><input type="radio" name="planOrder" value="proverbs"> Daily Proverbs <button type="button" class="add-book">+</button></label>
+        <label>Divide by<select id="divideBy"><option value="day">Day</option><option value="week">Week</option><option value="month">Month</option></select></label>
+
+        <div class="panel-title">DAYS OF THE WEEK</div>
+        <div class="weekday-options">
+          <label><input type="checkbox" value="0" checked> Sunday</label>
+          <label><input type="checkbox" value="1" checked> Monday</label>
+          <label><input type="checkbox" value="2" checked> Tuesday</label>
+          <label><input type="checkbox" value="3" checked> Wednesday</label>
+          <label><input type="checkbox" value="4" checked> Thursday</label>
+          <label><input type="checkbox" value="5" checked> Friday</label>
+          <label><input type="checkbox" value="6" checked> Saturday</label>
+        </div>
+
+        <div class="panel-title">OPTIONS</div>
+        <label><input type="checkbox" id="showVerses" checked> Show verse count</label>
+        <label><input type="checkbox" id="compactPlan"> Compact calendar</label>
+        <label>Version<select id="bibleVersion"><option>KJV</option><option>WEB</option><option>ESV</option></select></label>
+        <div class="panel-actions">
+          <label class="panel-button"><input type="file" id="panelCsvInput" accept=".csv"> Import CSV</label>
+          <button type="button" id="panelExportBtn">Export</button>
+          <button type="button" id="panelResetBtn" class="danger">Reset</button>
+        </div>
+      </section>
+
+      <div class="account-popover" id="accountPopover" hidden>
+        <div class="panel-title">ACCOUNT</div>
+        <form id="accountForm">
+          <label>Username<input name="username" autocomplete="username"></label>
+          <label>Email<input name="email" type="email" autocomplete="email"></label>
+          <label>Password<input name="password" type="password" autocomplete="current-password"></label>
+          <button type="submit">Sign in</button>
+        </form>
+        <div class="account-divider">or continue with</div>
+        <button type="button" class="oauth-button" data-provider="Google">Google</button>
+        <button type="button" class="oauth-button" data-provider="GitHub">GitHub</button>
+        <small>OAuth needs a provider callback and client credentials before it can be enabled.</small>
+      </div>
 
       <div class="sidebar-resize-handle" id="sidebarResizeHandle" title="Drag to resize"></div>
       
@@ -162,12 +211,28 @@
       </div>
     </section>
 
+    <section class="app-page" id="biblePage" hidden>
+      <div class="page-heading"><span>LIBRARY</span><h2>The Bible</h2></div>
+      <div class="bible-list" id="bibleList"></div>
+    </section>
+
+    <section class="app-page save-page" id="savePage" hidden>
+      <div class="page-heading"><span>SAVED READINGS</span><h2>Your saved passages</h2></div>
+      <p id="emptySaveMessage">Your saved list is empty. Start reading the Bible to save passages.</p>
+      <button type="button" id="goToBibleBtn">Read the Bible</button>
+    </section>
+
     </div>
 
   </div>
 
   <script src="readings-data.js"></script>
   <script src="quotes-data.js"></script>
+  <div id="resetDialog" class="reset-dialog" hidden>
+    <div class="panel-title">RESET PLAN</div>
+    <p>Clear all reading progress? This cannot be undone.</p>
+    <div class="dialog-actions"><button type="button" id="cancelResetBtn">Cancel</button><button type="button" id="confirmResetBtn" class="danger">Reset</button></div>
+  </div>
   <script src="script.js"></script>
   <script>
     // Sidebar open/close toggle (self-contained, does not touch script.js)
