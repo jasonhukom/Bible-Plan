@@ -34,92 +34,126 @@
         </button>
       </div>
 
-      <nav class="sidebar-nav">
-        <button class="sidebar-nav-btn" type="button" title="Calendar" data-page="calendar">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-            <rect x="3.5" y="5" width="17" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/>
-            <line x1="3.5" y1="9.5" x2="20.5" y2="9.5" stroke="currentColor" stroke-width="1.7"/>
-            <line x1="8" y1="3" x2="8" y2="7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-            <line x1="16" y1="3" x2="16" y2="7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
-          </svg>
-          <span class="sidebar-nav-label">Calendar</span>
-        </button>
+      <div class="sidebar-scroll-area" id="sidebarScrollArea">
 
-        <button class="sidebar-nav-btn" type="button" title="Bible" data-page="bible">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-            <path d="M4 5.5C4 4.67 4.67 4 5.5 4H12V20H5.5C4.67 20 4 19.33 4 18.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-            <path d="M20 5.5C20 4.67 19.33 4 18.5 4H12V20H18.5C19.33 20 20 19.33 20 18.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-            <line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="1.7"/>
-          </svg>
-          <span class="sidebar-nav-label">Bible</span>
-        </button>
+        <nav class="sidebar-nav">
+          <button class="sidebar-nav-btn" type="button" title="Calendar" data-page="calendar">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+              <rect x="3.5" y="5" width="17" height="16" rx="2" stroke="currentColor" stroke-width="1.7"/>
+              <line x1="3.5" y1="9.5" x2="20.5" y2="9.5" stroke="currentColor" stroke-width="1.7"/>
+              <line x1="8" y1="3" x2="8" y2="7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+              <line x1="16" y1="3" x2="16" y2="7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+            </svg>
+            <span class="sidebar-nav-label">Calendar</span>
+          </button>
 
-        <button class="sidebar-nav-btn" type="button" title="Save" data-page="save">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-            <path d="M5 4.5C5 4.22 5.22 4 5.5 4H15.5L19 7.5V19.5C19 19.78 18.78 20 18.5 20H5.5C5.22 20 5 19.78 5 19.5V4.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
-            <rect x="7.5" y="4" width="7" height="5" stroke="currentColor" stroke-width="1.7"/>
-            <rect x="7.5" y="13.5" width="9" height="6" stroke="currentColor" stroke-width="1.7"/>
-          </svg>
-          <span class="sidebar-nav-label">Save</span>
-        </button>
+          <button class="sidebar-nav-btn" type="button" title="Bible" data-page="bible">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+              <path d="M4 5.5C4 4.67 4.67 4 5.5 4H12V20H5.5C4.67 20 4 19.33 4 18.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <path d="M20 5.5C20 4.67 19.33 4 18.5 4H12V20H18.5C19.33 20 20 19.33 20 18.5V5.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="1.7"/>
+            </svg>
+            <span class="sidebar-nav-label">Bible</span>
+          </button>
 
-        <button class="sidebar-nav-btn" type="button" title="Reading Plans" id="readingPlansBtn">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-            <rect x="4" y="15.3" width="16" height="3.4" rx="1" stroke="currentColor" stroke-width="1.7"/>
-            <rect x="4.8" y="10.6" width="14.4" height="3.4" rx="1" stroke="currentColor" stroke-width="1.7"/>
-            <rect x="5.6" y="5.9" width="12.8" height="3.4" rx="1" stroke="currentColor" stroke-width="1.7"/>
-          </svg>
-          <span class="sidebar-nav-label">Reading Plans</span>
-        </button>
-      </nav>
+          <button class="sidebar-nav-btn" type="button" title="Save" data-page="save">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+              <path d="M5 4.5C5 4.22 5.22 4 5.5 4H15.5L19 7.5V19.5C19 19.78 18.78 20 18.5 20H5.5C5.22 20 5 19.78 5 19.5V4.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+              <rect x="7.5" y="4" width="7" height="5" stroke="currentColor" stroke-width="1.7"/>
+              <rect x="7.5" y="13.5" width="9" height="6" stroke="currentColor" stroke-width="1.7"/>
+            </svg>
+            <span class="sidebar-nav-label">Save</span>
+          </button>
 
-      <section class="sidebar-panel plan-panel" id="readingPlanPanel" hidden>
-        <div class="panel-title">TIME FRAME</div>
-        <label>Start date<input type="date" id="planStartDate"></label>
-        <label>Days<input type="number" id="planDays" min="1" max="730" value="121"></label>
+          <button class="sidebar-nav-btn" type="button" title="Reading Plans" id="readingPlansBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+              <rect x="4" y="15.3" width="16" height="3.4" rx="1" stroke="currentColor" stroke-width="1.7"/>
+              <rect x="4.8" y="10.6" width="14.4" height="3.4" rx="1" stroke="currentColor" stroke-width="1.7"/>
+              <rect x="5.6" y="5.9" width="12.8" height="3.4" rx="1" stroke="currentColor" stroke-width="1.7"/>
+            </svg>
+            <span class="sidebar-nav-label">Reading Plans</span>
+          </button>
+        </nav>
 
-        <div class="panel-title">BIBLE BOOKS</div>
-        <label><input type="radio" name="planOrder" value="traditional" checked> Traditional</label>
-        <label><input type="radio" name="planOrder" value="deuterocanonical"> Deuterocanonical</label>
-        <label><input type="radio" name="planOrder" value="chronological"> Chronological</label>
-        <label><input type="radio" name="planOrder" value="psalms"> Daily Psalms <button type="button" class="add-book">+</button></label>
-        <label><input type="radio" name="planOrder" value="proverbs"> Daily Proverbs <button type="button" class="add-book">+</button></label>
-        <label>Divide by<select id="divideBy"><option value="day">Day</option><option value="week">Week</option><option value="month">Month</option></select></label>
+        <section class="plan-panel" id="readingPlanPanel" hidden>
 
-        <div class="panel-title">DAYS OF THE WEEK</div>
-        <div class="weekday-options">
-          <label><input type="checkbox" value="0" checked> Sunday</label>
-          <label><input type="checkbox" value="1" checked> Monday</label>
-          <label><input type="checkbox" value="2" checked> Tuesday</label>
-          <label><input type="checkbox" value="3" checked> Wednesday</label>
-          <label><input type="checkbox" value="4" checked> Thursday</label>
-          <label><input type="checkbox" value="5" checked> Friday</label>
-          <label><input type="checkbox" value="6" checked> Saturday</label>
-        </div>
+          <div class="panel-box">
+            <div class="panel-box-title">Time</div>
+            <label>Start date<input type="date" id="planStartDate"></label>
+            <label>Days<input type="number" id="planDays" min="1" max="730" value="121"></label>
+          </div>
 
-        <div class="panel-title">OPTIONS</div>
-        <label><input type="checkbox" id="showVerses" checked> Show verse count</label>
-        <label><input type="checkbox" id="compactPlan"> Compact calendar</label>
-        <label>Version<select id="bibleVersion"><option>KJV</option><option>WEB</option><option>ESV</option></select></label>
-        <div class="panel-actions">
-          <label class="panel-button"><input type="file" id="panelCsvInput" accept=".csv"> Import CSV</label>
-          <button type="button" id="panelExportBtn">Export</button>
-          <button type="button" id="panelResetBtn" class="danger">Reset</button>
-        </div>
-      </section>
+          <div class="panel-box">
+            <div class="panel-box-title">Bible Books</div>
 
-      <div class="account-popover" id="accountPopover" hidden>
-        <div class="panel-title">ACCOUNT</div>
-        <form id="accountForm">
-          <label>Username<input name="username" autocomplete="username"></label>
-          <label>Email<input name="email" type="email" autocomplete="email"></label>
-          <label>Password<input name="password" type="password" autocomplete="current-password"></label>
-          <button type="submit">Sign in</button>
-        </form>
-        <div class="account-divider">or continue with</div>
-        <button type="button" class="oauth-button" data-provider="Google">Google</button>
-        <button type="button" class="oauth-button" data-provider="GitHub">GitHub</button>
-        <small>OAuth needs a provider callback and client credentials before it can be enabled.</small>
+            <div class="dropdown-field" data-dropdown="bookGroups">
+              <button type="button" class="dropdown-trigger" aria-expanded="false">
+                <span class="dropdown-trigger-text">
+                  <span class="dropdown-label">Bible Books</span>
+                  <span class="dropdown-value" id="bookGroupsSummary">—</span>
+                </span>
+                <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="dropdown-menu" hidden>
+                <label><input type="checkbox" data-book-group="ot" checked> Old Testament</label>
+                <label><input type="checkbox" data-book-group="dc"> Deuterocanonical</label>
+                <label><input type="checkbox" data-book-group="nt" checked> New Testament</label>
+              </div>
+            </div>
+
+            <div class="dropdown-field" data-dropdown="order">
+              <button type="button" class="dropdown-trigger" aria-expanded="false">
+                <span class="dropdown-trigger-text">
+                  <span class="dropdown-label">Order</span>
+                  <span class="dropdown-value" id="orderSummary">—</span>
+                </span>
+                <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="dropdown-menu" hidden>
+                <label><input type="radio" name="orderMode" value="inorder" checked> In-Order</label>
+                <label><input type="radio" name="orderMode" value="overlap"> Overlap</label>
+              </div>
+            </div>
+
+            <div class="dropdown-field" data-dropdown="wiseWords">
+              <button type="button" class="dropdown-trigger" aria-expanded="false">
+                <span class="dropdown-trigger-text">
+                  <span class="dropdown-label">Daily Wise Words</span>
+                  <span class="dropdown-value" id="wiseWordsSummary">—</span>
+                </span>
+                <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="dropdown-menu" hidden>
+                <label><input type="checkbox" data-wise-word="psalms" checked> Daily Psalms</label>
+                <label><input type="checkbox" data-wise-word="proverbs" checked> Daily Proverbs</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <div class="panel-box-title">Days of the Week</div>
+            <div class="weekday-options">
+              <label><input type="checkbox" value="0" checked> Sunday</label>
+              <label><input type="checkbox" value="1" checked> Monday</label>
+              <label><input type="checkbox" value="2" checked> Tuesday</label>
+              <label><input type="checkbox" value="3" checked> Wednesday</label>
+              <label><input type="checkbox" value="4" checked> Thursday</label>
+              <label><input type="checkbox" value="5" checked> Friday</label>
+              <label><input type="checkbox" value="6" checked> Saturday</label>
+            </div>
+          </div>
+
+          <div class="panel-box">
+            <div class="panel-box-title">Options</div>
+            <div class="panel-actions">
+              <label class="panel-button"><input type="file" id="panelCsvInput" accept=".csv"> Import CSV</label>
+              <button type="button" id="panelExportBtn">Export</button>
+              <button type="button" id="panelResetBtn" class="danger">Reset</button>
+            </div>
+          </div>
+
+        </section>
+
       </div>
 
       <div class="sidebar-resize-handle" id="sidebarResizeHandle" title="Drag to resize"></div>
@@ -182,6 +216,15 @@
         <h2 id="monthLabel">September 2026</h2>
         <button class="nav-btn" id="nextMonthBtn" aria-label="Next month">❯</button>
         <button class="nav-btn primary" id="todayBtn">Today</button>
+        <div class="progress-section" id="planProgress">
+          <div class="progress-stats">
+            <span id="progressLabel">0 / 0 days</span>
+            <span id="progressPercent">0%</span>
+          </div>
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+        </div>
       </div>
       <div class="actions">
         <label class="file-label">
@@ -226,14 +269,56 @@
 
   </div>
 
-  <script src="readings-data.js"></script>
-  <script src="quotes-data.js"></script>
+  <!-- Account modal (moved out of the sidebar so it overlays the whole app) -->
+  <div class="account-modal" id="accountPopover" hidden>
+    <div class="account-modal-backdrop" id="accountModalBackdrop"></div>
+    <div class="account-modal-panel" role="dialog" aria-modal="true" aria-labelledby="accountModalTitle">
+      <button type="button" class="account-modal-close" id="accountModalCloseBtn" aria-label="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+          <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="account-modal-title" id="accountModalTitle">
+        <svg class="account-modal-cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+          <line x1="16" y1="6" x2="16" y2="27" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          <line x1="7" y1="13" x2="25" y2="13" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        <span>Account</span>
+      </div>
+
+      <form id="accountForm">
+        <label>Username<input name="username" autocomplete="username"></label>
+        <label>Email<input name="email" type="email" autocomplete="email"></label>
+        <label>Password<input name="password" type="password" autocomplete="current-password"></label>
+        <button type="submit">Sign in</button>
+      </form>
+
+      <div class="account-divider">or continue with</div>
+
+      <button type="button" class="oauth-button oauth-apple" data-provider="Apple" id="appleSignInBtn">
+        <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M16.365 1.43c0 1.14-.462 2.15-1.211 2.911-.822.84-2.146 1.484-3.243 1.395-.14-1.104.44-2.264 1.19-2.99.83-.8 2.28-1.39 3.264-1.316zM20.62 17.09c-.494 1.14-.73 1.65-1.365 2.66-.885 1.41-2.133 3.17-3.68 3.18-1.373.02-1.727-.9-3.59-.89-1.862.01-2.253.91-3.627.89-1.547-.02-2.727-1.6-3.613-3.01-2.476-3.93-2.737-8.54-1.21-10.997.98-1.588 2.53-2.517 3.988-2.517 1.484 0 2.417.92 3.646.92 1.192 0 1.916-.92 3.646-.92 1.302 0 2.68.71 3.66 1.94-3.216 1.76-2.694 6.34.145 8.744z"/>
+        </svg>
+        Sign in with Apple
+      </button>
+      <button type="button" class="oauth-button" data-provider="GitHub">GitHub</button>
+
+      <small id="appleSignInNote">Fill in your Appwrite project details in <code>apple-signin.config.json</code> to activate Apple sign-in.</small>
+    </div>
+  </div>
+
   <div id="resetDialog" class="reset-dialog" hidden>
     <div class="panel-title">RESET PLAN</div>
     <p>Clear all reading progress? This cannot be undone.</p>
     <div class="dialog-actions"><button type="button" id="cancelResetBtn">Cancel</button><button type="button" id="confirmResetBtn" class="danger">Reset</button></div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.2"></script>
+  <script src="quotes-data.js"></script>
   <script src="script.js"></script>
+  <script src="apple-signin.js"></script>
   <script>
     // Sidebar open/close toggle (self-contained, does not touch script.js)
     (function () {
@@ -242,9 +327,30 @@
       if (!sidebar || !toggleBtn) return;
 
       toggleBtn.addEventListener('click', function () {
+        // Clear any inline width left over from a manual drag-resize so the
+        // collapsed/expanded CSS widths (not a stale inline style) win.
+        sidebar.style.width = '';
         var collapsed = sidebar.classList.toggle('collapsed');
         toggleBtn.setAttribute('aria-expanded', String(!collapsed));
         toggleBtn.setAttribute('aria-label', collapsed ? 'Open sidebar' : 'Close sidebar');
+      });
+    })();
+
+    // Account modal open/close (self-contained, does not touch script.js)
+    (function () {
+      var modal = document.getElementById('accountPopover');
+      var closeBtn = document.getElementById('accountModalCloseBtn');
+      var backdrop = document.getElementById('accountModalBackdrop');
+      if (!modal || !closeBtn || !backdrop) return;
+
+      function closeModal() {
+        modal.hidden = true;
+      }
+
+      closeBtn.addEventListener('click', closeModal);
+      backdrop.addEventListener('click', closeModal);
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !modal.hidden) closeModal();
       });
     })();
   </script>

@@ -1,0 +1,6 @@
+{
+  "endpoint": "https://cloud.appwrite.io/v1",
+  "projectId": "REPLACE_WITH_YOUR_APPWRITE_PROJECT_ID",
+  "successUrl": "",
+  "failureUrl": ""
+}

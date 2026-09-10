@@ -34,8 +34,9 @@
       startDate: dateToISO(new Date(Date.now() + 86400000)),
       days: 121,
       weekdays: [0, 1, 2, 3, 4, 5, 6],
-      showVerses: true,
-      order: "traditional"
+      bookGroups: ["ot", "nt"],
+      order: "inorder",
+      wiseWords: ["psalms", "proverbs"]
     }
   };
 
@@ -128,16 +129,7 @@
   }
 
   function initializeCalendarData() {
-    if (!window.READINGS || READINGS.length === 0) return;
-
-    state.calendarDays = READINGS.slice(0, state.settings.days || 121).map((reading) => ({
-      id: `day-${reading.idx}`,
-      date: reading.date,
-      dayIndex: reading.idx,
-      metadata: reading.verses || "",
-      books: parsePassageString(reading.passage)
-    }));
-    scheduleCalendarDays();
+    generatePlan();
   }
 
   function scheduleCalendarDays() {
@@ -170,7 +162,18 @@
         const parsed = JSON.parse(saved);
         if (parsed.calendarDays && Array.isArray(parsed.calendarDays) && parsed.calendarDays.length > 0) {
           state = parsed;
-          state.settings = { ...state.settings, startDate: dateToISO(new Date(Date.now() + 86400000)), days: state.calendarDays.length || 121, weekdays: [0, 1, 2, 3, 4, 5, 6], showVerses: true, order: "traditional" };
+          // Defaults fill in anything missing (e.g. an older save from before
+          // a setting existed); anything already saved is left untouched.
+          state.settings = {
+            quoteIndex: -1,
+            startDate: dateToISO(new Date(Date.now() + 86400000)),
+            days: state.calendarDays.length || 121,
+            weekdays: [0, 1, 2, 3, 4, 5, 6],
+            bookGroups: ["ot", "nt"],
+            order: "inorder",
+            wiseWords: ["psalms", "proverbs"],
+            ...state.settings
+          };
           return true;
         }
       }
@@ -188,9 +191,17 @@
     }
     state = {
       calendarDays: [],
-      settings: { quoteIndex: -1, startDate: dateToISO(new Date(Date.now() + 86400000)), days: 121, weekdays: [0, 1, 2, 3, 4, 5, 6], showVerses: true, order: "traditional" }
+      settings: {
+        quoteIndex: -1,
+        startDate: dateToISO(new Date(Date.now() + 86400000)),
+        days: 121,
+        weekdays: [0, 1, 2, 3, 4, 5, 6],
+        bookGroups: ["ot", "nt"],
+        order: "inorder",
+        wiseWords: ["psalms", "proverbs"]
+      }
     };
-    initializeCalendarData();
+    generatePlan();
     saveState();
     render();
   }
@@ -674,17 +685,163 @@
   function render() {
     renderCalendar();
     updateMonthLabel();
+    updateProgress();
   }
 
-  const BIBLE_BOOKS = [
+  function updateProgress() {
+    const labelEl = document.getElementById("progressLabel");
+    const percentEl = document.getElementById("progressPercent");
+    const fillEl = document.getElementById("progressFill");
+    if (!labelEl || !percentEl || !fillEl) return;
+
+    const total = state.calendarDays.length;
+    const completedDays = state.calendarDays.filter((day) =>
+      day.books.length > 0 && day.books.every((book) => book.chapters.every((ch) => ch.completed))
+    ).length;
+    const pct = total > 0 ? Math.round((completedDays / total) * 100) : 0;
+
+    labelEl.textContent = `${completedDays} / ${total} days`;
+    percentEl.textContent = `${pct}%`;
+    fillEl.style.width = `${pct}%`;
+  }
+
+  const OT_BOOKS = [
     ["Genesis", 50], ["Exodus", 40], ["Leviticus", 27], ["Numbers", 36], ["Deuteronomy", 34],
     ["Joshua", 24], ["Judges", 21], ["Ruth", 4], ["1 Samuel", 31], ["2 Samuel", 24], ["1 Kings", 22], ["2 Kings", 25],
     ["1 Chronicles", 29], ["2 Chronicles", 36], ["Ezra", 10], ["Nehemiah", 13], ["Esther", 10], ["Job", 42], ["Psalms", 150], ["Proverbs", 31],
     ["Ecclesiastes", 12], ["Song of Solomon", 8], ["Isaiah", 66], ["Jeremiah", 52], ["Lamentations", 5], ["Ezekiel", 48], ["Daniel", 14],
-    ["Hosea", 14], ["Joel", 3], ["Amos", 9], ["Obadiah", 1], ["Jonah", 4], ["Micah", 7], ["Nahum", 3], ["Habakkuk", 3], ["Zephaniah", 3], ["Haggai", 2], ["Zechariah", 14], ["Malachi", 4],
-    ["Matthew", 28], ["Mark", 16], ["Luke", 24], ["John", 21], ["Acts", 28], ["Romans", 16], ["1 Corinthians", 16], ["2 Corinthians", 13], ["Galatians", 6], ["Ephesians", 6], ["Philippians", 4], ["Colossians", 4], ["1 Thessalonians", 5], ["2 Thessalonians", 3], ["1 Timothy", 6], ["2 Timothy", 4], ["Titus", 3], ["Philemon", 1], ["Hebrews", 13], ["James", 5], ["1 Peter", 5], ["2 Peter", 3], ["1 John", 5], ["2 John", 1], ["3 John", 1], ["Jude", 1], ["Revelation", 22],
+    ["Hosea", 14], ["Joel", 3], ["Amos", 9], ["Obadiah", 1], ["Jonah", 4], ["Micah", 7], ["Nahum", 3], ["Habakkuk", 3], ["Zephaniah", 3], ["Haggai", 2], ["Zechariah", 14], ["Malachi", 4]
+  ];
+
+  const NT_BOOKS = [
+    ["Matthew", 28], ["Mark", 16], ["Luke", 24], ["John", 21], ["Acts", 28], ["Romans", 16], ["1 Corinthians", 16], ["2 Corinthians", 13], ["Galatians", 6], ["Ephesians", 6], ["Philippians", 4], ["Colossians", 4], ["1 Thessalonians", 5], ["2 Thessalonians", 3], ["1 Timothy", 6], ["2 Timothy", 4], ["Titus", 3], ["Philemon", 1], ["Hebrews", 13], ["James", 5], ["1 Peter", 5], ["2 Peter", 3], ["1 John", 5], ["2 John", 1], ["3 John", 1], ["Jude", 1], ["Revelation", 22]
+  ];
+
+  const DC_BOOKS = [
     ["Tobit", 14], ["Judith", 16], ["Wisdom", 19], ["Sirach", 51], ["Baruch", 6], ["1 Maccabees", 16], ["2 Maccabees", 15]
   ];
+
+  const BIBLE_BOOKS = [...OT_BOOKS, ...NT_BOOKS, ...DC_BOOKS];
+
+  // Relative order used whenever more than one group is selected: Old
+  // Testament, then Deuterocanonical, then New Testament (matches where a
+  // Catholic reading order places the deuterocanonical books).
+  const GROUP_ORDER = ["ot", "dc", "nt"];
+  const BOOK_GROUPS = { ot: OT_BOOKS, dc: DC_BOOKS, nt: NT_BOOKS };
+  const GROUP_LABELS = { ot: "Old Testament", dc: "Deuterocanonical", nt: "New Testament" };
+  const ORDER_LABELS = { inorder: "In-Order", overlap: "Overlap" };
+  const WISE_WORD_LABELS = { psalms: "Daily Psalms", proverbs: "Daily Proverbs" };
+
+  /* ================================================================
+     Dynamic Reading Plan Generator
+
+     Takes the selected Bible Book groups (Old Testament / Deuterocanonical /
+     New Testament), the Order mode (In-Order / Overlap), the Daily Wise
+     Words selection (Psalms / Proverbs), and the number of days, and
+     produces a full day-by-day reading schedule that always exactly spans
+     the chosen number of days -- 1 day means the whole selection in one
+     sitting, 128 days spreads it evenly across 128 days, etc.
+     ================================================================ */
+
+  function flattenBookList(bookList) {
+    const out = [];
+    bookList.forEach(([name, chapterCount]) => {
+      for (let chapter = 1; chapter <= chapterCount; chapter++) out.push({ name, chapter });
+    });
+    return out;
+  }
+
+  // Splits `list` into `days` buckets whose sizes differ by at most one
+  // item, with any extra items spread evenly across the range rather than
+  // clumped at the start.
+  function splitEvenly(list, days) {
+    const total = list.length;
+    const result = [];
+    let prevCut = 0;
+    for (let i = 0; i < days; i++) {
+      const cut = days > 0 ? Math.floor(((i + 1) * total) / days) : 0;
+      result.push(list.slice(prevCut, cut));
+      prevCut = cut;
+    }
+    return result;
+  }
+
+  function buildBooksSchedule(bookGroups, order, days) {
+    const groups = GROUP_ORDER.filter((g) => (bookGroups || []).includes(g));
+    if (groups.length === 0 || days <= 0) {
+      return Array.from({ length: Math.max(days, 0) }, () => []);
+    }
+
+    if (order === "overlap" && groups.length > 1) {
+      // Each selected group is paced independently across the full range so
+      // they all progress -- and finish -- together, rather than reading
+      // one group to completion before starting the next.
+      const perGroupSplit = groups.map((g) => splitEvenly(flattenBookList(BOOK_GROUPS[g]), days));
+      const merged = [];
+      for (let d = 0; d < days; d++) {
+        let dayItems = [];
+        perGroupSplit.forEach((split) => { dayItems = dayItems.concat(split[d]); });
+        merged.push(dayItems);
+      }
+      return merged;
+    }
+
+    // In-Order (or only one group selected): one continuous list, split
+    // evenly across the days.
+    const master = groups.flatMap((g) => flattenBookList(BOOK_GROUPS[g]));
+    return splitEvenly(master, days);
+  }
+
+  // Daily Psalms/Proverbs are a devotional daily reading: exactly one
+  // chapter per active reading day, cycling back to chapter 1 once the
+  // book is finished (a classic "Proverb a day" cadence), independent of
+  // how the main Bible Books are paced.
+  function buildWiseWordsForIndex(wiseWords, index) {
+    const items = [];
+    if ((wiseWords || []).includes("psalms")) items.push({ name: "Psalms", chapter: (index % 150) + 1 });
+    if ((wiseWords || []).includes("proverbs")) items.push({ name: "Proverbs", chapter: (index % 31) + 1 });
+    return items;
+  }
+
+  function groupItemsIntoBooks(items, dayIndex) {
+    const order = [];
+    const map = new Map();
+    items.forEach(({ name, chapter }) => {
+      if (!map.has(name)) { map.set(name, []); order.push(name); }
+      map.get(name).push(chapter);
+    });
+    return order.map((name) => ({
+      id: `book-${dayIndex}-${name.replace(/\s+/g, "")}`,
+      abbreviation: name,
+      fullName: name,
+      chapters: map.get(name).map((number) => ({
+        id: `ch-${dayIndex}-${name.replace(/\s+/g, "")}-${number}`,
+        number,
+        completed: false
+      }))
+    }));
+  }
+
+  function generatePlan() {
+    const days = Math.max(1, Math.min(730, Number(state.settings.days) || 1));
+    state.settings.days = days;
+
+    const booksSchedule = buildBooksSchedule(state.settings.bookGroups, state.settings.order, days);
+
+    const calendarDays = [];
+    for (let i = 0; i < days; i++) {
+      const items = booksSchedule[i].concat(buildWiseWordsForIndex(state.settings.wiseWords, i));
+      calendarDays.push({
+        id: `day-${i}`,
+        date: null,
+        dayIndex: i,
+        metadata: "",
+        books: groupItemsIntoBooks(items, i)
+      });
+    }
+    state.calendarDays = calendarDays;
+    scheduleCalendarDays();
+  }
 
   function renderBiblePage() {
     const list = document.getElementById("bibleList");
@@ -718,17 +875,59 @@
     if (page === "bible") renderBiblePage();
   }
 
-  function updatePlanFromPanel() {
+  // Start date / weekday changes only need to reshuffle which calendar
+  // dates the existing reading days land on -- no need to regenerate the
+  // reading content itself, so progress already made is kept.
+  function rescheduleOnly() {
     state.settings.startDate = document.getElementById("planStartDate").value;
-    state.settings.days = Number(document.getElementById("planDays").value) || 121;
     state.settings.weekdays = [...document.querySelectorAll(".weekday-options input:checked")].map((input) => Number(input.value));
-    state.calendarDays = READINGS.slice(0, state.settings.days).map((reading, index) => {
-      const oldDay = state.calendarDays[index];
-      return oldDay || { id: `day-${reading.idx}`, dayIndex: reading.idx, metadata: reading.verses || "", books: parsePassageString(reading.passage) };
-    });
     scheduleCalendarDays();
     saveState();
     render();
+  }
+
+  // Days / Bible Books / Order / Daily Wise Words changes alter what content
+  // is actually being read, so the whole plan is rebuilt from scratch.
+  function regeneratePlan() {
+    state.settings.startDate = document.getElementById("planStartDate").value;
+    state.settings.days = Math.max(1, Math.min(730, Number(document.getElementById("planDays").value) || 1));
+    state.settings.weekdays = [...document.querySelectorAll(".weekday-options input:checked")].map((input) => Number(input.value));
+
+    let bookGroups = [...document.querySelectorAll("[data-book-group]:checked")].map((input) => input.dataset.bookGroup);
+    if (bookGroups.length === 0) {
+      // At least one Bible Books group must stay selected -- re-check Old
+      // Testament rather than silently generating an empty plan.
+      bookGroups = ["ot"];
+      const otInput = document.querySelector('[data-book-group="ot"]');
+      if (otInput) otInput.checked = true;
+    }
+    state.settings.bookGroups = bookGroups;
+
+    state.settings.order = document.querySelector('input[name="orderMode"]:checked')?.value || "inorder";
+    state.settings.wiseWords = [...document.querySelectorAll("[data-wise-word]:checked")].map((input) => input.dataset.wiseWord);
+
+    generatePlan();
+    updateDropdownSummaries();
+    saveState();
+    render();
+  }
+
+  function updateDropdownSummaries() {
+    const groupsEl = document.getElementById("bookGroupsSummary");
+    const orderEl = document.getElementById("orderSummary");
+    const wiseEl = document.getElementById("wiseWordsSummary");
+
+    if (groupsEl) {
+      const groups = GROUP_ORDER.filter((g) => (state.settings.bookGroups || []).includes(g));
+      groupsEl.textContent = groups.length ? groups.map((g) => GROUP_LABELS[g]).join(", ") : "None selected";
+    }
+    if (orderEl) {
+      orderEl.textContent = ORDER_LABELS[state.settings.order] || "In-Order";
+    }
+    if (wiseEl) {
+      const wise = state.settings.wiseWords || [];
+      wiseEl.textContent = wise.length ? wise.map((w) => WISE_WORD_LABELS[w]).join(", ") : "None";
+    }
   }
 
   function initializePlanPanel() {
@@ -736,9 +935,53 @@
     tomorrow.setDate(tomorrow.getDate() + 1);
     document.getElementById("planStartDate").value = state.settings.startDate || dateToISO(tomorrow);
     document.getElementById("planDays").value = state.settings.days || state.calendarDays.length || 121;
-    (state.settings.weekdays || [0, 1, 2, 3, 4, 5, 6]).forEach((day) => {
-      const input = document.querySelector(`.weekday-options input[value="${day}"]`);
-      if (input) input.checked = true;
+
+    const weekdays = state.settings.weekdays || [0, 1, 2, 3, 4, 5, 6];
+    document.querySelectorAll(".weekday-options input").forEach((input) => {
+      input.checked = weekdays.includes(Number(input.value));
+    });
+
+    const bookGroups = state.settings.bookGroups || ["ot", "nt"];
+    document.querySelectorAll("[data-book-group]").forEach((input) => {
+      input.checked = bookGroups.includes(input.dataset.bookGroup);
+    });
+
+    const order = state.settings.order || "inorder";
+    document.querySelectorAll('input[name="orderMode"]').forEach((input) => {
+      input.checked = input.value === order;
+    });
+
+    const wiseWords = state.settings.wiseWords || ["psalms", "proverbs"];
+    document.querySelectorAll("[data-wise-word]").forEach((input) => {
+      input.checked = wiseWords.includes(input.dataset.wiseWord);
+    });
+
+    updateDropdownSummaries();
+  }
+
+  function initDropdowns() {
+    document.querySelectorAll(".dropdown-field").forEach((field) => {
+      const trigger = field.querySelector(".dropdown-trigger");
+      const menu = field.querySelector(".dropdown-menu");
+      if (!trigger || !menu) return;
+
+      trigger.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isOpen = !menu.hidden;
+        document.querySelectorAll(".dropdown-menu").forEach((m) => { m.hidden = true; });
+        document.querySelectorAll(".dropdown-trigger").forEach((t) => t.setAttribute("aria-expanded", "false"));
+        if (!isOpen) {
+          menu.hidden = false;
+          trigger.setAttribute("aria-expanded", "true");
+        }
+      });
+
+      menu.addEventListener("click", (e) => e.stopPropagation());
+    });
+
+    document.addEventListener("click", () => {
+      document.querySelectorAll(".dropdown-menu").forEach((m) => { m.hidden = true; });
+      document.querySelectorAll(".dropdown-trigger").forEach((t) => t.setAttribute("aria-expanded", "false"));
     });
   }
 
@@ -841,6 +1084,7 @@
     });
 
     document.querySelectorAll(".oauth-button").forEach((button) => {
+      if (button.id === "appleSignInBtn") return; // wired separately in apple-signin.js
       button.addEventListener("click", () => alert(`${button.dataset.provider} sign-in needs its OAuth callback configuration.`));
     });
 
@@ -850,14 +1094,14 @@
       if (!panel.hidden) initializePlanPanel();
     });
 
-    document.querySelectorAll("#planStartDate, #planDays, .weekday-options input").forEach((input) => {
-      input.addEventListener("change", updatePlanFromPanel);
+    document.querySelectorAll("#planStartDate, .weekday-options input").forEach((input) => {
+      input.addEventListener("change", rescheduleOnly);
     });
 
-    document.getElementById("showVerses").addEventListener("change", (event) => {
-      state.settings.showVerses = event.target.checked;
-      saveState();
+    document.querySelectorAll('#planDays, [data-book-group], input[name="orderMode"], [data-wise-word]').forEach((input) => {
+      input.addEventListener("change", regeneratePlan);
     });
+
     document.getElementById("panelExportBtn").addEventListener("click", exportPlan);
     document.getElementById("panelResetBtn").addEventListener("click", () => resetPlan());
     document.getElementById("cancelResetBtn").addEventListener("click", () => { document.getElementById("resetDialog").hidden = true; });
@@ -933,6 +1177,7 @@
     currentDate = getIndonesiaToday();
 
     initializePlanPanel();
+    initDropdowns();
 
     attachEventHandlers();
     initDragAndDrop();
@@ -950,4 +1195,9 @@
   } else {
     init();
   }
+
+  // Exposed so apple-signin.js (a separate, self-contained file) can update
+  // the sidebar account button after checking/making a session, without
+  // needing to duplicate this module's internals.
+  window.updateAccountUI = updateAccountUI;
 })();
