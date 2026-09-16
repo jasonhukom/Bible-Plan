@@ -147,12 +147,27 @@
      State Persistence
      ================================================================ */
 
+  // Anything that wants to know when the plan changed (cloud-sync.js does)
+  // registers here rather than polling localStorage.
+  const stateChangeListeners = [];
+
+  function notifyStateChanged() {
+    stateChangeListeners.forEach((listener) => {
+      try {
+        listener(state);
+      } catch (e) {
+        console.warn("State change listener failed:", e);
+      }
+    });
+  }
+
   function saveState() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
       console.warn("Failed to save state:", e);
     }
+    notifyStateChanged();
   }
 
   function loadState() {
@@ -872,6 +887,8 @@
     document.querySelector(".calendar-section").hidden = page !== "calendar";
     document.getElementById("biblePage").hidden = page !== "bible";
     document.getElementById("savePage").hidden = page !== "save";
+    const accountPage = document.getElementById("accountPage");
+    if (accountPage) accountPage.hidden = page !== "account";
     if (page === "bible") renderBiblePage();
   }
 
@@ -1073,20 +1090,9 @@
       button.addEventListener("click", () => showPage(button.dataset.page));
     });
 
-    document.getElementById("accountBtn").addEventListener("click", () => {
-      const popover = document.getElementById("accountPopover");
-      popover.hidden = !popover.hidden;
-    });
-
-    document.getElementById("accountForm").addEventListener("submit", (event) => {
-      event.preventDefault();
-      alert("Account sign-in will be connected when the authentication service is configured.");
-    });
-
-    document.querySelectorAll(".oauth-button").forEach((button) => {
-      if (button.id === "appleSignInBtn") return; // wired separately in apple-signin.js
-      button.addEventListener("click", () => alert(`${button.dataset.provider} sign-in needs its OAuth callback configuration.`));
-    });
+    // The account button, the sign-in/create-account forms and the OAuth
+    // buttons are all wired up in account-ui.js, which owns the account
+    // dialog and talks to auth.js.
 
     document.getElementById("readingPlansBtn").addEventListener("click", () => {
       const panel = document.getElementById("readingPlanPanel");
@@ -1196,8 +1202,59 @@
     init();
   }
 
-  // Exposed so apple-signin.js (a separate, self-contained file) can update
+  // Exposed so account-ui.js (a separate, self-contained file) can update
   // the sidebar account button after checking/making a session, without
   // needing to duplicate this module's internals.
   window.updateAccountUI = updateAccountUI;
+
+  /* ================================================================
+     App bridge
+
+     The narrow surface the account/sync modules are allowed to use. It
+     deliberately hands out copies rather than the live state object, so
+     nothing outside this file can mutate the calendar behind its back.
+     ================================================================ */
+  window.BiblePlanApp = {
+    /** A deep copy of { calendarDays, settings }. */
+    getState() {
+      return JSON.parse(JSON.stringify(state));
+    },
+
+    /** Replaces the plan wholesale (used when adopting an account's plan). */
+    replaceState(nextState) {
+      if (!nextState || !Array.isArray(nextState.calendarDays)) return false;
+      state = {
+        calendarDays: nextState.calendarDays,
+        settings: { ...state.settings, ...(nextState.settings || {}) }
+      };
+      if (!state.settings.days) state.settings.days = state.calendarDays.length;
+      saveState();
+      initializePlanPanel();
+      render();
+      return true;
+    },
+
+    /** Fires after every save. Returns an unsubscribe function. */
+    onStateChange(listener) {
+      if (typeof listener !== "function") return () => {};
+      stateChangeListeners.push(listener);
+      return () => {
+        const index = stateChangeListeners.indexOf(listener);
+        if (index !== -1) stateChangeListeners.splice(index, 1);
+      };
+    },
+
+    /** "ot" | "dc" | "nt" | null for a full book name. */
+    getBookCategory(bookName) {
+      const name = String(bookName || "");
+      const group = GROUP_ORDER.find((key) => BOOK_GROUPS[key].some(([book]) => book === name));
+      return group || null;
+    },
+
+    /** Switches the visible page ("calendar" | "bible" | "save" | "account"). */
+    showPage,
+
+    /** The localStorage key holding the offline copy of the plan. */
+    storageKey: STORAGE_KEY
+  };
 })();

@@ -1,0 +1,5 @@
+{
+  "_comment": "Copy to supabase.config.json (git-ignored) to run the app on a plain static server, where /api/config is not available. On Vercel this file is not needed: api/config.js serves the same values from environment variables.",
+  "supabaseUrl": "",
+  "supabaseAnonKey": ""
+}

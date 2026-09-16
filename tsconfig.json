@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ES2020",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+
+    /* Type checking is opt-in per file via the `// @ts-check` pragma. Every
+       file added for authentication and the database carries it, so they are
+       fully checked. The original vanilla files (script.js, quotes-data.js,
+       readings-data.js) predate this setup and are checked for syntax by
+       `npm run lint` instead; adding the pragma to them is a separate,
+       reviewable change rather than something to smuggle in here. */
+    "checkJs": false,
+
+    "strict": true,
+    "noImplicitAny": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": []
+  },
+  "include": ["*.js", "api/**/*.js", "scripts/**/*.mjs", "types/**/*.d.ts"],
+  "exclude": ["node_modules", "dataset"]
+}
