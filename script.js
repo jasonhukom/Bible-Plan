@@ -989,11 +989,8 @@
     document.getElementById("savePage").hidden = page !== "save";
     const accountPage = document.getElementById("accountPage");
     if (accountPage) accountPage.hidden = page !== "account";
-<<<<<<< HEAD
     const settingsPage = document.getElementById("settingsPage");
     if (settingsPage) settingsPage.hidden = page !== "settings";
-=======
->>>>>>> 32043f199c46c0697032b1151c3623d64f8b078b
     if (page === "bible") renderBiblePage();
   }
 

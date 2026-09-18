@@ -551,13 +551,7 @@
     on("menuSettingsBtn", "click", function () {
       closeDialog();
       var app = /** @type {any} */ (window).BiblePlanApp;
-<<<<<<< HEAD
       if (app && app.showPage) app.showPage("settings");
-=======
-      if (app && app.showPage) app.showPage("account");
-      var preferences = el("accountPreferences");
-      if (preferences) preferences.scrollIntoView({ behavior: "smooth", block: "center" });
->>>>>>> 32043f199c46c0697032b1151c3623d64f8b078b
     });
 
     on("menuSignOutBtn", "click", signOut);
