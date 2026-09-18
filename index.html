@@ -115,19 +115,12 @@
               </div>
             </div>
 
-            <div class="dropdown-field" data-dropdown="wiseWords">
-              <button type="button" class="dropdown-trigger" aria-expanded="false">
-                <span class="dropdown-trigger-text">
-                  <span class="dropdown-label">Daily Wise Words</span>
-                  <span class="dropdown-value" id="wiseWordsSummary">—</span>
-                </span>
-                <svg class="dropdown-chevron" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-              <div class="dropdown-menu" hidden>
-                <label><input type="checkbox" data-wise-word="psalms" checked> Daily Psalms</label>
-                <label><input type="checkbox" data-wise-word="proverbs" checked> Daily Proverbs</label>
-              </div>
-            </div>
+          </div>
+
+          <div class="panel-box">
+            <div class="panel-box-title">Daily Wise Words</div>
+            <label><input type="checkbox" data-wise-word="psalms" checked> Daily Psalms</label>
+            <label><input type="checkbox" data-wise-word="proverbs" checked> Daily Proverbs</label>
           </div>
 
           <div class="panel-box">
@@ -140,15 +133,6 @@
               <label><input type="checkbox" value="4" checked> Thursday</label>
               <label><input type="checkbox" value="5" checked> Friday</label>
               <label><input type="checkbox" value="6" checked> Saturday</label>
-            </div>
-          </div>
-
-          <div class="panel-box">
-            <div class="panel-box-title">Options</div>
-            <div class="panel-actions">
-              <label class="panel-button"><input type="file" id="panelCsvInput" accept=".csv"> Import CSV</label>
-              <button type="button" id="panelExportBtn">Export</button>
-              <button type="button" id="panelResetBtn" class="danger">Reset</button>
             </div>
           </div>
 
@@ -172,7 +156,7 @@
           </button>
 
           <!-- Separate Settings Button (Icon Only) -->
-          <button class="sidebar-icon-btn" type="button" title="Settings">
+          <button class="sidebar-icon-btn" type="button" title="Settings" data-page="settings">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
               <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.7"/>
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
@@ -211,28 +195,14 @@
 
     <!-- Controls -->
     <section class="controls">
-      <div class="month-nav">
-        <button class="nav-btn" id="prevMonthBtn" aria-label="Previous month">❮</button>
-        <h2 id="monthLabel">September 2026</h2>
-        <button class="nav-btn" id="nextMonthBtn" aria-label="Next month">❯</button>
-        <button class="nav-btn primary" id="todayBtn">Today</button>
-        <div class="progress-section" id="planProgress">
-          <div class="progress-stats">
-            <span id="progressLabel">0 / 0 days</span>
-            <span id="progressPercent">0%</span>
-          </div>
-          <div class="progress-track">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
+      <div class="progress-section" id="planProgress">
+        <div class="progress-stats">
+          <span id="progressLabel">0 / 0 days</span>
+          <span id="progressPercent">0%</span>
         </div>
-      </div>
-      <div class="actions">
-        <label class="file-label">
-          <input type="file" id="csvFileInput" accept=".csv" style="display:none">
-          <span>Import CSV</span>
-        </label>
-        <button id="exportBtn">Export Backup</button>
-        <button id="resetBtn" class="danger">Reset Plan</button>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
       </div>
     </section>
 
@@ -252,6 +222,13 @@
           <!-- Dynamically populated by script.js -->
         </div>
       </div>
+
+      <div class="calendar-bottom-nav">
+        <button class="nav-btn" id="prevMonthBtn" aria-label="Previous month">❮</button>
+        <button class="nav-btn primary" id="todayBtn">Today</button>
+        <h2 id="monthLabel">09/18/2026</h2>
+        <button class="nav-btn" id="nextMonthBtn" aria-label="Next month">❯</button>
+      </div>
     </section>
 
     <section class="app-page" id="biblePage" hidden>
@@ -263,6 +240,96 @@
       <div class="page-heading"><span>SAVED READINGS</span><h2>Your saved passages</h2></div>
       <p id="emptySaveMessage">Your saved list is empty. Start reading the Bible to save passages.</p>
       <button type="button" id="goToBibleBtn">Read the Bible</button>
+    </section>
+
+    <section class="app-page account-page" id="accountPage" hidden>
+      <div class="page-heading"><span>ACCOUNT</span><h2>Your account</h2></div>
+
+      <p class="account-page-notice" id="accountPageNotice" hidden></p>
+
+      <div id="accountPageSignedOut">
+        <p>Sign in to keep your reading plan, progress and saved passages on every device you use.</p>
+        <button type="button" id="accountPageSignInBtn">Sign in or create an account</button>
+      </div>
+
+      <div id="accountPageSignedIn" hidden>
+        <div class="panel-box">
+          <div class="panel-box-title">Profile</div>
+          <label>Display name<input type="text" id="profileDisplayName" autocomplete="name"></label>
+          <label>Avatar URL<input type="url" id="profileAvatarUrl" placeholder="https://…"></label>
+          <label>Email<input type="email" id="profileEmail" readonly></label>
+          <button type="button" id="profileSaveBtn">Save profile</button>
+        </div>
+
+        <div class="panel-box" id="accountPreferences">
+          <div class="panel-box-title">Preferences</div>
+          <label>Theme
+            <select id="settingsTheme">
+              <option value="default">Default</option>
+              <option value="night">Night</option>
+              <option value="paper">Paper</option>
+            </select>
+          </label>
+          <label>Translation
+            <select id="settingsTranslation">
+              <option value="KJV">KJV</option>
+              <option value="NKJV">NKJV</option>
+              <option value="NIV">NIV</option>
+              <option value="ESV">ESV</option>
+              <option value="NASB">NASB</option>
+              <option value="NRSV">NRSV</option>
+              <option value="CSB">CSB</option>
+            </select>
+          </label>
+          <label>Canon
+            <select id="settingsCanon">
+              <option value="protestant">Protestant</option>
+              <option value="catholic">Catholic</option>
+              <option value="orthodox">Orthodox</option>
+            </select>
+          </label>
+          <button type="button" id="preferencesSaveBtn">Save preferences</button>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-box-title">Password</div>
+          <label>New password<input type="password" id="accountPagePassword" autocomplete="new-password" minlength="6"></label>
+          <button type="button" id="passwordChangeBtn">Change password</button>
+        </div>
+
+        <div class="panel-box">
+          <div class="panel-box-title">Sync</div>
+          <p class="sync-status" id="syncStatusText">Waiting…</p>
+          <div class="panel-actions">
+            <button type="button" id="syncPushBtn">Upload this device's plan</button>
+            <button type="button" id="syncPullBtn">Download plan from account</button>
+          </div>
+        </div>
+
+        <div class="panel-actions">
+          <button type="button" id="accountPageSignOutBtn" class="danger">Sign Out</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="app-page" id="settingsPage" hidden>
+      <div class="page-heading"><span>PREFERENCES</span><h2>Settings</h2></div>
+
+      <div class="panel-box">
+        <div class="panel-box-title">Appearance</div>
+        <label><input type="radio" name="themeMode" value="light"> Light</label>
+        <label><input type="radio" name="themeMode" value="dark" checked> Dark</label>
+        <label><input type="radio" name="themeMode" value="device"> Device</label>
+      </div>
+
+      <div class="panel-box">
+        <div class="panel-box-title">Data</div>
+        <div class="panel-actions">
+          <label class="panel-button"><input type="file" id="csvFileInput" accept=".csv"> Import CSV</label>
+          <button type="button" id="exportBtn">Export Backup</button>
+          <button type="button" id="resetBtn" class="danger">Reset Plan</button>
+        </div>
+      </div>
     </section>
 
     </div>
@@ -288,24 +355,81 @@
         <span>Account</span>
       </div>
 
-      <form id="accountForm">
-        <label>Username<input name="username" autocomplete="username"></label>
-        <label>Email<input name="email" type="email" autocomplete="email"></label>
-        <label>Password<input name="password" type="password" autocomplete="current-password"></label>
-        <button type="submit">Sign in</button>
-      </form>
+      <!-- Signed out: sign in / create account -->
+      <div class="account-view" id="accountViewCredentials">
+        <div class="account-tabs" role="tablist">
+          <button type="button" class="account-tab is-active" data-auth-tab="signin" role="tab" aria-selected="true">Sign In</button>
+          <button type="button" class="account-tab" data-auth-tab="signup" role="tab" aria-selected="false">Create Account</button>
+        </div>
 
-      <div class="account-divider">or continue with</div>
+        <form id="accountForm">
+          <label id="accountNameField" hidden>Display name<input name="displayName" autocomplete="name"></label>
+          <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <label>Password<input name="password" type="password" autocomplete="current-password" required minlength="6"></label>
+          <button type="submit" id="accountSubmitBtn">Sign in</button>
+        </form>
 
-      <button type="button" class="oauth-button oauth-apple" data-provider="Apple" id="appleSignInBtn">
-        <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M16.365 1.43c0 1.14-.462 2.15-1.211 2.911-.822.84-2.146 1.484-3.243 1.395-.14-1.104.44-2.264 1.19-2.99.83-.8 2.28-1.39 3.264-1.316zM20.62 17.09c-.494 1.14-.73 1.65-1.365 2.66-.885 1.41-2.133 3.17-3.68 3.18-1.373.02-1.727-.9-3.59-.89-1.862.01-2.253.91-3.627.89-1.547-.02-2.727-1.6-3.613-3.01-2.476-3.93-2.737-8.54-1.21-10.997.98-1.588 2.53-2.517 3.988-2.517 1.484 0 2.417.92 3.646.92 1.192 0 1.916-.92 3.646-.92 1.302 0 2.68.71 3.66 1.94-3.216 1.76-2.694 6.34.145 8.744z"/>
-        </svg>
-        Sign in with Apple
-      </button>
-      <button type="button" class="oauth-button" data-provider="GitHub">GitHub</button>
+        <button type="button" class="account-link" id="forgotPasswordBtn">Forgot your password?</button>
 
-      <small id="appleSignInNote">Fill in your Appwrite project details in <code>apple-signin.config.json</code> to activate Apple sign-in.</small>
+        <div class="account-divider">or continue with</div>
+
+        <button type="button" class="oauth-button oauth-google" data-provider="google">
+          <svg class="oauth-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-2 3.02v2.51h3.24c1.89-1.74 2.98-4.3 2.98-7.36z"/>
+            <path fill="#34A853" d="M12 22c2.7 0 4.96-.9 6.62-2.41l-3.24-2.51c-.9.6-2.04.96-3.38.96-2.6 0-4.8-1.76-5.59-4.12H3.07v2.59A10 10 0 0 0 12 22z"/>
+            <path fill="#FBBC05" d="M6.41 13.92a6 6 0 0 1 0-3.84V7.49H3.07a10 10 0 0 0 0 9.02l3.34-2.59z"/>
+            <path fill="#EA4335" d="M12 5.94c1.47 0 2.78.5 3.82 1.49l2.86-2.86C16.95 2.98 14.7 2 12 2a10 10 0 0 0-8.93 5.49l3.34 2.59C7.2 7.72 9.4 5.94 12 5.94z"/>
+          </svg>
+          Continue with Google
+        </button>
+
+        <button type="button" class="oauth-button oauth-apple" data-provider="apple" id="appleSignInBtn">
+          <svg class="oauth-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M16.365 1.43c0 1.14-.462 2.15-1.211 2.911-.822.84-2.146 1.484-3.243 1.395-.14-1.104.44-2.264 1.19-2.99.83-.8 2.28-1.39 3.264-1.316zM20.62 17.09c-.494 1.14-.73 1.65-1.365 2.66-.885 1.41-2.133 3.17-3.68 3.18-1.373.02-1.727-.9-3.59-.89-1.862.01-2.253.91-3.627.89-1.547-.02-2.727-1.6-3.613-3.01-2.476-3.93-2.737-8.54-1.21-10.997.98-1.588 2.53-2.517 3.988-2.517 1.484 0 2.417.92 3.646.92 1.192 0 1.916-.92 3.646-.92 1.302 0 2.68.71 3.66 1.94-3.216 1.76-2.694 6.34.145 8.744z"/>
+          </svg>
+          Continue with Apple
+        </button>
+
+        <button type="button" class="oauth-button" data-provider="github">Continue with GitHub</button>
+      </div>
+
+      <!-- Signed out: forgotten password -->
+      <div class="account-view" id="accountViewReset" hidden>
+        <p class="account-view-intro">We'll email you a link to set a new password.</p>
+        <form id="resetRequestForm">
+          <label>Email<input name="email" type="email" autocomplete="email" required></label>
+          <button type="submit" id="resetRequestBtn">Send reset link</button>
+        </form>
+        <button type="button" class="account-link" id="resetBackBtn">Back to sign in</button>
+      </div>
+
+      <!-- Following a reset link -->
+      <div class="account-view" id="accountViewNewPassword" hidden>
+        <p class="account-view-intro">Choose a new password for your account.</p>
+        <form id="newPasswordForm">
+          <label>New password<input name="password" type="password" autocomplete="new-password" required minlength="6"></label>
+          <button type="submit" id="newPasswordBtn">Update password</button>
+        </form>
+      </div>
+
+      <!-- Signed in -->
+      <div class="account-view" id="accountViewMenu" hidden>
+        <div class="account-identity">
+          <span class="account-identity-avatar" id="accountMenuAvatar"></span>
+          <span class="account-identity-text">
+            <strong id="accountMenuName">Reader</strong>
+            <small id="accountMenuEmail"></small>
+          </span>
+        </div>
+        <div class="account-menu">
+          <button type="button" id="menuAccountBtn">Account</button>
+          <button type="button" id="menuSettingsBtn">Settings</button>
+          <button type="button" id="menuSignOutBtn" class="danger">Sign Out</button>
+        </div>
+      </div>
+
+      <p class="account-message" id="accountMessage" hidden></p>
+      <small id="accountConfigNote" hidden></small>
     </div>
   </div>
 
@@ -315,10 +439,14 @@
     <div class="dialog-actions"><button type="button" id="cancelResetBtn">Cancel</button><button type="button" id="confirmResetBtn" class="danger">Reset</button></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="quotes-data.js"></script>
   <script src="script.js"></script>
-  <script src="apple-signin.js"></script>
+  <script src="supabase-client.js"></script>
+  <script src="auth.js"></script>
+  <script src="data.js"></script>
+  <script src="cloud-sync.js"></script>
+  <script src="account-ui.js"></script>
   <script>
     // Sidebar open/close toggle (self-contained, does not touch script.js)
     (function () {
@@ -333,6 +461,13 @@
         var collapsed = sidebar.classList.toggle('collapsed');
         toggleBtn.setAttribute('aria-expanded', String(!collapsed));
         toggleBtn.setAttribute('aria-label', collapsed ? 'Open sidebar' : 'Close sidebar');
+
+        // Closing the navbar shouldn't leave the Reading Plans panel open
+        // behind it.
+        if (collapsed) {
+          var planPanel = document.getElementById('readingPlanPanel');
+          if (planPanel) planPanel.hidden = true;
+        }
       });
     })();
 

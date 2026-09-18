@@ -147,12 +147,27 @@
      State Persistence
      ================================================================ */
 
+  // Anything that wants to know when the plan changed (cloud-sync.js does)
+  // registers here rather than polling localStorage.
+  const stateChangeListeners = [];
+
+  function notifyStateChanged() {
+    stateChangeListeners.forEach((listener) => {
+      try {
+        listener(state);
+      } catch (e) {
+        console.warn("State change listener failed:", e);
+      }
+    });
+  }
+
   function saveState() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     } catch (e) {
       console.warn("Failed to save state:", e);
     }
+    notifyStateChanged();
   }
 
   function loadState() {
@@ -452,6 +467,7 @@
 
     targetBook.chapters.push(chapter);
     targetBook.chapters.sort((a, b) => a.number - b.number);
+    sortDayBooks(toDay);
 
     saveState();
     render();
@@ -477,6 +493,7 @@
     } else {
       toDay.books.push(book);
     }
+    sortDayBooks(toDay);
 
     saveState();
     render();
@@ -543,7 +560,6 @@
 
     if (calendarDay) {
       cell.dataset.dayId = calendarDay.id;
-      cell.draggable = true;
     }
 
     const dateHeader = document.createElement("div");
@@ -575,12 +591,18 @@
     return cell;
   }
 
+  // Which books are currently expanded, keyed by book id. Kept outside the
+  // render cycle so a book stays open across the re-renders that happen
+  // every time a chapter is checked off.
+  const expandedBookIds = new Set();
+
   function createBookElement(dayId, book) {
     const bookEl = document.createElement("div");
     bookEl.className = "book";
     bookEl.dataset.dayId = dayId;
     bookEl.dataset.bookId = book.id;
     bookEl.draggable = true;
+    bookEl.classList.toggle("expanded", expandedBookIds.has(book.id));
 
     const header = document.createElement("div");
     header.className = "book-header";
@@ -602,9 +624,25 @@
     const completed = book.chapters.filter(c => c.completed).length;
     progress.textContent = `${completed}/${book.chapters.length}`;
 
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "book-toggle";
+    toggle.setAttribute("aria-label", `Show chapters for ${book.fullName}`);
+    toggle.innerHTML = '<svg class="book-toggle-chevron" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+    // Clicking anywhere on the header (besides the checkbox itself) opens
+    // or closes the chapter list -- the chevron is just the visual cue.
+    header.addEventListener("click", (e) => {
+      if (e.target === checkbox) return;
+      const isExpanded = bookEl.classList.toggle("expanded");
+      if (isExpanded) expandedBookIds.add(book.id);
+      else expandedBookIds.delete(book.id);
+    });
+
     header.appendChild(checkbox);
     header.appendChild(title);
     header.appendChild(progress);
+    header.appendChild(toggle);
     bookEl.appendChild(header);
 
     const chaptersContainer = document.createElement("div");
@@ -644,12 +682,10 @@
   }
 
   function updateMonthLabel() {
-    const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December"
-    ];
     const label = document.getElementById("monthLabel");
-    label.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    const mm = String(currentDate.getMonth() + 1).padStart(2, "0");
+    const dd = String(currentDate.getDate()).padStart(2, "0");
+    label.textContent = `${mm}/${dd}/${currentDate.getFullYear()}`;
   }
 
   function updateClock() {
@@ -671,15 +707,71 @@
     timeEl.textContent = `${h}:${m}:${s}`;
   }
 
+  // The quote is picked deterministically from the current hour, so it's
+  // the same for everyone within that hour and moves on by itself at the
+  // top of the next hour -- it no longer changes when the banner is clicked.
   function updateQuote() {
     if (!window.QUOTES || QUOTES.length === 0) return;
 
-    state.settings.quoteIndex = (state.settings.quoteIndex + 1) % QUOTES.length;
-    saveState();
-
-    const q = QUOTES[state.settings.quoteIndex];
+    const hourIndex = Math.floor(Date.now() / 3600000) % QUOTES.length;
+    const q = QUOTES[hourIndex];
     document.getElementById("quoteText").textContent = q.text;
     document.getElementById("quoteSource").textContent = q.source ? `— ${q.source}` : "";
+  }
+
+  /* ================================================================
+     Theme (Light / Dark / Device)
+
+     Kept in its own localStorage key rather than in state.settings so
+     that Reset Plan (which clears reading progress) never touches the
+     person's display preference.
+     ================================================================ */
+
+  const THEME_STORAGE_KEY = "biblePlan.themeMode";
+
+  function resolveTheme(mode) {
+    if (mode === "light" || mode === "dark") return mode;
+    // "device": follow the OS/browser preference.
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  }
+
+  function applyTheme(mode) {
+    document.documentElement.setAttribute("data-theme", resolveTheme(mode));
+  }
+
+  function getThemeMode() {
+    try {
+      return localStorage.getItem(THEME_STORAGE_KEY) || "dark";
+    } catch (e) {
+      return "dark";
+    }
+  }
+
+  function setThemeMode(mode) {
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, mode);
+    } catch (e) {
+      console.warn("Failed to save theme:", e);
+    }
+    applyTheme(mode);
+  }
+
+  function initTheme() {
+    const mode = getThemeMode();
+    applyTheme(mode);
+
+    document.querySelectorAll('input[name="themeMode"]').forEach((input) => {
+      input.checked = input.value === mode;
+      input.addEventListener("change", () => {
+        if (input.checked) setThemeMode(input.value);
+      });
+    });
+
+    if (window.matchMedia) {
+      window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", () => {
+        if (getThemeMode() === "device") applyTheme("device");
+      });
+    }
   }
 
   function render() {
@@ -803,6 +895,23 @@
     return items;
   }
 
+  // Display hierarchy applied to every date's reading, regardless of the
+  // order the plan actually paced the books in: Old Testament, then the
+  // daily Psalms/Proverbs readings, then Deuterocanonical, then New
+  // Testament.
+  function bookCategoryRank(name) {
+    if (name === "Psalms") return 1;
+    if (name === "Proverbs") return 2;
+    if (OT_BOOKS.some(([n]) => n === name)) return 0;
+    if (DC_BOOKS.some(([n]) => n === name)) return 3;
+    if (NT_BOOKS.some(([n]) => n === name)) return 4;
+    return 5;
+  }
+
+  function sortDayBooks(day) {
+    day.books.sort((a, b) => bookCategoryRank(a.fullName) - bookCategoryRank(b.fullName));
+  }
+
   function groupItemsIntoBooks(items, dayIndex) {
     const order = [];
     const map = new Map();
@@ -810,7 +919,13 @@
       if (!map.has(name)) { map.set(name, []); order.push(name); }
       map.get(name).push(chapter);
     });
-    return order.map((name) => ({
+
+    const sortedOrder = order
+      .map((name, index) => ({ name, index }))
+      .sort((a, b) => bookCategoryRank(a.name) - bookCategoryRank(b.name) || a.index - b.index)
+      .map((entry) => entry.name);
+
+    return sortedOrder.map((name) => ({
       id: `book-${dayIndex}-${name.replace(/\s+/g, "")}`,
       abbreviation: name,
       fullName: name,
@@ -856,7 +971,7 @@
       for (let chapter = 1; chapter <= chapters; chapter++) {
         const button = document.createElement("button");
         button.type = "button";
-        button.textContent = chapter;
+        button.textContent = `Chapter ${chapter}`;
         button.title = `${name} ${chapter}`;
         chapterList.appendChild(button);
       }
@@ -867,11 +982,15 @@
 
   function showPage(page) {
     document.querySelectorAll("[data-page]").forEach((button) => button.classList.toggle("active", button.dataset.page === page));
-    document.querySelector(".quote-banner").hidden = page !== "calendar";
+    // The quote banner stays visible on every page, not just the calendar.
     document.querySelector(".controls").hidden = page !== "calendar";
     document.querySelector(".calendar-section").hidden = page !== "calendar";
     document.getElementById("biblePage").hidden = page !== "bible";
     document.getElementById("savePage").hidden = page !== "save";
+    const accountPage = document.getElementById("accountPage");
+    if (accountPage) accountPage.hidden = page !== "account";
+    const settingsPage = document.getElementById("settingsPage");
+    if (settingsPage) settingsPage.hidden = page !== "settings";
     if (page === "bible") renderBiblePage();
   }
 
@@ -1044,6 +1163,8 @@
       if (newWidth < snapCloseThreshold) {
         sidebar.classList.add('collapsed');
         sidebar.style.width = '';
+        const planPanel = document.getElementById('readingPlanPanel');
+        if (planPanel) planPanel.hidden = true;
         return;
       }
 
@@ -1073,20 +1194,9 @@
       button.addEventListener("click", () => showPage(button.dataset.page));
     });
 
-    document.getElementById("accountBtn").addEventListener("click", () => {
-      const popover = document.getElementById("accountPopover");
-      popover.hidden = !popover.hidden;
-    });
-
-    document.getElementById("accountForm").addEventListener("submit", (event) => {
-      event.preventDefault();
-      alert("Account sign-in will be connected when the authentication service is configured.");
-    });
-
-    document.querySelectorAll(".oauth-button").forEach((button) => {
-      if (button.id === "appleSignInBtn") return; // wired separately in apple-signin.js
-      button.addEventListener("click", () => alert(`${button.dataset.provider} sign-in needs its OAuth callback configuration.`));
-    });
+    // The account button, the sign-in/create-account forms and the OAuth
+    // buttons are all wired up in account-ui.js, which owns the account
+    // dialog and talks to auth.js.
 
     document.getElementById("readingPlansBtn").addEventListener("click", () => {
       const panel = document.getElementById("readingPlanPanel");
@@ -1102,19 +1212,10 @@
       input.addEventListener("change", regeneratePlan);
     });
 
-    document.getElementById("panelExportBtn").addEventListener("click", exportPlan);
-    document.getElementById("panelResetBtn").addEventListener("click", () => resetPlan());
     document.getElementById("cancelResetBtn").addEventListener("click", () => { document.getElementById("resetDialog").hidden = true; });
     document.getElementById("confirmResetBtn").addEventListener("click", () => {
       document.getElementById("resetDialog").hidden = true;
       resetPlan(true);
-    });
-    document.getElementById("panelCsvInput").addEventListener("change", (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => importCSV(loadEvent.target.result);
-      reader.readAsText(file);
     });
     document.getElementById("goToBibleBtn").addEventListener("click", () => showPage("bible"));
 
@@ -1148,17 +1249,18 @@
       }
     });
 
-    document.querySelector(".file-label").addEventListener("click", (e) => {
-      if (e.target.tagName !== "INPUT") {
-        document.getElementById("csvFileInput").click();
-      }
-    });
+    const csvLabel = document.getElementById("csvFileInput").closest("label");
+    if (csvLabel) {
+      csvLabel.addEventListener("click", (e) => {
+        if (e.target.tagName !== "INPUT") {
+          document.getElementById("csvFileInput").click();
+        }
+      });
+    }
 
     document.getElementById("exportBtn").addEventListener("click", exportPlan);
 
     document.getElementById("resetBtn").addEventListener("click", () => resetPlan());
-
-    document.getElementById("quoteBanner").addEventListener("click", updateQuote);
   }
 
   /* ================================================================
@@ -1178,6 +1280,7 @@
 
     initializePlanPanel();
     initDropdowns();
+    initTheme();
 
     attachEventHandlers();
     initDragAndDrop();
@@ -1188,6 +1291,9 @@
     showPage("calendar");
 
     setInterval(updateClock, 1000);
+    // Checked well under once an hour so the banner picks up the new
+    // quote promptly right after the hour turns over.
+    setInterval(updateQuote, 60000);
   }
 
   if (document.readyState === "loading") {
@@ -1196,8 +1302,59 @@
     init();
   }
 
-  // Exposed so apple-signin.js (a separate, self-contained file) can update
+  // Exposed so account-ui.js (a separate, self-contained file) can update
   // the sidebar account button after checking/making a session, without
   // needing to duplicate this module's internals.
   window.updateAccountUI = updateAccountUI;
+
+  /* ================================================================
+     App bridge
+
+     The narrow surface the account/sync modules are allowed to use. It
+     deliberately hands out copies rather than the live state object, so
+     nothing outside this file can mutate the calendar behind its back.
+     ================================================================ */
+  window.BiblePlanApp = {
+    /** A deep copy of { calendarDays, settings }. */
+    getState() {
+      return JSON.parse(JSON.stringify(state));
+    },
+
+    /** Replaces the plan wholesale (used when adopting an account's plan). */
+    replaceState(nextState) {
+      if (!nextState || !Array.isArray(nextState.calendarDays)) return false;
+      state = {
+        calendarDays: nextState.calendarDays,
+        settings: { ...state.settings, ...(nextState.settings || {}) }
+      };
+      if (!state.settings.days) state.settings.days = state.calendarDays.length;
+      saveState();
+      initializePlanPanel();
+      render();
+      return true;
+    },
+
+    /** Fires after every save. Returns an unsubscribe function. */
+    onStateChange(listener) {
+      if (typeof listener !== "function") return () => {};
+      stateChangeListeners.push(listener);
+      return () => {
+        const index = stateChangeListeners.indexOf(listener);
+        if (index !== -1) stateChangeListeners.splice(index, 1);
+      };
+    },
+
+    /** "ot" | "dc" | "nt" | null for a full book name. */
+    getBookCategory(bookName) {
+      const name = String(bookName || "");
+      const group = GROUP_ORDER.find((key) => BOOK_GROUPS[key].some(([book]) => book === name));
+      return group || null;
+    },
+
+    /** Switches the visible page ("calendar" | "bible" | "save" | "account"). */
+    showPage,
+
+    /** The localStorage key holding the offline copy of the plan. */
+    storageKey: STORAGE_KEY
+  };
 })();

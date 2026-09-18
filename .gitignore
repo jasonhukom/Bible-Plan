@@ -2,3 +2,14 @@
 Thumbs.db
 *.log
 node_modules/
+
+# Secrets and local configuration — never commit these.
+.env
+.env.*
+!.env.example
+supabase.config.json
+
+# Tooling / deploy output
+.vercel
+dist/
+*.tsbuildinfo
