@@ -2216,7 +2216,7 @@ body.is-resizing {
 
 .bible-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  grid-template-columns: 1fr;
   gap: 6px;
 }
 
@@ -2234,19 +2234,17 @@ body.is-resizing {
 
 .chapter-list {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 4px 8px 8px;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 8px 8px;
 }
 
 .chapter-list button {
-  width: 100%;
-  padding: 7px 10px;
+  width: 27px;
+  height: 27px;
   border: 1px solid var(--night-line);
-  border-radius: 3px;
   background: var(--night);
   color: var(--gold-bright);
-  text-align: left;
   cursor: pointer;
 }
 

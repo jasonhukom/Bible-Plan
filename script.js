@@ -971,7 +971,7 @@
       for (let chapter = 1; chapter <= chapters; chapter++) {
         const button = document.createElement("button");
         button.type = "button";
-        button.textContent = `Chapter ${chapter}`;
+        button.textContent = chapter;
         button.title = `${name} ${chapter}`;
         chapterList.appendChild(button);
       }
