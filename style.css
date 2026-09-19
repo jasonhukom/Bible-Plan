@@ -2199,7 +2199,7 @@ body.is-resizing {
 
 .app-page {
   max-width: 850px;
-  margin: 0 auto;
+  margin: 0;
 }
 
 .page-heading span {
@@ -2216,7 +2216,7 @@ body.is-resizing {
 
 .bible-list {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 100%;
   gap: 6px;
 }
 
@@ -2226,7 +2226,7 @@ body.is-resizing {
 }
 
 .bible-list summary {
-  padding: 9px;
+  padding: 9px 12px;
   cursor: pointer;
   color: var(--cream);
   font-family: var(--font-display);
@@ -2240,8 +2240,9 @@ body.is-resizing {
 }
 
 .chapter-list button {
-  width: 27px;
-  height: 27px;
+  width: 67px;
+  height: 67px;
+  padding: 0;
   border: 1px solid var(--night-line);
   background: var(--night);
   color: var(--gold-bright);
