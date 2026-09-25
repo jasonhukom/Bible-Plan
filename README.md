@@ -1,2 +1,1 @@
-
-# B I B L I A
+B i b l i a
