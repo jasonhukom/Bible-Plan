@@ -20,8 +20,9 @@ const PROFILE_COLUMNS =
 const SETTINGS_COLUMNS =
   "user_id, theme, translation, canon, preferences, created_at, updated_at";
 const PLAN_COLUMNS =
-  "id, user_id, name, start_date, days, is_active, created_at, updated_at";
-const PROGRESS_COLUMNS = "user_id, day_index, date, passage, completed, completed_at";
+  "id, user_id, name, start_date, days, weekdays, book_groups, order_mode, wise_words, is_active, created_at, updated_at";
+const SCHEDULE_COLUMNS =
+  "id, user_id, plan_id, day_index, date, book, book_name, chapter, category, position, completed, completed_at";
 
 function fail(message) {
   return { data: null, error: { message } };
@@ -155,42 +156,122 @@ export const dataApi = {
   },
 
   /* ========================================================================
-     Reading plan progress
+     Reading plan (configurable) + schedule
      ------------------------------------------------------------------------
-     One row per plan day (keyed by the reading's stable idx from
-     readingPlanData.js), toggled complete/incomplete. See
-     supabase/migration_plan_progress.sql for the table this reads/writes.
+     reading_plans holds the config (start date, length, book groups, order
+     mode) -- exactly one row per user has is_active = true. reading_schedule
+     holds one row per scheduled chapter, which is what makes per-chapter
+     completion and drag-and-drop rescheduling simple: both are just updates
+     to a single row.
      ======================================================================== */
 
-  listCompletedDays() {
+  getActivePlan() {
     return withUser((client, userId) =>
-      client.from("plan_progress").select(PROGRESS_COLUMNS).eq("user_id", userId)
+      client
+        .from("reading_plans")
+        .select(PLAN_COLUMNS)
+        .eq("user_id", userId)
+        .eq("is_active", true)
+        .maybeSingle()
     );
   },
 
   /**
-   * @param {number} dayIndex
-   * @param {string} date
-   * @param {string} passage
-   * @param {boolean} completed
+   * Creates the user's plan if they don't have one yet, otherwise updates
+   * the existing active plan in place (there's only ever one active plan).
+   * @param {{name?: string, start_date: string, days: number, book_groups: string[], order_mode: string}} config
    */
-  setDayCompleted(dayIndex, date, passage, completed) {
+  saveActivePlan(config) {
+    return withUser(async (client, userId) => {
+      const { data: existing } = await client
+        .from("reading_plans")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("is_active", true)
+        .maybeSingle();
+
+      if (existing) {
+        return client
+          .from("reading_plans")
+          .update(config)
+          .eq("id", existing.id)
+          .select(PLAN_COLUMNS)
+          .maybeSingle();
+      }
+      return client
+        .from("reading_plans")
+        .insert({ ...config, user_id: userId, is_active: true })
+        .select(PLAN_COLUMNS)
+        .maybeSingle();
+    });
+  },
+
+  listSchedule(planId) {
     return withUser((client, userId) =>
       client
-        .from("plan_progress")
-        .upsert(
-          {
-            user_id: userId,
-            day_index: dayIndex,
-            date,
-            passage,
-            completed,
-            completed_at: completed ? new Date().toISOString() : null
-          },
-          { onConflict: "user_id,day_index" }
-        )
-        .select(PROGRESS_COLUMNS)
-        .maybeSingle()
+        .from("reading_schedule")
+        .select(SCHEDULE_COLUMNS)
+        .eq("user_id", userId)
+        .eq("plan_id", planId)
+        .order("day_index", { ascending: true })
+        .order("position", { ascending: true })
     );
+  },
+
+  /**
+   * Replaces the entire schedule for a plan -- used when the plan config
+   * changes and the whole thing needs regenerating. Chunked into batches of
+   * 500 rows since a full 360-day, two-testament plan can be 1000+ rows.
+   * @param {string} planId
+   * @param {Array<{day_index:number,date:string,book:string,book_name:string,chapter:number,category:string,position:number}>} rows
+   */
+  async replaceSchedule(planId, rows) {
+    return withUser(async (client, userId) => {
+      const del = await client.from("reading_schedule").delete().eq("plan_id", planId).eq("user_id", userId);
+      if (del.error) return del;
+
+      const withIds = rows.map((r) => ({ ...r, plan_id: planId, user_id: userId }));
+      const batchSize = 500;
+      for (let i = 0; i < withIds.length; i += batchSize) {
+        const batch = withIds.slice(i, i + batchSize);
+        const { error } = await client.from("reading_schedule").insert(batch);
+        if (error) return { data: null, error };
+      }
+      return { data: { inserted: withIds.length }, error: null };
+    });
+  },
+
+  /** @param {string} rowId @param {boolean} completed */
+  setChapterCompleted(rowId, completed) {
+    return withUser((client, userId) =>
+      client
+        .from("reading_schedule")
+        .update({ completed, completed_at: completed ? new Date().toISOString() : null })
+        .eq("id", rowId)
+        .eq("user_id", userId)
+    );
+  },
+
+  /**
+   * Moves one or more schedule rows to a new date (drag-and-drop). Each
+   * move can carry its own day_index/position since rows dropped on the
+   * same day need sequential positions.
+   * @param {Array<{id: string, date: string, day_index: number, position: number}>} moves
+   */
+  moveScheduleEntries(moves) {
+    return withUser(async (client, userId) => {
+      const results = await Promise.all(
+        moves.map((m) =>
+          client
+            .from("reading_schedule")
+            .update({ date: m.date, day_index: m.day_index, position: m.position })
+            .eq("id", m.id)
+            .eq("user_id", userId)
+        )
+      );
+      const failed = results.find((r) => r.error);
+      if (failed) return { data: null, error: failed.error };
+      return { data: { moved: moves.length }, error: null };
+    });
   }
 };

@@ -4,44 +4,60 @@ A calendar-based Bible reading tracker, a Bible reader, and saved verses —
 rebuilt on React + Vite, still using your existing Supabase project for
 accounts and data.
 
-## What changed from the old vanilla-JS app
+## What's in this version
 
 - **Framework**: vanilla JS/HTML → **React + Vite**, with real routing
   (React Router) instead of one `index.html` swapping `data-page` sections.
-- **Pages**: Plan, Bible, and Saves are now their own routes/pages
-  (`/plan`, `/bible`, `/saves`). Settings (`/settings`) and Login
-  (`/login`) stay as their own lighter pages rather than living in the
-  main nav rail alongside the others.
-- **New Profile page** (`/profile`, only reachable once signed in): avatar
-  upload, name, description, church (plain text field), and a saved-verses
-  summary linking to Saves.
-- **New Bible reader** (`/bible`): pulls text live from the
-  [HelloAO Bible API](https://bible.helloao.org) — free, no API key,
-  no rate limits. Styled after Bible.com/YouVersion: a book sidebar on the
-  left, the reading pane on the right. **Opening a chapter automatically
-  collapses the sidebar** so the reading pane has your full attention; a
-  "Books" button brings it back.
-- **Tap-to-save verses**: tap any verse in the reader to save it. It shows
-  up on the Saves page **in the order you saved it** (oldest save first).
-  Tap a saved verse's reference to jump straight back to it in the reader.
-- **Books are grouped into three lists**: Old Testament, Deuterocanonical,
-  and New Testament, instead of one long list. Whether the middle group has
-  anything in it depends on the translation — most Protestant translations
-  (BSB, WEB, KJV, ASV) don't include those books at all.
-- **The reading plan itself is unchanged** — same 121 days, same dates,
-  same passages, ported byte-for-byte from `readings-data.js`. Each day's
-  passage now links straight into the Bible reader.
+- **Pages**: Plan (`/plan`), Bible (`/bible`), and Saves (`/saves`) are
+  their own routes. Settings and Login stay lighter/separate.
+- **Profile page** (`/profile`, signed-in only): avatar upload, name,
+  description, church (plain text), and a saved-verses summary.
+- **Bible reader** (`/bible`): live text from the
+  [HelloAO Bible API](https://bible.helloao.org) — free, no key, no rate
+  limit. Books split into Old Testament / Deuterocanonical / New Testament.
+  Opening a chapter collapses the sidebar; tap a verse to save it (Saves
+  page lists them in the order you saved them).
+- **Plan page** (`/plan`): a Google Calendar-style month view — event pills
+  per book, color-coded (gold = OT, blue = NT, green = Deuterocanonical),
+  drag a pill to reschedule a whole book's reading to another day, click a
+  pill to open a day's chapter checklist (expand a book, check off
+  individual chapters, or drag a single chapter row to a different day).
+  Mini-calendar + plan editor live in the sidebar; dark/light toggle and a
+  clock sit in the calendar's bottom bar.
+
+## The reading plan is fully dynamic now
+
+Earlier drafts of this rewrite shipped one fixed 121-day plan. That's gone.
+**The plan is generated on the fly** from whatever you set in the sidebar's
+"Reading Plans" panel:
+
+- **Start date** — any date.
+- **Length** — any number of days (1–730).
+- **Books** — Old Testament, New Testament, Deuterocanonical, any
+  combination.
+- **Order** — "Overlap" (a bit of every selected group each day — this is
+  the default) or "In order" (finish one group before starting the next).
+
+The default for a new account is **360 days, Old + New Testament,
+overlap mode**, starting the day you sign up. Chapter counts come live from
+the HelloAO API for whichever translation is set as default, so this is
+accurate for real book lengths rather than a hardcoded table — and it
+means Deuterocanonical only produces readings if your default translation
+actually includes those books.
+
+Changing the plan in the sidebar **regenerates the whole schedule** —
+every chapter gets a fresh row in `reading_schedule`, so make sure that's
+what you want before hitting "Apply plan"; it replaces what's there,
+including any read checkmarks and any chapters you'd manually dragged to a
+different day.
 
 ## Why the default translation is BSB, not NIV
 
-NIV is a commercially licensed translation (Biblica/Zondervan) with tight
-distribution restrictions, so it isn't available through HelloAO's API —
-that API only carries translations with no copyright restrictions. **BSB
-(Berean Standard Bible)** is the closest widely-used free alternative
-(modern, readable, leans word-for-word), so it's the app's default. WEB,
-KJV, and ASV are also available from the translation picker. Any of the
-1000+ translations HelloAO hosts will work if you type its id in — the
-picker just shows a friendly shortlist.
+NIV is a commercially licensed translation (Biblica/Zondervan), so it
+isn't available through HelloAO's API — that API only carries translations
+with no copyright restrictions. **BSB (Berean Standard Bible)** is the
+closest widely-used free alternative, so it's the app's default. WEB, KJV,
+and ASV are also in the picker.
 
 ## Setup
 
@@ -60,27 +76,20 @@ picker just shows a friendly shortlist.
    cp .env.example .env.local
    ```
 
-   These are build-time, `VITE_`-prefixed variables (the standard Vite way
-   of exposing config to client code) — different from the old app's
-   runtime `/api/config` endpoint, but the anon key is just as safe to
-   expose since every table sits behind Row Level Security.
+3. **Run the database migrations** (Supabase Dashboard → SQL Editor → New
+   query → paste → Run). If this is a fresh project, run `schema.sql`
+   first — it already contains `reading_plans` and `reading_schedule`,
+   which is what the plan generator reads and writes. Then run, in order:
 
-3. **Run the database migrations**
+   - `migration_profile_fields.sql` — adds `bio` and `church_name` to
+     `profiles`, plus a public `avatars` storage bucket.
+   - `migration_saved_verses_text.sql` — adds `book_name` and `verse_text`
+     to `saved_verses`.
 
-   If this is a fresh Supabase project, run `supabase/schema.sql` first.
-   Either way, run these three in order (Supabase Dashboard → SQL Editor):
-
-   - `supabase/migration_profile_fields.sql` — adds `bio` and
-     `church_name` to `profiles`, plus a public `avatars` storage bucket.
-   - `supabase/migration_saved_verses_text.sql` — adds `book_name` and
-     `verse_text` to `saved_verses`, so a saved verse renders without an
-     extra API call and keeps reading the same even if you later switch
-     translations.
-   - `supabase/migration_plan_progress.sql` — adds a small `plan_progress`
-     table for the Plan page's read/unread checkmarks. (The original
-     `reading_plans` / `reading_schedule` tables are still there,
-     untouched, for a future multi-plan feature — this rewrite ships with
-     just the one fixed 121-day plan, so it uses a simpler table instead.)
+   (An earlier draft added a `migration_plan_progress.sql` file for a
+   fixed-plan design — that's gone now that the plan is fully dynamic. If
+   you already ran it, the table it created is just unused; safe to leave
+   or drop.)
 
 4. **Run it locally**
 
@@ -88,17 +97,19 @@ picker just shows a friendly shortlist.
    npm run dev
    ```
 
-5. **Deploy** — same as before: push to GitHub, import into Vercel,
-   add the two `VITE_` env vars in the Vercel project settings.
-   `vercel.json` is already set up for SPA routing.
+5. **Deploy** — push to GitHub, import into Vercel, add the two `VITE_`
+   env vars in the Vercel project settings. `vercel.json` is already set
+   up for SPA routing.
 
-## What's intentionally simplified in this rewrite
+## Known trade-offs in this pass
 
-- **Plan customization** (choosing chronological order, overlap mode,
-  which book groups to include) isn't carried over yet — the app ships
-  with the one 121-day plan you already had running. The dataset CSVs
-  for those variants are still in your original repo if you want that
-  brought back in a follow-up.
+- **Drag-and-drop persists immediately** — there's no undo yet. Dropping a
+  book or chapter onto another day writes to the database right away.
+- **The "Days of the week" and "Daily wise words" (Psalms/Proverbs insert)
+  options** from the original plan panel aren't in the generator yet —
+  `reading_plans` has columns for both (`weekdays`, `wise_words`) so this
+  is a reasonable follow-up, they're just not wired into the generator or
+  the sidebar form yet.
 - **Church field** is plain text, not a Google Places lookup, per your
   call — no Google Maps API key needed.
 
@@ -106,22 +117,28 @@ picker just shows a friendly shortlist.
 
 ```
 src/
-  main.jsx              entry point
-  App.jsx                routes
+  main.jsx                entry point
+  App.jsx                  routes
   context/
-    AuthContext.jsx       Supabase session
-    ThemeContext.jsx       dark/light/device theme
+    AuthContext.jsx          Supabase session
+    ThemeContext.jsx          dark/light/device theme
+    CalendarViewContext.jsx    shared mini-cal <-> main-cal month/date state
+    PlanContext.jsx             plan config + full per-chapter schedule
   lib/
     supabaseClient.js       Supabase client (env-configured)
     dataApi.js               all reads/writes to your data
     helloao.js                HelloAO Bible API client
-    bibleBooks.js              OT/Deuterocanonical/NT classification
-    readingPlanData.js          the 121-day plan (ported as-is)
+    bibleBooks.js              OT/Deuterocanonical/NT classification + colors
+    planGenerator.js            turns plan config into a day-by-day schedule
+    calendarGrid.js              month-grid date math
   components/
-    Layout.jsx, ProtectedRoute.jsx
+    Layout.jsx, Sidebar.jsx, MiniCalendar.jsx, ProtectedRoute.jsx
   pages/
     LoginPage, PlanPage, BiblePage, SavesPage, ProfilePage, SettingsPage
 supabase/
-  schema.sql                  original schema (unchanged)
-  migration_*.sql             the three new migrations above
+  schema.sql                  original schema (unchanged) -- reading_plans
+                               and reading_schedule are what the plan
+                               generator uses
+  migration_profile_fields.sql
+  migration_saved_verses_text.sql
 ```

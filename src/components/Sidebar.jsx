@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import MiniCalendar from "./MiniCalendar";
 import { useAuth } from "../context/AuthContext";
+import { usePlan } from "../context/PlanContext";
 import { dataApi } from "../lib/dataApi";
-import { READINGS } from "../lib/readingPlanData";
 
 const SIDEBAR_STORAGE_KEY = "bible-plan-sidebar-open";
 
@@ -64,9 +64,15 @@ const navIcons = {
 export default function Sidebar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { plan, generating, error, regenerate } = usePlan();
   const [open, setOpen] = useState(() => localStorage.getItem(SIDEBAR_STORAGE_KEY) !== "closed");
   const [plansExpanded, setPlansExpanded] = useState(true);
   const [avatarUrl, setAvatarUrl] = useState(null);
+
+  const [startDate, setStartDate] = useState("");
+  const [days, setDays] = useState(360);
+  const [groups, setGroups] = useState(["ot", "nt"]);
+  const [orderMode, setOrderMode] = useState("overlap");
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, open ? "open" : "closed");
@@ -80,8 +86,28 @@ export default function Sidebar() {
     dataApi.getProfile().then(({ data }) => setAvatarUrl(data?.avatar_url || null));
   }, [user]);
 
-  const planStart = READINGS[0]?.date;
-  const planEnd = READINGS[READINGS.length - 1]?.date;
+  useEffect(() => {
+    if (!plan) return;
+    setStartDate(plan.start_date);
+    setDays(plan.days);
+    setGroups(plan.book_groups);
+    setOrderMode(plan.order_mode);
+  }, [plan]);
+
+  function toggleGroup(group) {
+    setGroups((prev) => (prev.includes(group) ? prev.filter((g) => g !== group) : [...prev, group]));
+  }
+
+  function handleApplyPlan(e) {
+    e.preventDefault();
+    regenerate({
+      name: plan?.name || "My reading plan",
+      start_date: startDate,
+      days: Number(days),
+      book_groups: groups,
+      order_mode: orderMode
+    });
+  }
 
   return (
     <>
@@ -133,15 +159,70 @@ export default function Sidebar() {
             </nav>
 
             {plansExpanded && (
-              <div className="plan-panel">
+              <form className="plan-panel" onSubmit={handleApplyPlan}>
                 <div className="panel-box">
-                  <div className="panel-box-title">Current plan</div>
-                  <p className="hint-text">
-                    {planStart} – {planEnd} · {READINGS.length} days
-                  </p>
-                  <p className="hint-text">Old &amp; New Testament, with daily Psalms &amp; Proverbs.</p>
+                  <div className="panel-box-title">Plan settings</div>
+
+                  <label className="plan-field-label" htmlFor="plan-start">
+                    Start date
+                  </label>
+                  <input
+                    id="plan-start"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="plan-field-input"
+                  />
+
+                  <label className="plan-field-label" htmlFor="plan-days">
+                    Length (days)
+                  </label>
+                  <input
+                    id="plan-days"
+                    type="number"
+                    min={1}
+                    max={730}
+                    value={days}
+                    onChange={(e) => setDays(e.target.value)}
+                    className="plan-field-input"
+                  />
+
+                  <div className="plan-field-label">Books</div>
+                  <div className="plan-checkbox-row">
+                    <label>
+                      <input type="checkbox" checked={groups.includes("ot")} onChange={() => toggleGroup("ot")} />
+                      Old Testament
+                    </label>
+                    <label>
+                      <input type="checkbox" checked={groups.includes("nt")} onChange={() => toggleGroup("nt")} />
+                      New Testament
+                    </label>
+                    <label>
+                      <input type="checkbox" checked={groups.includes("dc")} onChange={() => toggleGroup("dc")} />
+                      Deuterocanonical
+                    </label>
+                  </div>
+
+                  <label className="plan-field-label" htmlFor="plan-order">
+                    Order
+                  </label>
+                  <select
+                    id="plan-order"
+                    className="plan-field-input"
+                    value={orderMode}
+                    onChange={(e) => setOrderMode(e.target.value)}
+                  >
+                    <option value="overlap">Overlap (a bit of each book each day)</option>
+                    <option value="inorder">In order (finish one, then the next)</option>
+                  </select>
+
+                  {error && <p className="error-text">{error}</p>}
+
+                  <button className="btn" type="submit" disabled={generating || groups.length === 0}>
+                    {generating ? "Generating…" : "Apply plan"}
+                  </button>
                 </div>
-              </div>
+              </form>
             )}
           </div>
 

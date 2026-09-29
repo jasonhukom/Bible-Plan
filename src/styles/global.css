@@ -737,6 +737,43 @@ h3 {
   margin-bottom: 6px;
 }
 
+.plan-field-label {
+  display: block;
+  font-size: 11px;
+  color: var(--gold-bright);
+  margin: 10px 0 4px;
+}
+
+.plan-field-input {
+  width: 100%;
+  background: var(--night-2);
+  border: 1px solid var(--night-line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 12.5px;
+  color: var(--cream);
+}
+
+.plan-checkbox-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+}
+
+.plan-checkbox-row label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.plan-panel .btn {
+  width: 100%;
+  margin-top: 12px;
+  font-size: 12.5px;
+  padding: 8px;
+}
+
 .sidebar-footer {
   border-top: 1px solid var(--night-line);
   padding: 8px 10px;
@@ -879,7 +916,7 @@ h3 {
    CALENDAR PAGE (Google-Calendar-style month view)
    -------------------------------------------------------------------------- */
 
-.main-content:has(.calendar-page) {
+.main-content-flush {
   padding: 0;
   display: flex;
   height: 100vh;
@@ -899,21 +936,24 @@ h3 {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  padding: 10px 10px 0;
+  overflow: hidden;
 }
 
 .calendar-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1px solid var(--night-line);
   flex-shrink: 0;
+  padding-bottom: 6px;
 }
 
 .calendar-weekdays span {
-  padding: 8px 10px;
-  font-size: 11px;
+  padding: 4px 10px;
+  font-family: var(--font-display);
+  font-size: 15px;
   font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+  color: var(--cream);
 }
 
 .calendar-month-grid {
@@ -921,23 +961,32 @@ h3 {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(6, 1fr);
+  gap: 5px;
   min-height: 0;
+  overflow: hidden;
 }
 
 .cal-day-cell {
-  border-right: 1px solid var(--night-line);
-  border-bottom: 1px solid var(--night-line);
-  padding: 4px;
+  background: var(--night-2);
+  border: 1px solid var(--night-line);
+  border-radius: 8px;
+  padding: 5px;
   display: flex;
   flex-direction: column;
   min-width: 0;
   min-height: 0;
   overflow: hidden;
   cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease;
 }
 
 .cal-day-cell:hover {
-  background: rgba(219, 181, 88, 0.04);
+  border-color: var(--gold);
+}
+
+.cal-day-cell.muted {
+  background: transparent;
+  border-color: transparent;
 }
 
 .cal-day-cell.muted .cal-day-number {
@@ -946,11 +995,17 @@ h3 {
 }
 
 .cal-day-cell.selected {
-  background: rgba(219, 181, 88, 0.07);
+  border-color: var(--gold-bright);
+}
+
+.cal-day-cell.drag-over {
+  border-color: var(--gold-bright);
+  background: rgba(219, 181, 88, 0.1);
 }
 
 .cal-day-number-row {
   display: flex;
+  justify-content: flex-end;
   flex-shrink: 0;
   margin-bottom: 3px;
 }
@@ -968,8 +1023,9 @@ h3 {
 }
 
 .cal-day-number {
-  font-size: 12.5px;
-  color: var(--cream);
+  font-size: 13px;
+  font-weight: 700;
+  color: #fbf5e6;
   width: 22px;
   height: 22px;
   display: flex;
@@ -981,12 +1037,12 @@ h3 {
 .cal-day-number.today {
   background: var(--gold);
   color: var(--night);
-  font-weight: 700;
 }
 
 .cal-day-events {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 2px;
   overflow: hidden;
   min-height: 0;
@@ -997,9 +1053,12 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 6px;
+  width: calc(100% - 6px);
+  margin: 0 3px;
   padding: 1.5px 6px;
   border-radius: 5px;
   font-size: 10.5px;
+  font-weight: 600;
   line-height: 1.5;
   text-align: left;
   white-space: nowrap;
@@ -1014,7 +1073,7 @@ h3 {
 
 .cal-event-range {
   flex-shrink: 0;
-  opacity: 0.85;
+  opacity: 0.9;
   font-size: 9.5px;
 }
 
@@ -1042,17 +1101,57 @@ h3 {
 .calendar-bottom-bar {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 14px;
   padding: 10px 16px;
   flex-shrink: 0;
-  border-top: 1px solid var(--night-line);
+}
+
+.calendar-bottom-left,
+.calendar-bottom-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-date-text {
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.time-format-btn {
+  font-size: 12.5px;
+  color: var(--cream);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.time-format-btn:hover {
+  background: rgba(219, 181, 88, 0.1);
+}
+
+.theme-toggle-btn {
+  flex-shrink: 0;
 }
 
 .calendar-bottom-title {
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 600;
-  margin-left: 4px;
+  margin: 0 4px;
+}
+
+.today-btn {
+  background: transparent;
+  border: 1.5px solid var(--gold-bright);
+  color: var(--gold-bright);
+  padding: 7px 16px;
+}
+
+.today-btn:hover {
+  background: rgba(219, 181, 88, 0.12);
 }
 
 .icon-btn {
@@ -1071,7 +1170,7 @@ h3 {
 }
 
 /* --------------------------------------------------------------------------
-   OVERFLOW / DAY DETAIL POPUP
+   OVERFLOW / DAY DETAIL POPUP (per-book chapter accordion)
    -------------------------------------------------------------------------- */
 
 .cal-overlay {
@@ -1086,7 +1185,7 @@ h3 {
 }
 
 .cal-popup {
-  width: min(360px, 100%);
+  width: min(380px, 100%);
   max-height: 80vh;
   overflow-y: auto;
   background: var(--night-2);
@@ -1106,18 +1205,77 @@ h3 {
   font-size: 15px;
 }
 
-.cal-popup-done {
+.popup-book-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.popup-book-section {
+  border-bottom: 1px solid var(--night-line);
+  padding-bottom: 4px;
+}
+
+.popup-book-header {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  margin-bottom: 14px;
+  width: 100%;
+  padding: 8px 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--cream);
+  text-align: left;
 }
 
-.cal-popup-list {
+.popup-chevron {
+  display: inline-block;
+  transition: transform 0.15s ease;
+  color: var(--ink-soft);
+}
+
+.popup-chevron.open {
+  transform: rotate(90deg);
+}
+
+.popup-book-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.popup-chapter-list {
   display: flex;
   flex-direction: column;
+  gap: 2px;
+  padding: 2px 0 8px 24px;
+}
+
+.popup-chapter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: grab;
+}
+
+.popup-chapter-row:hover {
+  background: rgba(219, 181, 88, 0.08);
+}
+
+.popup-chapter-num {
+  font-weight: 600;
+}
+
+.popup-chapter-read {
+  display: flex;
+  align-items: center;
   gap: 6px;
+  font-size: 12px;
+  color: var(--ink-soft);
 }
 
 /* --------------------------------------------------------------------------
