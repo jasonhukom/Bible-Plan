@@ -1,63 +1,36 @@
-# Bible Plan (React rewrite)
+# Bible Plan
 
-A calendar-based Bible reading tracker, a Bible reader, and saved verses —
-rebuilt on React + Vite, still using your existing Supabase project for
-accounts and data.
+A calendar-based Bible reading tracker, a Bible reader, and saved verses — rebuilt on React + Vite, using your existing Supabase project for accounts and data.
 
 ## What's in this version
 
-- **Framework**: vanilla JS/HTML → **React + Vite**, with real routing
-  (React Router) instead of one `index.html` swapping `data-page` sections.
-- **Pages**: Plan (`/plan`), Bible (`/bible`), and Saves (`/saves`) are
-  their own routes. Settings and Login stay lighter/separate.
-- **Profile page** (`/profile`, signed-in only): avatar upload, name,
-  description, church (plain text), and a saved-verses summary.
-- **Bible reader** (`/bible`): live text from the
-  [HelloAO Bible API](https://bible.helloao.org) — free, no key, no rate
-  limit. Books split into Old Testament / Deuterocanonical / New Testament.
-  Opening a chapter collapses the sidebar; tap a verse to save it (Saves
-  page lists them in the order you saved them).
-- **Plan page** (`/plan`): a Google Calendar-style month view — event pills
-  per book, color-coded (gold = OT, blue = NT, green = Deuterocanonical),
-  drag a pill to reschedule a whole book's reading to another day, click a
-  pill to open a day's chapter checklist (expand a book, check off
-  individual chapters, or drag a single chapter row to a different day).
-  Mini-calendar + plan editor live in the sidebar; dark/light toggle and a
-  clock sit in the calendar's bottom bar.
+- **Framework**: React + Vite, with real routing (React Router).
+- **Frictionless Onboarding**: Users are greeted immediately with the Calendar (Plan) page upon opening the app. No initial sign-up wall. An anonymous session is generated automatically. 
+- **First-Time Setup Modal**: On first load, users are asked which books they have already read, allowing them to instantly mark books as completed and exclude them from their new reading schedule.
+- **Pages**: Plan (`/plan`), Bible (`/bible`), and Saves (`/saves`) are their own routes. 
+- **Authentication**: Clicking the Profile button prompts the user to securely sign in (using an identifier like email or username). 
+- **Profile page** (`/profile`, signed-in only): Avatar upload, display name, and a saved-verses summary. (The description and church fields were removed per design revisions).
+- **Bible reader** (`/bible`): Live text from the [HelloAO Bible API](https://bible.helloao.org). Opening a chapter collapses the sidebar; tap a verse to save it. 
+- **Plan page** (`/plan`): A Google Calendar-style month view. Event pills per book, color-coded. Drag a pill to reschedule a whole book's reading to another day, click a pill to open a day's chapter checklist.
+- **Mobile First Navigation**: A fully responsive mobile layout that transitions the desktop sidebar into a sleek bottom navigation bar on smaller screens. 
 
 ## The reading plan is fully dynamic now
 
-Earlier drafts of this rewrite shipped one fixed 121-day plan. That's gone.
-**The plan is generated on the fly** from whatever you set in the sidebar's
-"Reading Plans" panel:
+The plan is generated on the fly from whatever you set in the sidebar's "Reading Plans" panel (or the initial onboarding flow):
 
-- **Start date** — any date.
+- **Start date** — defaults to today, but can be set to any date.
 - **Length** — any number of days (1–730).
-- **Books** — Old Testament, New Testament, Deuterocanonical, any
-  combination.
-- **Order** — "Overlap" (a bit of every selected group each day — this is
-  the default) or "In order" (finish one group before starting the next).
+- **Books** — Old Testament, New Testament, Deuterocanonical, any combination.
+- **Exclude Books** — You can select books you have already read to completely omit them from the generated schedule.
+- **Order** — "Overlap" (a bit of every selected group each day) or "In order" (finish one group before starting the next).
 
-The default for a new account is **360 days, Old + New Testament,
-overlap mode**, starting the day you sign up. Chapter counts come live from
-the HelloAO API for whichever translation is set as default, so this is
-accurate for real book lengths rather than a hardcoded table — and it
-means Deuterocanonical only produces readings if your default translation
-actually includes those books.
+The default for a new user is **360 days, Old + New Testament, overlap mode**, starting the day you open the app. Chapter counts come live from the HelloAO API for whichever translation is set as default.
 
-Changing the plan in the sidebar **regenerates the whole schedule** —
-every chapter gets a fresh row in `reading_schedule`, so make sure that's
-what you want before hitting "Apply plan"; it replaces what's there,
-including any read checkmarks and any chapters you'd manually dragged to a
-different day.
+Changing the plan in the sidebar **regenerates the whole schedule** — every chapter gets a fresh row in `reading_schedule`.
 
 ## Why the default translation is BSB, not NIV
 
-NIV is a commercially licensed translation (Biblica/Zondervan), so it
-isn't available through HelloAO's API — that API only carries translations
-with no copyright restrictions. **BSB (Berean Standard Bible)** is the
-closest widely-used free alternative, so it's the app's default. WEB, KJV,
-and ASV are also in the picker.
+NIV is a commercially licensed translation, so it isn't available through HelloAO's API. **BSB (Berean Standard Bible)** is the closest widely-used free alternative, so it's the app's default. WEB, KJV, and ASV are also in the picker.
 
 ## Setup
 
@@ -69,27 +42,16 @@ and ASV are also in the picker.
 
 2. **Configure Supabase**
 
-   Copy `.env.example` to `.env.local` and fill in your project's URL and
-   anon key (Supabase Dashboard → Project Settings → API):
+   Copy `.env.example` to `.env.local` and fill in your project's URL and anon key (Supabase Dashboard → Project Settings → API):
 
    ```bash
    cp .env.example .env.local
    ```
 
-3. **Run the database migrations** (Supabase Dashboard → SQL Editor → New
-   query → paste → Run). If this is a fresh project, run `schema.sql`
-   first — it already contains `reading_plans` and `reading_schedule`,
-   which is what the plan generator reads and writes. Then run, in order:
-
-   - `migration_profile_fields.sql` — adds `bio` and `church_name` to
-     `profiles`, plus a public `avatars` storage bucket.
-   - `migration_saved_verses_text.sql` — adds `book_name` and `verse_text`
-     to `saved_verses`.
-
-   (An earlier draft added a `migration_plan_progress.sql` file for a
-   fixed-plan design — that's gone now that the plan is fully dynamic. If
-   you already ran it, the table it created is just unused; safe to leave
-   or drop.)
+3. **Run the database migrations** (Supabase Dashboard → SQL Editor → New query → paste → Run). 
+   - `schema.sql` — contains `reading_plans` and `reading_schedule`.
+   - `migration_profile_fields.sql` — adds `bio` and `church_name` to `profiles` (though no longer used by the UI), plus a public `avatars` storage bucket.
+   - `migration_saved_verses_text.sql` — adds `book_name` and `verse_text` to `saved_verses`.
 
 4. **Run it locally**
 
@@ -97,21 +59,7 @@ and ASV are also in the picker.
    npm run dev
    ```
 
-5. **Deploy** — push to GitHub, import into Vercel, add the two `VITE_`
-   env vars in the Vercel project settings. `vercel.json` is already set
-   up for SPA routing.
-
-## Known trade-offs in this pass
-
-- **Drag-and-drop persists immediately** — there's no undo yet. Dropping a
-  book or chapter onto another day writes to the database right away.
-- **The "Days of the week" and "Daily wise words" (Psalms/Proverbs insert)
-  options** from the original plan panel aren't in the generator yet —
-  `reading_plans` has columns for both (`weekdays`, `wise_words`) so this
-  is a reasonable follow-up, they're just not wired into the generator or
-  the sidebar form yet.
-- **Church field** is plain text, not a Google Places lookup, per your
-  call — no Google Maps API key needed.
+5. **Deploy** — push to GitHub, import into Vercel, add the two `VITE_` env vars in the Vercel project settings.
 
 ## Project layout
 
@@ -120,7 +68,7 @@ src/
   main.jsx                entry point
   App.jsx                  routes
   context/
-    AuthContext.jsx          Supabase session
+    AuthContext.jsx          Supabase session & anonymous login
     ThemeContext.jsx          dark/light/device theme
     CalendarViewContext.jsx    shared mini-cal <-> main-cal month/date state
     PlanContext.jsx             plan config + full per-chapter schedule
@@ -132,13 +80,7 @@ src/
     planGenerator.js            turns plan config into a day-by-day schedule
     calendarGrid.js              month-grid date math
   components/
-    Layout.jsx, Sidebar.jsx, MiniCalendar.jsx, ProtectedRoute.jsx
+    Layout.jsx, Sidebar.jsx, OnboardingModal.jsx, MiniCalendar.jsx, ProtectedRoute.jsx
   pages/
     LoginPage, PlanPage, BiblePage, SavesPage, ProfilePage, SettingsPage
-supabase/
-  schema.sql                  original schema (unchanged) -- reading_plans
-                               and reading_schedule are what the plan
-                               generator uses
-  migration_profile_fields.sql
-  migration_saved_verses_text.sql
 ```
