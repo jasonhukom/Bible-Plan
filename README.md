@@ -1,86 +1,109 @@
 # Bible Plan
 
-A calendar-based Bible reading tracker, a Bible reader, and saved verses — rebuilt on React + Vite, using your existing Supabase project for accounts and data.
+> **A beautifully crafted, distraction-free environment to track your daily reading, engage with Scripture, and document your spiritual journey. Designed to remove the friction between intention and action, Bible Plan provides a seamless, dynamic reading schedule that adapts to your pace.**
+>
+> *A low-friction, highly customizable Bible reading tracker built with seamless anonymous onboarding and live API integrations.*
 
-## What's in this version
+[![React](https://img.shields.io/badge/React-18-61dafb?style=flat&logo=react)](#)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat&logo=vite)](#)
+[![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3ECF8E?style=flat&logo=supabase)](https://supabase.com/)
+[![HelloAO API](https://img.shields.io/badge/HelloAO-Bible%20API-orange?style=flat)](#)
 
-- **Framework**: React + Vite, with real routing (React Router).
-- **Frictionless Onboarding**: Users are greeted immediately with the Calendar (Plan) page upon opening the app. No initial sign-up wall. An anonymous session is generated automatically. 
-- **First-Time Setup Modal**: On first load, users are asked which books they have already read, allowing them to instantly mark books as completed and exclude them from their new reading schedule.
-- **Pages**: Plan (`/plan`), Bible (`/bible`), and Saves (`/saves`) are their own routes. 
-- **Authentication**: Clicking the Profile button prompts the user to securely sign in (using an identifier like email or username). 
-- **Profile page** (`/profile`, signed-in only): Avatar upload, display name, and a saved-verses summary. (The description and church fields were removed per design revisions).
-- **Bible reader** (`/bible`): Live text from the [HelloAO Bible API](https://bible.helloao.org). Opening a chapter collapses the sidebar; tap a verse to save it. 
-- **Plan page** (`/plan`): A Google Calendar-style month view. Event pills per book, color-coded. Drag a pill to reschedule a whole book's reading to another day, click a pill to open a day's chapter checklist.
-- **Mobile First Navigation**: A fully responsive mobile layout that transitions the desktop sidebar into a sleek bottom navigation bar on smaller screens. 
+---
 
-## The reading plan is fully dynamic now
+## 🌟 The Philosophy
 
-The plan is generated on the fly from whatever you set in the sidebar's "Reading Plans" panel (or the initial onboarding flow):
+Bible Plan is built upon the gentle principle that engaging with Scripture should feel like a breathing space rather than a chore. 
 
-- **Start date** — defaults to today, but can be set to any date.
-- **Length** — any number of days (1–730).
-- **Books** — Old Testament, New Testament, Deuterocanonical, any combination.
-- **Exclude Books** — You can select books you have already read to completely omit them from the generated schedule.
-- **Order** — "Overlap" (a bit of every selected group each day) or "In order" (finish one group before starting the next).
+- **Frictionless Entry**: The moment you open the app, you are greeted with your daily reading plan. No initial sign-up walls. An anonymous session is generated immediately so you can start right away.
+- **Your Pace, Your Plan**: Reading plans shouldn't feel like a rigid contract. Easily exclude books you've already read, adjust the length, or drag-and-drop chapters to a different day when life gets busy.
+- **Deep Immersion**: The reading interface collapses distractions, bringing the text front and center, with a seamless dark/light mode transition to suit your environment.
 
-The default for a new user is **360 days, Old + New Testament, overlap mode**, starting the day you open the app. Chapter counts come live from the HelloAO API for whichever translation is set as default.
+---
 
-Changing the plan in the sidebar **regenerates the whole schedule** — every chapter gets a fresh row in `reading_schedule`.
+## 🚀 Key Features
 
-## Why the default translation is BSB, not NIV
+### 1. Fully Dynamic Reading Plan Generator
+- **Customizable Length & Start**: Choose any number of days (1–730) for your plan. The schedule defaults to starting today, but you can define a custom start date.
+- **Book Selection**: Filter by Old Testament, New Testament, or Deuterocanonical books.
+- **Frictionless Onboarding Modal**: On your very first visit, select books you have already read to instantly exclude them from your generated schedule.
+- **Pacing Modes**: Select "Overlap" (a bit of every selected group each day) or "In order" (finish one group before starting the next).
 
-NIV is a commercially licensed translation, so it isn't available through HelloAO's API. **BSB (Berean Standard Bible)** is the closest widely-used free alternative, so it's the app's default. WEB, KJV, and ASV are also in the picker.
+### 2. Interactive Google Calendar-Style View
+- **Month Grid & Event Pills**: View your reading assignments visually. Pills are color-coded by testament (gold = OT, blue = NT, green = Deuterocanonical).
+- **Drag-and-Drop Rescheduling**: Drag an entire book's pill to move it to another day, or click a pill to open a checklist and drag individual chapters.
+- **Progress Tracking**: Simply check off chapters as you read them; progress is saved automatically.
 
-## Setup
+### 3. Integrated Bible Reader & Saved Verses
+- **Live Text from HelloAO API**: Fetches real-time, accurate chapter texts. Uses the free, open-license BSB (Berean Standard Bible) by default, with WEB, KJV, and ASV also available.
+- **Distraction-Free Mode**: Opening a chapter automatically collapses the sidebar.
+- **Interactive Verses**: Tap any verse while reading to save it to your personal collection. Your `/saves` page keeps a chronological record of your favorite passages.
 
-1. **Install dependencies**
+### 4. Seamless Account Upgrades & Mobile First
+- **Anonymous to Permanent**: Start tracking anonymously. When you're ready, click the Profile button to securely sign in or link an identifier (username or email) to permanently save your progress.
+- **Responsive Mobile Layout**: On smaller screens, the desktop sidebar elegantly transforms into a sleek, bottom navigation bar, ensuring a native app-like experience.
 
-   ```bash
-   npm install
-   ```
+---
 
-2. **Configure Supabase**
+## 🛠️ Tech Stack
 
-   Copy `.env.example` to `.env.local` and fill in your project's URL and anon key (Supabase Dashboard → Project Settings → API):
+- **Frontend**: [React 18](https://react.dev/), [Vite](https://vitejs.dev/), [React Router](https://reactrouter.com/)
+- **Styling**: Vanilla CSS tokens & responsive media queries with a curated dark/light color palette
+- **Backend / Database**: [Supabase](https://supabase.com/) (PostgreSQL, Row Level Security, Anonymous & Email Auth)
+- **External APIs**: [HelloAO Bible API](https://bible.helloao.org) (No rate limit, open-license translations)
 
-   ```bash
-   cp .env.example .env.local
-   ```
+---
 
-3. **Run the database migrations** (Supabase Dashboard → SQL Editor → New query → paste → Run). 
-   - `schema.sql` — contains `reading_plans` and `reading_schedule`.
-   - `migration_profile_fields.sql` — adds `bio` and `church_name` to `profiles` (though no longer used by the UI), plus a public `avatars` storage bucket.
-   - `migration_saved_verses_text.sql` — adds `book_name` and `verse_text` to `saved_verses`.
+## 🏁 Getting Started
 
-4. **Run it locally**
+### Prerequisites
+- Node.js 18+
+- npm or pnpm
 
-   ```bash
-   npm run dev
-   ```
-
-5. **Deploy** — push to GitHub, import into Vercel, add the two `VITE_` env vars in the Vercel project settings.
-
-## Project layout
-
+### 1. Clone & Install
+```bash
+git clone https://github.com/jasonhukom/Bible-Plan.git
+cd Bible-Plan
+npm install
 ```
-src/
-  main.jsx                entry point
-  App.jsx                  routes
-  context/
-    AuthContext.jsx          Supabase session & anonymous login
-    ThemeContext.jsx          dark/light/device theme
-    CalendarViewContext.jsx    shared mini-cal <-> main-cal month/date state
-    PlanContext.jsx             plan config + full per-chapter schedule
-  lib/
-    supabaseClient.js       Supabase client (env-configured)
-    dataApi.js               all reads/writes to your data
-    helloao.js                HelloAO Bible API client
-    bibleBooks.js              OT/Deuterocanonical/NT classification + colors
-    planGenerator.js            turns plan config into a day-by-day schedule
-    calendarGrid.js              month-grid date math
-  components/
-    Layout.jsx, Sidebar.jsx, OnboardingModal.jsx, MiniCalendar.jsx, ProtectedRoute.jsx
-  pages/
-    LoginPage, PlanPage, BiblePage, SavesPage, ProfilePage, SettingsPage
+
+### 2. Configure Environment Variables
+Copy `.env.example` to `.env.local`:
+```bash
+cp .env.example .env.local
 ```
+Fill in your Supabase project credentials (found in Supabase Dashboard → Project Settings → API):
+```env
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### 3. Run Database Migrations
+In your Supabase Dashboard → SQL Editor → New query, run the following files in order:
+1. `supabase/schema.sql` — Sets up `reading_plans` and `reading_schedule`.
+2. `supabase/migration_profile_fields.sql` — Adds `bio`, `church_name`, and the `avatars` storage bucket.
+3. `supabase/migration_saved_verses_text.sql` — Enhances `saved_verses` with `book_name` and `verse_text`.
+
+### 4. Run Locally
+```bash
+npm run dev
+```
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+## 🎮 Navigation & Usage
+
+| Interface Element | Function |
+|---|---|
+| **Calendar View** | Click days to view assigned chapters. Drag pills to reschedule. |
+| **Checklist** | Click checkboxes to mark chapters as read. |
+| **Verse Text** | Click any individual verse while reading to save it. |
+| **Profile Button** | Upgrade your anonymous session to a permanent account. |
+| **Sidebar / Bottom Nav** | Seamlessly switch between Plan, Bible, Saves, and Settings. |
+
+---
+
+## 📄 License
+
+MIT © [jasonhukom](https://github.com/jasonhukom)
