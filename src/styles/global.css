@@ -368,9 +368,17 @@ h3 {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 7px 8px;
   border-radius: 8px;
   color: var(--cream);
+}
+
+.book-list-btn {
+  padding: 4px 8px;
+  font-size: 16px;
+}
+
+.chapter-grid-btn {
+  padding: 7px 8px;
   font-size: 14px;
 }
 
