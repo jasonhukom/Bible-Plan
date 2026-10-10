@@ -53,7 +53,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div style={{ maxWidth: 480 }}>
+    <div className="page-header page-header-sticky" style={{ maxWidth: 480, margin: "0 auto", padding: "20px 20px 40px" }}>
       <div className="page-header">
         <h1>Settings</h1>
       </div>
@@ -77,6 +77,7 @@ export default function SettingsPage() {
           ))}
         </div>
       </div>
+
 
       <div className="card" style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 15, marginBottom: 14 }}>Calendar</h2>
