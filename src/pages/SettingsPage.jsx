@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { dataApi } from "../lib/dataApi";
@@ -117,9 +117,8 @@ export default function SettingsPage() {
             ))}
           </select>
           <p className="hint-text" style={{ marginTop: 10 }}>
-            NIV isn't available here — it's a commercially licensed translation, and this app
-            reads from a free, no-license-restriction Bible API. BSB (Berean Standard Bible) is
-            the closest widely-used free alternative, so it's the default.
+            To view copyright and licensing information for the translations used in this app, 
+            please see the <Link to="/licenses" style={{ textDecoration: "underline" }}>Licenses page</Link>.
           </p>
           {message && <p className="hint-text">{message}</p>}
         </div>

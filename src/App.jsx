@@ -5,6 +5,7 @@ import BiblePage from "./pages/BiblePage";
 import SavesPage from "./pages/SavesPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import LicensesPage from "./pages/LicensesPage";
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/saves" element={<SavesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/licenses" element={<LicensesPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/plan" replace />} />
