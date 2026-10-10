@@ -171,6 +171,15 @@ export default function PlanPage() {
   return (
     <div className="calendar-page">
       {showOnboarding && <OnboardingModal onClose={handleOnboardingComplete} />}
+      <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div>
+            <h1 style={{ margin: 0 }}>Plan</h1>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        </div>
+      </div>
       <div className="calendar-grid-wrap">
         <div className="calendar-weekdays">
           {WEEKDAY_LABELS.map((w) => (

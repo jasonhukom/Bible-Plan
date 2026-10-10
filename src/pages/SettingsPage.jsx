@@ -53,9 +53,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="page-header page-header-sticky" style={{ maxWidth: 480, margin: "0 auto", padding: "20px 20px 40px" }}>
-      <div className="page-header">
-        <h1>Settings</h1>
+    <div style={{ maxWidth: 480, margin: "0 auto", padding: "20px 20px 40px" }}>
+      <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <div>
+            <h1 style={{ margin: 0 }}>Settings</h1>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        </div>
       </div>
 
       <div className="card" style={{ marginBottom: 20 }}>
