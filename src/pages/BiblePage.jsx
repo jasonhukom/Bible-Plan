@@ -224,36 +224,38 @@ export default function BiblePage() {
 
           {(["ot", "dc", "nt"]).map((groupKey) =>
             grouped[groupKey].length ? (
-              <div className="book-group" key={groupKey}>
+            <div className="book-group" key={groupKey}>
                 <div className="book-group-label">{GROUP_LABELS[groupKey]}</div>
-                {grouped[groupKey].map((book) => (
-                  <div key={book.id}>
-                    <button
-                      className={`book-list-btn${expandedBook === book.id ? " active" : ""}`}
-                      onClick={() => openBook(book.id)}
-                      type="button"
-                      style={expandedBook !== book.id && routeBook ? { color: "var(--ink-soft)" } : {}}
-                    >
-                      {book.commonName || book.name}
-                    </button>
-                    {expandedBook === book.id && (
-                      <div className="chapter-grid">
-                        {Array.from({ length: book.numberOfChapters }, (_, i) => i + 1).map((ch) => (
-                          <button
-                            key={ch}
-                            type="button"
-                            className={`chapter-grid-btn${
-                              routeBook === book.id && Number(routeChapter) === ch ? " active" : ""
-                            }`}
-                            onClick={() => openChapter(book.id, ch)}
-                          >
-                            {ch}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                <div className="book-group-grid">
+                  {grouped[groupKey].map((book) => (
+                    <div key={book.id}>
+                      <button
+                        className={`book-list-btn${expandedBook === book.id ? " active" : ""}`}
+                        onClick={() => openBook(book.id)}
+                        type="button"
+                        style={expandedBook !== book.id && routeBook ? { color: "var(--ink-soft)" } : {}}
+                      >
+                        {book.commonName || book.name}
+                      </button>
+                      {expandedBook === book.id && (
+                        <div className="chapter-grid">
+                          {Array.from({ length: book.numberOfChapters }, (_, i) => i + 1).map((ch) => (
+                            <button
+                              key={ch}
+                              type="button"
+                              className={`chapter-grid-btn${
+                                routeBook === book.id && Number(routeChapter) === ch ? " active" : ""
+                              }`}
+                              onClick={() => openChapter(book.id, ch)}
+                            >
+                              {ch}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : null
           )}
