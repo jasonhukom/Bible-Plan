@@ -296,17 +296,11 @@ h3 {
   display: none;
 }
 
-.bible-sidebar-toggle {
-  display: none;
-}
+
 
 @media (max-width: 719px) {
   .bible-layout {
     flex-direction: column;
-  }
-
-  .bible-sidebar-toggle {
-    display: none;
   }
 
   .bible-sidebar {

@@ -173,11 +173,6 @@ export default function BiblePage() {
     <div>
       <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button className="icon-btn" onClick={() => navigate(-1)} title="Go back">
-            <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
-              <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
           <div>
             <h1 style={{ margin: 0 }}>Bible</h1>
             {currentBook && (
@@ -189,7 +184,7 @@ export default function BiblePage() {
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <div style={{ position: 'relative' }}>
-            <button className="btn btn-ghost bible-sidebar-toggle" onClick={() => setVersionsSidebarOpen(!versionsSidebarOpen)} style={{ maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <button className="btn btn-ghost" onClick={() => setVersionsSidebarOpen(!versionsSidebarOpen)} style={{ maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {translations.find(t => t.id === translationId)?.label || translationId}
             </button>
             {versionsSidebarOpen && (

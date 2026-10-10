@@ -85,14 +85,10 @@ export default function ProfilePage() {
   if (loading) return <p className="reader-loading">Loading profile…</p>;
 
   return (
-    <div style={{ maxWidth: 520 }}>
-      <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div>
-            <h1 style={{ margin: 0 }}>Profile</h1>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+    <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 20px 40px" }}>
+      <div className="page-header page-header-sticky" style={{ alignItems: "center", justifyContent: "center", position: "relative" }}>
+        <h1 style={{ margin: 0 }}>Profile</h1>
+        <div style={{ position: 'absolute', right: 0, display: 'flex', gap: '10px', alignItems: 'center' }}>
           <Link to="/settings" className="icon-btn" title="Settings" style={{ border: "1px solid var(--night-line)" }}>
             <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
               <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.7" />
