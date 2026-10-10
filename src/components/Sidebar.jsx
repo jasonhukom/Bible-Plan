@@ -67,7 +67,7 @@ export default function Sidebar() {
   const { plan, generating, error, regenerate } = usePlan();
   const [open, setOpen] = useState(() => localStorage.getItem(SIDEBAR_STORAGE_KEY) !== "closed");
   const [plansExpanded, setPlansExpanded] = useState(true);
-  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [profile, setProfile] = useState(null);
 
   const [startDate, setStartDate] = useState("");
   const [days, setDays] = useState(360);
@@ -80,10 +80,10 @@ export default function Sidebar() {
 
   useEffect(() => {
     if (!user) {
-      setAvatarUrl(null);
+      setProfile(null);
       return;
     }
-    dataApi.getProfile().then(({ data }) => setAvatarUrl(data?.avatar_url || null));
+    dataApi.getProfile().then(({ data }) => setProfile(data || null));
   }, [user]);
 
   useEffect(() => {
@@ -232,12 +232,14 @@ export default function Sidebar() {
               type="button"
               onClick={() => navigate(user ? "/profile" : "/login")}
             >
-              {avatarUrl ? (
-                <img className="sidebar-avatar" src={avatarUrl} alt="" />
+              {profile?.avatar_url ? (
+                <img className="sidebar-avatar" src={profile.avatar_url} alt="" />
               ) : (
                 navIcons.account
               )}
-              <span className="sidebar-nav-label">{user ? "Profile" : "Account"}</span>
+              <span className="sidebar-nav-label">
+                {user ? (profile?.display_name || "Profile") : "Account"}
+              </span>
             </button>
             <NavLink to="/settings" className="sidebar-icon-btn" title="Settings">
               {navIcons.settings}

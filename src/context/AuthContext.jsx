@@ -40,6 +40,10 @@ export function AuthProvider({ children }) {
         return supabase.auth.signUp({ email, password });
       },
 
+      async signInAnonymously() {
+        return supabase.auth.signInAnonymously();
+      },
+
       async signOut() {
         return supabase.auth.signOut();
       }

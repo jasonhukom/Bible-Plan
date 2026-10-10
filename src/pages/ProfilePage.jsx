@@ -9,8 +9,6 @@ export default function ProfilePage() {
 
   const [profile, setProfile] = useState(null);
   const [displayName, setDisplayName] = useState("");
-  const [bio, setBio] = useState("");
-  const [churchName, setChurchName] = useState("");
   const [savedCount, setSavedCount] = useState(0);
 
   const [loading, setLoading] = useState(true);
@@ -25,8 +23,6 @@ export default function ProfilePage() {
         if (profileData) {
           setProfile(profileData);
           setDisplayName(profileData.display_name || "");
-          setBio(profileData.bio || "");
-          setChurchName(profileData.church_name || "");
         }
         setSavedCount((verses || []).length);
         setLoading(false);
@@ -59,9 +55,7 @@ export default function ProfilePage() {
     setError("");
     setMessage("");
     const { data, error } = await dataApi.updateProfile({
-      display_name: displayName,
-      bio,
-      church_name: churchName
+      display_name: displayName
     });
     if (error) setError(error.message);
     else {
@@ -115,26 +109,6 @@ export default function ProfilePage() {
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Your name"
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="bio">Description</label>
-          <textarea
-            id="bio"
-            value={bio}
-            onChange={(e) => setBio(e.target.value)}
-            placeholder="A little about you"
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="church">Church</label>
-          <input
-            id="church"
-            value={churchName}
-            onChange={(e) => setChurchName(e.target.value)}
-            placeholder="Where you attend"
           />
         </div>
 

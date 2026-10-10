@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
-  const { user, isConfigured, signInWithPassword, signUpWithPassword } = useAuth();
+  const { user, isConfigured, signInWithPassword, signUpWithPassword, signInAnonymously } = useAuth();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState("sign-in"); // "sign-in" | "sign-up"
@@ -107,6 +107,22 @@ export default function LoginPage() {
 
           <button className="btn" type="submit" disabled={busy || !isConfigured} style={{ width: "100%" }}>
             {busy ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
+          </button>
+          
+          <button
+            type="button"
+            className="btn btn-ghost"
+            style={{ width: "100%", marginTop: 12 }}
+            onClick={async () => {
+              try {
+                await signInAnonymously();
+                navigate("/plan");
+              } catch (err) {
+                setError(err.message);
+              }
+            }}
+          >
+            Continue as guest
           </button>
         </form>
       </div>

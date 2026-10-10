@@ -239,6 +239,7 @@ h3 {
   display: flex;
   gap: 20px;
   align-items: flex-start;
+  flex-direction: row-reverse;
 }
 
 .bible-sidebar {
@@ -264,6 +265,9 @@ h3 {
 }
 
 @media (max-width: 719px) {
+  .bible-layout {
+    flex-direction: column;
+  }
   .bible-sidebar-toggle {
     display: inline-flex;
     margin-bottom: 14px;
@@ -271,6 +275,7 @@ h3 {
   .bible-sidebar {
     position: static;
     max-height: none;
+    width: 100%;
   }
 }
 
@@ -344,7 +349,7 @@ h3 {
 .reader {
   flex: 1;
   min-width: 0;
-  max-width: 720px;
+  width: 100%;
 }
 
 .reader-heading {
@@ -367,7 +372,7 @@ h3 {
 
 .reader-text {
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 22px;
   line-height: 1.85;
   color: var(--cream);
 }
@@ -413,6 +418,10 @@ h3 {
   color: var(--ink-soft);
   padding: 40px 0;
   text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 50vh;
 }
 
 /* --------------------------------------------------------------------------
