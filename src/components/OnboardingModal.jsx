@@ -7,6 +7,7 @@ export default function OnboardingModal({ onClose }) {
   const [readBooks, setReadBooks] = useState(new Set());
   const [removeBooks, setRemoveBooks] = useState(false);
   
+  const [startDate, setStartDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [days, setDays] = useState(360);
   const [groups, setGroups] = useState(["ot", "nt"]);
   const [orderMode, setOrderMode] = useState("overlap");
@@ -39,7 +40,7 @@ export default function OnboardingModal({ onClose }) {
     
     await regenerate({
       name: "My reading plan",
-      start_date: new Date().toISOString().split("T")[0],
+      start_date: startDate,
       days: Number(days),
       book_groups: groups,
       order_mode: orderMode
@@ -84,6 +85,9 @@ export default function OnboardingModal({ onClose }) {
           <h2>Plan Settings</h2>
         </div>
         <form onSubmit={handleApply} style={{ padding: 4 }}>
+          <label className="plan-field-label">Start Date</label>
+          <input className="plan-field-input" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
+
           <label className="plan-field-label">Length (days)</label>
           <input className="plan-field-input" type="number" min={1} max={730} value={days} onChange={e => setDays(e.target.value)} />
           

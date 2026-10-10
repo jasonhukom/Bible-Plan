@@ -100,13 +100,9 @@ export default function Sidebar() {
 
   function handleApplyPlan(e) {
     e.preventDefault();
-    
-    const d = new Date();
-    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-
     regenerate({
       name: plan?.name || "My reading plan",
-      start_date: today,
+      start_date: startDate,
       days: Number(days),
       book_groups: groups,
       order_mode: orderMode
@@ -182,6 +178,17 @@ export default function Sidebar() {
                 <div className="panel-box">
                   <div className="panel-box-title">Plan settings</div>
 
+
+                  <label className="plan-field-label" htmlFor="plan-start">
+                    Start date
+                  </label>
+                  <input
+                    id="plan-start"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="plan-field-input"
+                  />
 
                   <label className="plan-field-label" htmlFor="plan-days">
                     Length (days)
