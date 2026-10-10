@@ -76,70 +76,71 @@ export default function SettingsPage() {
             </button>
           ))}
         </div>
-      </div>
 
 
-      <div className="card" style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, marginBottom: 14 }}>Calendar</h2>
-        <p className="hint-text" style={{ marginBottom: 10 }}>Where each day's date number sits in its cell</p>
-        <div className="theme-options">
-          {[
-            ["left", "Top left"],
-            ["center", "Top center"],
-            ["right", "Top right"]
-          ].map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              className={`theme-option${numberPosition === key ? " active" : ""}`}
-              onClick={() => handleNumberPositionChange(key)}
-            >
-              {label}
-            </button>
-          ))}
+
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 15, marginBottom: 14 }}>Calendar</h2>
+          <p className="hint-text" style={{ marginBottom: 10 }}>Where each day's date number sits in its cell</p>
+          <div className="theme-options">
+            {[
+              ["left", "Top left"],
+              ["center", "Top center"],
+              ["right", "Top right"]
+            ].map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                className={`theme-option${numberPosition === key ? " active" : ""}`}
+                onClick={() => handleNumberPositionChange(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="card" style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, marginBottom: 14 }}>Default translation</h2>
-        <select
-          value={defaultTranslation}
-          onChange={(e) => handleTranslationChange(e.target.value)}
-          style={{ width: "100%", background: "var(--night)", border: "1px solid var(--night-line)", borderRadius: 8, padding: 10 }}
-        >
-          {!translations.some((t) => t.id === defaultTranslation) && (
-            <option value={defaultTranslation}>{defaultTranslation}</option>
-          )}
-          {translations.map((t) => (
-            <option key={t.id} value={t.id}>
-              {t.label}
-            </option>
-          ))}
-        </select>
-        <p className="hint-text" style={{ marginTop: 10 }}>
-          NIV isn't available here — it's a commercially licensed translation, and this app
-          reads from a free, no-license-restriction Bible API. BSB (Berean Standard Bible) is
-          the closest widely-used free alternative, so it's the default.
-        </p>
-        {message && <p className="hint-text">{message}</p>}
-      </div>
-
-      <div className="card">
-        <h2 style={{ fontSize: 15, marginBottom: 10 }}>Account</h2>
-        {user ? (
-          <>
-            <p className="hint-text" style={{ marginBottom: 14 }}>
-              Signed in as {user.email}
-            </p>
-            <button className="btn btn-danger" onClick={handleSignOut} type="button">
-              Sign out
-            </button>
-          </>
-        ) : (
-          <p className="hint-text">
-            {isConfigured ? "You're not signed in." : "Supabase isn't configured for this deployment."}
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 15, marginBottom: 14 }}>Default translation</h2>
+          <select
+            value={defaultTranslation}
+            onChange={(e) => handleTranslationChange(e.target.value)}
+            style={{ width: "100%", background: "var(--night)", border: "1px solid var(--night-line)", borderRadius: 8, padding: 10 }}
+          >
+            {!translations.some((t) => t.id === defaultTranslation) && (
+              <option value={defaultTranslation}>{defaultTranslation}</option>
+            )}
+            {translations.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+          <p className="hint-text" style={{ marginTop: 10 }}>
+            NIV isn't available here — it's a commercially licensed translation, and this app
+            reads from a free, no-license-restriction Bible API. BSB (Berean Standard Bible) is
+            the closest widely-used free alternative, so it's the default.
           </p>
-        )}
+          {message && <p className="hint-text">{message}</p>}
+        </div>
+
+        <div className="card">
+          <h2 style={{ fontSize: 15, marginBottom: 10 }}>Account</h2>
+          {user ? (
+            <>
+              <p className="hint-text" style={{ marginBottom: 14 }}>
+                Signed in as {user.email}
+              </p>
+              <button className="btn btn-danger" onClick={handleSignOut} type="button">
+                Sign out
+              </button>
+            </>
+          ) : (
+            <p className="hint-text">
+              {isConfigured ? "You're not signed in." : "Supabase isn't configured for this deployment."}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
