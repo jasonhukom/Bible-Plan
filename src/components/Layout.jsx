@@ -6,13 +6,14 @@ import { PlanProvider } from "../context/PlanContext";
 export default function Layout() {
   const location = useLocation();
   const isCalendarRoute = location.pathname === "/plan";
+  const isBibleRoute = location.pathname.startsWith("/bible");
 
   return (
     <CalendarViewProvider>
       <PlanProvider>
         <div className="app-shell">
           <Sidebar />
-          <main className={`main-content${isCalendarRoute ? " main-content-flush" : ""}`}>
+          <main className={`main-content${isCalendarRoute ? " main-content-flush" : ""}${isBibleRoute ? " main-content-bible" : ""}`}>
             <Outlet />
           </main>
         </div>

@@ -120,6 +120,10 @@ h3 {
   padding: var(--layout-padding);
 }
 
+.main-content-bible {
+  --layout-padding: clamp(8px, 1.5vw, 16px);
+}
+
 .page-header {
   display: flex;
   align-items: center;
@@ -434,7 +438,7 @@ h3 {
 
 .reader-text {
   font-family: var(--font-display);
-  font-size: 22px;
+  font-size: 28px;
   line-height: 1.85;
   color: var(--cream);
   padding: 0 4px;
@@ -468,7 +472,7 @@ h3 {
 
 .verse-num {
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: 0.55em;
   font-weight: 700;
   color: var(--gold-bright);
   vertical-align: super;

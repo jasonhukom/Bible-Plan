@@ -191,9 +191,8 @@ export default function PlanPage() {
             return (
               <div
                 key={cell.date}
-                className={`cal-day-cell${cell.isCurrentMonth ? "" : " muted"}${isSelected ? " selected" : ""}${
-                  isFullyRead ? " done" : ""
-                }${dragOverDate === cell.date ? " drag-over" : ""}`}
+                className={`cal-day-cell${cell.isCurrentMonth ? "" : " muted"}${isSelected ? " selected" : ""}${isFullyRead ? " done" : ""
+                  }${dragOverDate === cell.date ? " drag-over" : ""}`}
                 onClick={() => setSelectedDate(cell.date)}
                 onDragOver={(e) => {
                   e.preventDefault();
