@@ -150,7 +150,7 @@ export default function BiblePage() {
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <select
-            className="field-select translation-select"
+            className="bible-translation-select"
             value={translationId}
             onChange={(e) => goToTranslation(e.target.value)}
             style={{ marginBottom: 0, width: "auto" }}
