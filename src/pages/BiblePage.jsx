@@ -2,11 +2,10 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   DEFAULT_TRANSLATION_ID,
-  TRANSLATION_NAMES,
-  listFeaturedTranslations,
+  listTranslations,
   listBooks,
   getChapter
-} from "../lib/youversion";
+} from "../lib/bible";
 import { groupBooks, GROUP_LABELS } from "../lib/bibleBooks";
 import { useAuth } from "../context/AuthContext";
 import { dataApi } from "../lib/dataApi";
@@ -25,6 +24,7 @@ export default function BiblePage() {
   const [chapterLoading, setChapterLoading] = useState(false);
   const [chapterError, setChapterError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(!routeBook);
+  const [versionsSidebarOpen, setVersionsSidebarOpen] = useState(false);
   const [expandedBook, setExpandedBook] = useState(routeBook || null);
   const [savedVerses, setSavedVerses] = useState([]);
   const [saveNotice, setSaveNotice] = useState("");
@@ -34,7 +34,7 @@ export default function BiblePage() {
 
   // Featured translation list for the picker.
   useEffect(() => {
-    listFeaturedTranslations().then(setTranslations).catch(() => setTranslations([]));
+    listTranslations().then(setTranslations).catch(() => setTranslations([]));
   }, []);
 
   // Book list for the current translation.
@@ -157,21 +157,29 @@ export default function BiblePage() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <select
-            className="bible-translation-select"
-            value={translationId}
-            onChange={(e) => goToTranslation(e.target.value)}
-            style={{ marginBottom: 0, width: "auto" }}
-          >
-            {!translations.some((t) => t.id === translationId) && (
-              <option value={translationId}>{TRANSLATION_NAMES[translationId] || translationId}</option>
+          <div style={{ position: 'relative' }}>
+            <button className="btn btn-ghost bible-sidebar-toggle" onClick={() => setVersionsSidebarOpen(!versionsSidebarOpen)} style={{ maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {translations.find(t => t.id === translationId)?.label || translationId}
+            </button>
+            {versionsSidebarOpen && (
+              <div className="versions-sidebar-dropdown">
+                <div className="versions-sidebar-header">
+                  <h3 style={{ margin: 0, fontSize: 14 }}>Select Translation</h3>
+                </div>
+                <div className="versions-sidebar-list">
+                  {translations.map((t) => (
+                    <button 
+                      key={t.id} 
+                      className={`version-list-btn${translationId === t.id ? ' active' : ''}`}
+                      onClick={() => { goToTranslation(t.id); setVersionsSidebarOpen(false); }}
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             )}
-            {translations.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+          </div>
           <button className="btn btn-ghost bible-sidebar-toggle" onClick={() => setSidebarOpen((v) => !v)}>
             {sidebarOpen ? "Hide books" : "Books"}
           </button>
