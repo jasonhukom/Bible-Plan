@@ -5,7 +5,7 @@ import {
   listFeaturedTranslations,
   listBooks,
   getChapter
-} from "../lib/helloao";
+} from "../lib/youversion";
 import { groupBooks, GROUP_LABELS } from "../lib/bibleBooks";
 import { useAuth } from "../context/AuthContext";
 import { dataApi } from "../lib/dataApi";

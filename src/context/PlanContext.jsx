@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useAuth } from "./AuthContext";
 import { dataApi } from "../lib/dataApi";
 import { generateSchedule } from "../lib/planGenerator";
-import { DEFAULT_TRANSLATION_ID } from "../lib/helloao";
+import { DEFAULT_TRANSLATION_ID } from "../lib/youversion";
 
 const PlanContext = createContext(null);
 

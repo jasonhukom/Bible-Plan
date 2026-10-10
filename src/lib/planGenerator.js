@@ -13,7 +13,7 @@
 //   "inorder"  -- finish one group before starting the next.
 // ============================================================================
 
-import { listBooks } from "./helloao";
+import { listBooks } from "./youversion";
 import { classifyBook, BOOK_NAMES } from "./bibleBooks";
 
 const GROUP_ORDER = ["ot", "dc", "nt"];

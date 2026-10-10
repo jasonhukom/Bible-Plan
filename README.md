@@ -7,7 +7,7 @@
 [![React](https://img.shields.io/badge/React-18-61dafb?style=flat&logo=react)](#)
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?style=flat&logo=vite)](#)
 [![Supabase](https://img.shields.io/badge/Supabase-Database%20%26%20Auth-3ECF8E?style=flat&logo=supabase)](https://supabase.com/)
-[![HelloAO API](https://img.shields.io/badge/HelloAO-Bible%20API-orange?style=flat)](#)
+[![YouVersion API](https://img.shields.io/badge/YouVersion-Bible%20API-orange?style=flat)](https://developers.youversion.com/api/bibles)
 
 ---
 
@@ -35,7 +35,7 @@ Bible Plan is built upon the gentle principle that engaging with Scripture shoul
 - **Progress Tracking**: Simply check off chapters as you read them; progress is saved automatically.
 
 ### 3. Integrated Bible Reader & Saved Verses
-- **Live Text from HelloAO API**: Fetches real-time, accurate chapter texts. Uses the free, open-license BSB (Berean Standard Bible) by default, with WEB, KJV, and ASV also available.
+- **Live Text from YouVersion API**: Fetches real-time, accurate chapter texts. Uses the BSB (Berean Standard Bible) by default (Biblica Bible License: https://docs.google.com/document/d/1JagIromoy-ZJDiPspaocxan5QrObctqb/edit), with WEB, KJV, and ASV also available.
 - **Distraction-Free Mode**: Opening a chapter automatically collapses the sidebar.
 - **Interactive Verses**: Tap any verse while reading to save it to your personal collection. Your `/saves` page keeps a chronological record of your favorite passages.
 
@@ -50,7 +50,7 @@ Bible Plan is built upon the gentle principle that engaging with Scripture shoul
 - **Frontend**: [React 18](https://react.dev/), [Vite](https://vitejs.dev/), [React Router](https://reactrouter.com/)
 - **Styling**: Vanilla CSS tokens & responsive media queries with a curated dark/light color palette
 - **Backend / Database**: [Supabase](https://supabase.com/) (PostgreSQL, Row Level Security, Anonymous & Email Auth)
-- **External APIs**: [HelloAO Bible API](https://bible.helloao.org) (No rate limit, open-license translations)
+- **External APIs**: [YouVersion Platform API](https://developers.youversion.com/api/bibles) for real-time Bible text and metadata. (See [Biblica Bible License](https://docs.google.com/document/d/1JagIromoy-ZJDiPspaocxan5QrObctqb/edit))
 
 ---
 

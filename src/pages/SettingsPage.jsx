@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { dataApi } from "../lib/dataApi";
-import { DEFAULT_TRANSLATION_ID, listFeaturedTranslations } from "../lib/helloao";
+import { DEFAULT_TRANSLATION_ID, listFeaturedTranslations } from "../lib/youversion";
 
 export default function SettingsPage() {
   const { user, signOut, isConfigured } = useAuth();

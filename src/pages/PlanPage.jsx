@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DEFAULT_TRANSLATION_ID } from "../lib/helloao";
+import { DEFAULT_TRANSLATION_ID } from "../lib/youversion";
 import { GROUP_COLORS } from "../lib/bibleBooks";
 import { buildMonthGrid, monthLabel, WEEKDAY_LABELS } from "../lib/calendarGrid";
 import { useCalendarView } from "../context/CalendarViewContext";
