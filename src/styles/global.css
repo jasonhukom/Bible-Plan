@@ -286,9 +286,11 @@ h3 {
   .bible-layout {
     flex-direction: column;
   }
+
   .bible-sidebar-toggle {
     display: none;
   }
+
   .bible-sidebar {
     position: static;
     max-height: none;
@@ -673,7 +675,8 @@ h3 {
 }
 
 .sidebar.collapsed .sidebar-brand {
-  display: none; /* Hide brand when collapsed */
+  display: none;
+  /* Hide brand when collapsed */
 }
 
 .sidebar:not(.collapsed) .toggle-icon-open {
@@ -879,14 +882,15 @@ h3 {
    -------------------------------------------------------------------------- */
 
 .mobile-bottom-nav {
-  display: none; /* Hidden on desktop */
+  display: none;
+  /* Hidden on desktop */
 }
 
 @media (max-width: 719px) {
   .sidebar {
     display: none;
   }
-  
+
   .mobile-bottom-nav {
     display: flex;
     position: fixed;
@@ -901,7 +905,7 @@ h3 {
     justify-content: space-around;
     padding: 0 10px;
   }
-  
+
   .mobile-nav-btn {
     display: flex;
     align-items: center;
@@ -917,7 +921,8 @@ h3 {
     height: 24px;
   }
 
-  .mobile-nav-btn.active, .mobile-nav-btn:hover {
+  .mobile-nav-btn.active,
+  .mobile-nav-btn:hover {
     color: var(--gold-bright);
     background: rgba(219, 181, 88, 0.1);
   }
@@ -939,11 +944,12 @@ h3 {
     width: 26px;
     height: 26px;
   }
-  
+
   .main-content {
-    padding-bottom: 80px; /* space for bottom nav */
+    padding-bottom: 80px;
+    /* space for bottom nav */
   }
-  
+
   /* Make bible title truncated */
   .reader-heading h1 {
     font-size: 22px;
@@ -952,8 +958,6 @@ h3 {
     text-overflow: ellipsis;
     max-width: 100%;
   }
-}
-  padding: 8px;
 }
 
 .sidebar-footer {
@@ -1508,14 +1512,17 @@ h3 {
   width: 12px;
   height: 12px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--night-2);
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--gold);
   border-radius: 6px;
   border: 3px solid var(--night-2);
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gold-bright);
 }
