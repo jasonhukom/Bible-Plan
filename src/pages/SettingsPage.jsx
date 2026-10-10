@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { dataApi } from "../lib/dataApi";
-import { DEFAULT_TRANSLATION_ID, listFeaturedTranslations } from "../lib/youversion";
+import { DEFAULT_TRANSLATION_ID, TRANSLATION_NAMES, listFeaturedTranslations } from "../lib/youversion";
 
 export default function SettingsPage() {
   const { user, signOut, isConfigured } = useAuth();
@@ -108,7 +108,7 @@ export default function SettingsPage() {
             style={{ width: "100%", background: "var(--night)", border: "1px solid var(--night-line)", borderRadius: 8, padding: 10 }}
           >
             {!translations.some((t) => t.id === defaultTranslation) && (
-              <option value={defaultTranslation}>{defaultTranslation}</option>
+              <option value={defaultTranslation}>{TRANSLATION_NAMES[defaultTranslation] || defaultTranslation}</option>
             )}
             {translations.map((t) => (
               <option key={t.id} value={t.id}>

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   DEFAULT_TRANSLATION_ID,
+  TRANSLATION_NAMES,
   listFeaturedTranslations,
   listBooks,
   getChapter
@@ -163,7 +164,7 @@ export default function BiblePage() {
             style={{ marginBottom: 0, width: "auto" }}
           >
             {!translations.some((t) => t.id === translationId) && (
-              <option value={translationId}>{translationId}</option>
+              <option value={translationId}>{TRANSLATION_NAMES[translationId] || translationId}</option>
             )}
             {translations.map((t) => (
               <option key={t.id} value={t.id}>

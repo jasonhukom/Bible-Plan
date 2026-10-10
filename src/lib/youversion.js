@@ -9,6 +9,12 @@ import { ApiClient } from "@youversion/platform-core";
 const API_KEY = "S6kifuJ2rYUWbGGIGKwXOdTJVyK9aFnZFyAK73XrLmwyTGJd";
 export const DEFAULT_TRANSLATION_ID = "3034"; 
 
+export const TRANSLATION_NAMES = {
+  "3034": "BSB",
+  "1": "KJV",
+  "12": "ASV",
+  "206": "WEB"
+};
 const apiClient = new ApiClient({
   appKey: API_KEY,
 });
