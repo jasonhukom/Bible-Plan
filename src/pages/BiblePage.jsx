@@ -139,13 +139,7 @@ export default function BiblePage() {
 
   return (
     <div>
-      <div className="page-header" style={{ 
-        alignItems: "center", 
-        position: "sticky", 
-        top: 0, 
-        background: "var(--night)", 
-        zIndex: 10
-      }}>
+      <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button className="icon-btn" onClick={() => navigate(-1)} title="Go back">
             <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
