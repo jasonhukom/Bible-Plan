@@ -3,17 +3,17 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
-  const { user, isConfigured, signInWithPassword, signUpWithPassword, signInAnonymously } = useAuth();
+  const { user, isConfigured, signInWithPassword, signUpWithPassword } = useAuth();
   const navigate = useNavigate();
 
   const [mode, setMode] = useState("sign-in"); // "sign-in" | "sign-up"
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
 
-  if (user) return <Navigate to="/plan" replace />;
+  if (user && !user.is_anonymous) return <Navigate to="/plan" replace />;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -21,12 +21,14 @@ export default function LoginPage() {
     setInfo("");
     setBusy(true);
     try {
+      const loginEmail = identifier.includes("@") ? identifier : `${identifier}@bibleplan.local`;
+      
       if (mode === "sign-in") {
-        const { error } = await signInWithPassword(email, password);
+        const { error } = await signInWithPassword(loginEmail, password);
         if (error) throw error;
         navigate("/plan");
       } else {
-        const { error, data } = await signUpWithPassword(email, password);
+        const { error, data } = await signUpWithPassword(loginEmail, password);
         if (error) throw error;
         if (data.session) {
           navigate("/plan");
@@ -79,14 +81,14 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit}>
           <div className="field">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="identifier">Email / Username</label>
             <input
-              id="email"
-              type="email"
+              id="identifier"
+              type="text"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              autoComplete="username"
             />
           </div>
           <div className="field">
@@ -107,22 +109,6 @@ export default function LoginPage() {
 
           <button className="btn" type="submit" disabled={busy || !isConfigured} style={{ width: "100%" }}>
             {busy ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
-          </button>
-          
-          <button
-            type="button"
-            className="btn btn-ghost"
-            style={{ width: "100%", marginTop: 12 }}
-            onClick={async () => {
-              try {
-                await signInAnonymously();
-                navigate("/plan");
-              } catch (err) {
-                setError(err.message);
-              }
-            }}
-          >
-            Continue as guest
           </button>
         </form>
       </div>

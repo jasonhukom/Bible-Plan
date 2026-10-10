@@ -230,7 +230,7 @@ export default function Sidebar() {
             <button
               className="sidebar-nav-btn"
               type="button"
-              onClick={() => navigate(user ? "/profile" : "/login")}
+              onClick={() => navigate(user && !user?.is_anonymous ? "/profile" : "/login")}
             >
               {profile?.avatar_url ? (
                 <img className="sidebar-avatar" src={profile.avatar_url} alt="" />
@@ -238,7 +238,7 @@ export default function Sidebar() {
                 navIcons.account
               )}
               <span className="sidebar-nav-label">
-                {user ? (profile?.display_name || "Profile") : "Account"}
+                {user && !user?.is_anonymous ? (profile?.display_name || "Profile") : "Account"}
               </span>
             </button>
             <NavLink to="/settings" className="sidebar-icon-btn" title="Settings">

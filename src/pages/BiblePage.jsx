@@ -159,7 +159,7 @@ export default function BiblePage() {
         </p>
       )}
 
-      <div className="bible-layout">
+      <div className={`bible-layout${!routeBook ? " home-mode" : ""}`}>
         <aside className={`bible-sidebar${sidebarOpen ? "" : " collapsed"}`}>
           <select
             className="field-select translation-select"
@@ -188,27 +188,24 @@ export default function BiblePage() {
                       className={`book-list-btn${expandedBook === book.id ? " active" : ""}`}
                       onClick={() => openBook(book.id)}
                       type="button"
-                      style={expandedBook !== book.id ? { color: "var(--ink-soft)" } : {}}
+                      style={expandedBook !== book.id && routeBook ? { color: "var(--ink-soft)" } : {}}
                     >
                       {book.commonName || book.name}
                     </button>
                     {expandedBook === book.id && (
-                      <div style={{ padding: "8px 4px" }}>
-                        <select
-                          className="field-select"
-                          style={{ width: "100%", padding: "8px", borderRadius: "6px", background: "var(--night)", color: "var(--cream)", border: "1px solid var(--night-line)" }}
-                          value={routeBook === book.id ? routeChapter : ""}
-                          onChange={(e) => {
-                            if (e.target.value) openChapter(book.id, e.target.value);
-                          }}
-                        >
-                          <option value="" disabled>Select Chapter</option>
-                          {Array.from({ length: book.numberOfChapters }, (_, i) => i + 1).map((ch) => (
-                            <option key={ch} value={ch}>
-                              Chapter {ch}
-                            </option>
-                          ))}
-                        </select>
+                      <div className="chapter-grid">
+                        {Array.from({ length: book.numberOfChapters }, (_, i) => i + 1).map((ch) => (
+                          <button
+                            key={ch}
+                            type="button"
+                            className={`chapter-grid-btn${
+                              routeBook === book.id && Number(routeChapter) === ch ? " active" : ""
+                            }`}
+                            onClick={() => openChapter(book.id, ch)}
+                          >
+                            {ch}
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>

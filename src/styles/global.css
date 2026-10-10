@@ -242,6 +242,24 @@ h3 {
   flex-direction: row-reverse;
 }
 
+.bible-layout.home-mode {
+  flex-direction: column;
+}
+
+.bible-layout.home-mode .bible-sidebar {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  border: none;
+  background: transparent;
+  position: static;
+  max-height: none;
+}
+
+.bible-layout.home-mode .reader {
+  display: none;
+}
+
 .bible-sidebar {
   width: var(--book-sidebar-width);
   flex-shrink: 0;

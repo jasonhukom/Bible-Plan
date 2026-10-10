@@ -15,24 +15,10 @@ export default function App() {
 
       <Route element={<Layout />}>
         <Route path="/" element={<Navigate to="/plan" replace />} />
-        <Route
-          path="/plan"
-          element={
-            <ProtectedRoute>
-              <PlanPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/plan" element={<PlanPage />} />
         <Route path="/bible" element={<BiblePage />} />
         <Route path="/bible/:translationId/:bookId/:chapter" element={<BiblePage />} />
-        <Route
-          path="/saves"
-          element={
-            <ProtectedRoute>
-              <SavesPage />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/saves" element={<SavesPage />} />
         <Route
           path="/profile"
           element={

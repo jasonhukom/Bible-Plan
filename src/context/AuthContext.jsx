@@ -14,8 +14,15 @@ export function AuthProvider({ children }) {
     }
 
     supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
+      if (data.session) {
+        setSession(data.session);
+        setLoading(false);
+      } else {
+        supabase.auth.signInAnonymously().then(({ data: anonData }) => {
+          setSession(anonData.session);
+          setLoading(false);
+        });
+      }
     });
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
@@ -38,10 +45,6 @@ export function AuthProvider({ children }) {
 
       async signUpWithPassword(email, password) {
         return supabase.auth.signUp({ email, password });
-      },
-
-      async signInAnonymously() {
-        return supabase.auth.signInAnonymously();
       },
 
       async signOut() {
