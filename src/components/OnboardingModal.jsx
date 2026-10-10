@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { BOOK_NAMES } from "../lib/bibleBooks";
 import { usePlan } from "../context/PlanContext";
+import { useAuth } from "../context/AuthContext";
+import LoginModal from "./LoginModal";
 
 export default function OnboardingModal({ onClose }) {
   const [step, setStep] = useState(1);
@@ -13,6 +15,10 @@ export default function OnboardingModal({ onClose }) {
   const [orderMode, setOrderMode] = useState("overlap");
 
   const { regenerate, generating, error } = usePlan();
+  const { user } = useAuth();
+  
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingPlan, setPendingPlan] = useState(null);
 
   function toggleBook(id) {
     setReadBooks(prev => {
@@ -33,19 +39,48 @@ export default function OnboardingModal({ onClose }) {
     setGroups(prev => prev.includes(g) ? prev.filter(x => x !== g) : [...prev, g]);
   }
 
-  async function handleApply(e) {
+  function handleApply(e) {
     e.preventDefault();
     const excludeBooks = removeBooks ? Array.from(readBooks) : [];
     const preCompletedBooks = removeBooks ? [] : Array.from(readBooks);
-    
-    await regenerate({
+    const config = {
       name: "My reading plan",
       start_date: startDate,
       days: Number(days),
       book_groups: groups,
       order_mode: orderMode
-    }, { excludeBooks, preCompletedBooks });
-    onClose();
+    };
+    
+    if (user?.is_anonymous) {
+      setPendingPlan({ config, excludeBooks, preCompletedBooks });
+      setShowLoginModal(true);
+    } else {
+      regenerate(config, { excludeBooks, preCompletedBooks }).then(() => onClose());
+    }
+  }
+
+  function handleLoginModalClose() {
+    setShowLoginModal(false);
+    if (pendingPlan) {
+      regenerate(pendingPlan.config, { 
+        excludeBooks: pendingPlan.excludeBooks, 
+        preCompletedBooks: pendingPlan.preCompletedBooks 
+      }).then(() => onClose());
+    } else {
+      onClose();
+    }
+  }
+
+  function handleLoginModalSuccess() {
+    setShowLoginModal(false);
+    if (pendingPlan) {
+      regenerate(pendingPlan.config, { 
+        excludeBooks: pendingPlan.excludeBooks, 
+        preCompletedBooks: pendingPlan.preCompletedBooks 
+      }).then(() => onClose());
+    } else {
+      onClose();
+    }
   }
 
   if (step === 1) {
@@ -111,6 +146,9 @@ export default function OnboardingModal({ onClose }) {
           </div>
         </form>
       </div>
+      {showLoginModal && (
+        <LoginModal onClose={handleLoginModalClose} onSuccess={handleLoginModalSuccess} />
+      )}
     </div>
   );
 }

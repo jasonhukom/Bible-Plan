@@ -287,8 +287,7 @@ h3 {
     flex-direction: column;
   }
   .bible-sidebar-toggle {
-    display: inline-flex;
-    margin-bottom: 14px;
+    display: none;
   }
   .bible-sidebar {
     position: static;
@@ -393,6 +392,7 @@ h3 {
   font-size: 22px;
   line-height: 1.85;
   color: var(--cream);
+  padding: 0 4px;
 }
 
 .reader-heading-inline {
@@ -1465,4 +1465,23 @@ h3 {
   background: var(--gold);
   color: var(--night);
   border-color: var(--gold);
+}
+
+/* --------------------------------------------------------------------------
+   SCROLLBAR STYLES
+   -------------------------------------------------------------------------- */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+::-webkit-scrollbar-track {
+  background: var(--night-2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 6px;
+  border: 3px solid var(--night-2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-bright);
 }

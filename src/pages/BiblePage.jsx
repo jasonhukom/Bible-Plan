@@ -139,7 +139,7 @@ export default function BiblePage() {
 
   return (
     <div>
-      <div className="page-header">
+      <div className="page-header" style={{ alignItems: "center" }}>
         <div>
           <h1>Bible</h1>
           {currentBook && (
@@ -148,23 +148,12 @@ export default function BiblePage() {
             </p>
           )}
         </div>
-        <button className="btn btn-ghost bible-sidebar-toggle" onClick={() => setSidebarOpen((v) => !v)}>
-          {sidebarOpen ? "Hide books" : "Books"}
-        </button>
-      </div>
-
-      {saveNotice && (
-        <p className="hint-text" style={{ marginBottom: 14 }}>
-          {saveNotice} <Link to="/login">Sign in</Link>
-        </p>
-      )}
-
-      <div className={`bible-layout${!routeBook ? " home-mode" : ""}`}>
-        <aside className={`bible-sidebar${sidebarOpen ? "" : " collapsed"}`}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <select
             className="field-select translation-select"
             value={translationId}
             onChange={(e) => goToTranslation(e.target.value)}
+            style={{ marginBottom: 0, width: "auto" }}
           >
             {!translations.some((t) => t.id === translationId) && (
               <option value={translationId}>{translationId}</option>
@@ -175,6 +164,21 @@ export default function BiblePage() {
               </option>
             ))}
           </select>
+          <button className="btn btn-ghost bible-sidebar-toggle" onClick={() => setSidebarOpen((v) => !v)}>
+            {sidebarOpen ? "Hide books" : "Books"}
+          </button>
+        </div>
+      </div>
+
+      {saveNotice && (
+        <p className="hint-text" style={{ marginBottom: 14 }}>
+          {saveNotice} <Link to="/login">Sign in</Link>
+        </p>
+      )}
+
+      <div className={`bible-layout${!routeBook ? " home-mode" : ""}`}>
+        <aside className={`bible-sidebar${sidebarOpen ? "" : " collapsed"}`}>
+
 
           {booksLoading && <p className="hint-text">Loading books…</p>}
 
@@ -223,20 +227,22 @@ export default function BiblePage() {
 
           {chapterData && !chapterLoading && (
             <>
-              <button className="back-link" onClick={() => setSidebarOpen(true)} type="button">
-                ← Books
-              </button>
               <div className="reader-heading">
                 <h1>
                   {chapterData.book.commonName || chapterData.book.name} {chapterData.chapter.number}
                 </h1>
-                <div className="reader-nav">
-                  <button className="btn btn-ghost" onClick={() => changeChapter(-1)} type="button">
-                    ‹ Prev
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                  <button className="back-link" onClick={() => setSidebarOpen(true)} type="button" style={{ margin: 0 }}>
+                    ← Books
                   </button>
-                  <button className="btn btn-ghost" onClick={() => changeChapter(1)} type="button">
-                    Next ›
-                  </button>
+                  <div className="reader-nav">
+                    <button className="btn btn-ghost" onClick={() => changeChapter(-1)} type="button">
+                      ‹ Prev
+                    </button>
+                    <button className="btn btn-ghost" onClick={() => changeChapter(1)} type="button">
+                      Next ›
+                    </button>
+                  </div>
                 </div>
               </div>
 

@@ -1,19 +1,14 @@
 import { useState } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function LoginPage() {
-  const { user, isConfigured, signInWithPassword, signUpWithPassword } = useAuth();
-  const navigate = useNavigate();
-
-  const [mode, setMode] = useState("sign-in"); // "sign-in" | "sign-up"
+export default function LoginModal({ onClose, onSuccess }) {
+  const { isConfigured, signInWithPassword, signUpWithPassword } = useAuth();
+  const [mode, setMode] = useState("sign-in");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
-
-  if (user && !user.is_anonymous) return <Navigate to="/plan" replace />;
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -26,12 +21,14 @@ export default function LoginPage() {
       if (mode === "sign-in") {
         const { error } = await signInWithPassword(loginEmail, password);
         if (error) throw error;
-        navigate("/plan");
+        onSuccess?.();
+        onClose();
       } else {
         const { error, data } = await signUpWithPassword(loginEmail, password);
         if (error) throw error;
         if (data.session) {
-          navigate("/plan");
+          onSuccess?.();
+          onClose();
         } else {
           setInfo("Check your email to confirm your account, then sign in.");
           setMode("sign-in");
@@ -45,20 +42,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="login-shell">
-      <div className="card login-card">
+    <div className="cal-overlay" style={{ zIndex: 100 }}>
+      <div className="cal-popup login-card">
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <svg width="34" height="34" viewBox="0 0 32 32" style={{ color: "var(--gold-bright)" }}>
             <line x1="16" y1="6" x2="16" y2="27" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
             <line x1="7" y1="13" x2="25" y2="13" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
           </svg>
-          <h1 style={{ marginTop: 10 }}>Bible Plan</h1>
+          <h2 style={{ marginTop: 10 }}>Bible Plan</h2>
         </div>
 
         {!isConfigured && (
-          <p className="error-text">
-            Supabase isn't configured for this deployment yet — set VITE_SUPABASE_URL and
-            VITE_SUPABASE_ANON_KEY (see .env.example).
+          <p className="error-text" style={{ marginBottom: 12 }}>
+            Supabase isn't configured for this deployment yet.
           </p>
         )}
 
@@ -107,9 +103,14 @@ export default function LoginPage() {
           {error && <p className="error-text">{error}</p>}
           {info && <p className="hint-text">{info}</p>}
 
-          <button className="btn" type="submit" disabled={busy || !isConfigured} style={{ width: "100%" }}>
-            {busy ? "Please wait…" : mode === "sign-in" ? "Sign in" : "Create account"}
-          </button>
+          <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
+            <button className="btn btn-ghost" type="button" onClick={onClose} style={{ flex: 1 }}>
+              Skip
+            </button>
+            <button className="btn" type="submit" disabled={busy || !isConfigured} style={{ flex: 1 }}>
+              {busy ? "Wait…" : mode === "sign-in" ? "Sign in" : "Sign up"}
+            </button>
+          </div>
         </form>
       </div>
     </div>

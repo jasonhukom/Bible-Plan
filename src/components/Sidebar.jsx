@@ -4,6 +4,7 @@ import MiniCalendar from "./MiniCalendar";
 import { useAuth } from "../context/AuthContext";
 import { usePlan } from "../context/PlanContext";
 import { dataApi } from "../lib/dataApi";
+import LoginModal from "./LoginModal";
 
 const SIDEBAR_STORAGE_KEY = "bible-plan-sidebar-open";
 
@@ -73,6 +74,9 @@ export default function Sidebar() {
   const [days, setDays] = useState(360);
   const [groups, setGroups] = useState(["ot", "nt"]);
   const [orderMode, setOrderMode] = useState("overlap");
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showMobilePlan, setShowMobilePlan] = useState(false);
+  const [pendingPlan, setPendingPlan] = useState(null);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, open ? "open" : "closed");
@@ -100,14 +104,111 @@ export default function Sidebar() {
 
   function handleApplyPlan(e) {
     e.preventDefault();
-    regenerate({
+    const config = {
       name: plan?.name || "My reading plan",
       start_date: startDate,
       days: Number(days),
       book_groups: groups,
       order_mode: orderMode
-    });
+    };
+    if (user?.is_anonymous) {
+      setPendingPlan(config);
+      setShowLoginModal(true);
+    } else {
+      regenerate(config);
+      setShowMobilePlan(false);
+    }
   }
+
+  function handleLoginModalClose() {
+    setShowLoginModal(false);
+    if (pendingPlan) {
+      regenerate(pendingPlan);
+      setPendingPlan(null);
+    }
+    setShowMobilePlan(false);
+  }
+
+  function handleLoginModalSuccess() {
+    setShowLoginModal(false);
+    if (pendingPlan) {
+      regenerate(pendingPlan);
+      setPendingPlan(null);
+    }
+    setShowMobilePlan(false);
+  }
+
+  const renderPlanForm = (isMobile) => (
+    <form className="plan-panel" onSubmit={handleApplyPlan}>
+      <div className="panel-box">
+        <div className="panel-box-title">Plan settings</div>
+        {isMobile && (
+          <button type="button" className="btn btn-ghost" style={{ position: 'absolute', top: 12, right: 12, padding: '4px 8px' }} onClick={() => setShowMobilePlan(false)}>
+            Close
+          </button>
+        )}
+
+        <label className="plan-field-label" htmlFor={`plan-start-${isMobile}`}>
+          Start date
+        </label>
+        <input
+          id={`plan-start-${isMobile}`}
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          className="plan-field-input"
+        />
+
+        <label className="plan-field-label" htmlFor={`plan-days-${isMobile}`}>
+          Length (days)
+        </label>
+        <input
+          id={`plan-days-${isMobile}`}
+          type="number"
+          min={1}
+          max={730}
+          value={days}
+          onChange={(e) => setDays(e.target.value)}
+          className="plan-field-input"
+        />
+
+        <div className="plan-field-label">Books</div>
+        <div className="plan-checkbox-row">
+          <label>
+            <input type="checkbox" checked={groups.includes("ot")} onChange={() => toggleGroup("ot")} />
+            Old Testament
+          </label>
+          <label>
+            <input type="checkbox" checked={groups.includes("nt")} onChange={() => toggleGroup("nt")} />
+            New Testament
+          </label>
+          <label>
+            <input type="checkbox" checked={groups.includes("dc")} onChange={() => toggleGroup("dc")} />
+            Deuterocanonical
+          </label>
+        </div>
+
+        <label className="plan-field-label" htmlFor={`plan-order-${isMobile}`}>
+          Order
+        </label>
+        <select
+          id={`plan-order-${isMobile}`}
+          className="plan-field-input"
+          value={orderMode}
+          onChange={(e) => setOrderMode(e.target.value)}
+        >
+          <option value="overlap">Overlap (a bit of each book each day)</option>
+          <option value="inorder">In order (finish one, then the next)</option>
+        </select>
+
+        {error && <p className="error-text">{error}</p>}
+
+        <button className="btn" type="submit" disabled={generating || groups.length === 0}>
+          {generating ? "Generating…" : "Apply plan"}
+        </button>
+      </div>
+    </form>
+  );
 
   return (
     <>
@@ -173,80 +274,14 @@ export default function Sidebar() {
               </button>
             </nav>
 
-            {plansExpanded && (
-              <form className="plan-panel" onSubmit={handleApplyPlan}>
-                <div className="panel-box">
-                  <div className="panel-box-title">Plan settings</div>
-
-
-                  <label className="plan-field-label" htmlFor="plan-start">
-                    Start date
-                  </label>
-                  <input
-                    id="plan-start"
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="plan-field-input"
-                  />
-
-                  <label className="plan-field-label" htmlFor="plan-days">
-                    Length (days)
-                  </label>
-                  <input
-                    id="plan-days"
-                    type="number"
-                    min={1}
-                    max={730}
-                    value={days}
-                    onChange={(e) => setDays(e.target.value)}
-                    className="plan-field-input"
-                  />
-
-                  <div className="plan-field-label">Books</div>
-                  <div className="plan-checkbox-row">
-                    <label>
-                      <input type="checkbox" checked={groups.includes("ot")} onChange={() => toggleGroup("ot")} />
-                      Old Testament
-                    </label>
-                    <label>
-                      <input type="checkbox" checked={groups.includes("nt")} onChange={() => toggleGroup("nt")} />
-                      New Testament
-                    </label>
-                    <label>
-                      <input type="checkbox" checked={groups.includes("dc")} onChange={() => toggleGroup("dc")} />
-                      Deuterocanonical
-                    </label>
-                  </div>
-
-                  <label className="plan-field-label" htmlFor="plan-order">
-                    Order
-                  </label>
-                  <select
-                    id="plan-order"
-                    className="plan-field-input"
-                    value={orderMode}
-                    onChange={(e) => setOrderMode(e.target.value)}
-                  >
-                    <option value="overlap">Overlap (a bit of each book each day)</option>
-                    <option value="inorder">In order (finish one, then the next)</option>
-                  </select>
-
-                  {error && <p className="error-text">{error}</p>}
-
-                  <button className="btn" type="submit" disabled={generating || groups.length === 0}>
-                    {generating ? "Generating…" : "Apply plan"}
-                  </button>
-                </div>
-              </form>
-            )}
+            {plansExpanded && renderPlanForm(false)}
           </div>
 
           <div className="sidebar-footer">
             <button
               className="sidebar-nav-btn"
               type="button"
-              onClick={() => navigate(user && !user?.is_anonymous ? "/profile" : "/login")}
+              onClick={() => navigate("/profile")}
             >
               {profile?.avatar_url ? (
                 <img className="sidebar-avatar" src={profile.avatar_url} alt="" />
@@ -254,7 +289,7 @@ export default function Sidebar() {
                 navIcons.account
               )}
               <span className="sidebar-nav-label">
-                {user && !user?.is_anonymous ? (profile?.display_name || "Profile") : "Account"}
+                {user && !user?.is_anonymous ? (profile?.display_name || "Profile") : "Profile"}
               </span>
             </button>
             <NavLink to="/settings" className="sidebar-icon-btn" title="Settings">
@@ -264,7 +299,7 @@ export default function Sidebar() {
         </aside>
 
       <nav className="mobile-bottom-nav">
-        <button className="mobile-nav-btn" onClick={() => { setPlansExpanded(true); setOpen(true); }} aria-label="Reading Plans">
+        <button className="mobile-nav-btn" onClick={() => setShowMobilePlan(true)} aria-label="Reading Plans">
           {navIcons.readingPlans}
         </button>
         <NavLink to="/saves" className="mobile-nav-btn" aria-label="Saved">
@@ -283,7 +318,7 @@ export default function Sidebar() {
         </NavLink>
         <button 
           className="mobile-nav-btn" 
-          onClick={() => navigate(user && !user?.is_anonymous ? "/profile" : "/login")}
+          onClick={() => navigate("/profile")}
           aria-label="Profile"
         >
           {profile?.avatar_url ? (
@@ -293,6 +328,18 @@ export default function Sidebar() {
           )}
         </button>
       </nav>
+
+      {showMobilePlan && (
+        <div className="cal-overlay" style={{ zIndex: 100 }}>
+          <div className="cal-popup" style={{ position: 'relative', padding: 0, background: 'transparent', border: 'none' }}>
+            {renderPlanForm(true)}
+          </div>
+        </div>
+      )}
+
+      {showLoginModal && (
+        <LoginModal onClose={handleLoginModalClose} onSuccess={handleLoginModalSuccess} />
+      )}
     </>
   );
 }

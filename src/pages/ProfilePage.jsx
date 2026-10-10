@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { dataApi } from "../lib/dataApi";
+import LoginModal from "../components/LoginModal";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -16,6 +17,7 @@ export default function ProfilePage() {
   const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     Promise.all([dataApi.getProfile(), dataApi.listSavedVerses()]).then(
@@ -96,10 +98,22 @@ export default function ProfilePage() {
             onChange={handleAvatarChange}
           />
           <p className="hint-text" style={{ marginTop: 8 }}>
-            {user?.email}
+            {user?.email || "Anonymous user"}
           </p>
         </div>
       </div>
+
+      {user?.is_anonymous && (
+        <div className="card" style={{ marginBottom: 24, padding: "16px", borderColor: "var(--gold)" }}>
+          <h2 style={{ fontSize: 15, color: "var(--gold-bright)", margin: "0 0 8px 0" }}>Secure Your Account</h2>
+          <p className="hint-text" style={{ marginBottom: 12 }}>
+            Sign in with an email to sync your data across devices and receive daily reminders.
+          </p>
+          <button className="btn" type="button" onClick={() => setShowLoginModal(true)}>
+            Sign In / Register
+          </button>
+        </div>
+      )}
 
       <form onSubmit={handleSave}>
         <div className="field">
@@ -129,6 +143,16 @@ export default function ProfilePage() {
           View saved verses
         </Link>
       </div>
+
+      <div style={{ marginTop: 24 }}>
+        <Link className="btn btn-ghost" to="/settings">
+          App Settings
+        </Link>
+      </div>
+
+      {showLoginModal && (
+        <LoginModal onClose={() => setShowLoginModal(false)} onSuccess={() => setShowLoginModal(false)} />
+      )}
     </div>
   );
 }
