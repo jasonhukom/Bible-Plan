@@ -100,9 +100,13 @@ export default function Sidebar() {
 
   function handleApplyPlan(e) {
     e.preventDefault();
+    
+    const d = new Date();
+    const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
     regenerate({
       name: plan?.name || "My reading plan",
-      start_date: startDate,
+      start_date: today,
       days: Number(days),
       book_groups: groups,
       order_mode: orderMode
@@ -111,23 +115,38 @@ export default function Sidebar() {
 
   return (
     <>
-      {open && (
-        <aside className="sidebar">
-          <div className="sidebar-header">
-            <div className="sidebar-brand">
-              <svg className="sidebar-logo" viewBox="0 0 32 32">
-                <line x1="16" y1="6" x2="16" y2="27" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-                <line x1="7" y1="13" x2="25" y2="13" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+      <aside className={`sidebar${open ? "" : " collapsed"}`}>
+        <div className="sidebar-header">
+          <NavLink to="/plan" className="sidebar-brand">
+            <svg className="sidebar-logo" viewBox="0 0 32 32">
+              <line x1="16" y1="6" x2="16" y2="27" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+              <line x1="7" y1="13" x2="25" y2="13" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            <span className="sidebar-title">Bible Plan</span>
+          </NavLink>
+          <button className="sidebar-toggle" type="button" onClick={() => setOpen(!open)} aria-label="Toggle sidebar">
+            {open ? (
+              <>
+                <svg className="toggle-icon-close" viewBox="0 0 24 24" fill="none">
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                <svg className="toggle-icon-hover" viewBox="0 0 24 24" fill="none">
+                  <line x1="4" y1="7" x2="20" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="4" y1="17" x2="20" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </>
+            ) : (
+              <svg className="toggle-icon-open" viewBox="0 0 24 24" fill="none">
+                <line x1="4" y1="7" x2="20" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                <line x1="4" y1="17" x2="20" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
               </svg>
-              <span className="sidebar-title">Bible Plan</span>
-            </div>
-            <button className="sidebar-toggle" type="button" onClick={() => setOpen(false)} aria-label="Close sidebar">
-              <svg viewBox="0 0 24 24" fill="none">
-                <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
+            )}
+          </button>
+        </div>
+
 
           <div className="sidebar-scroll-area">
             <MiniCalendar />
@@ -163,16 +182,6 @@ export default function Sidebar() {
                 <div className="panel-box">
                   <div className="panel-box-title">Plan settings</div>
 
-                  <label className="plan-field-label" htmlFor="plan-start">
-                    Start date
-                  </label>
-                  <input
-                    id="plan-start"
-                    type="date"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                    className="plan-field-input"
-                  />
 
                   <label className="plan-field-label" htmlFor="plan-days">
                     Length (days)
@@ -246,17 +255,37 @@ export default function Sidebar() {
             </NavLink>
           </div>
         </aside>
-      )}
 
-      {!open && (
-        <button className="sidebar-reopen" type="button" onClick={() => setOpen(true)} aria-label="Open sidebar">
-          <svg viewBox="0 0 24 24" fill="none">
-            <line x1="4" y1="7" x2="20" y2="7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-            <line x1="4" y1="17" x2="20" y2="17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
+      <nav className="mobile-bottom-nav">
+        <button className="mobile-nav-btn" onClick={() => { setPlansExpanded(true); setOpen(true); }} aria-label="Reading Plans">
+          {navIcons.readingPlans}
         </button>
-      )}
+        <NavLink to="/saves" className="mobile-nav-btn" aria-label="Saved">
+          {navIcons.save}
+        </NavLink>
+        
+        <NavLink to="/plan" className="mobile-nav-brand-btn" aria-label="Home">
+          <svg className="mobile-logo" viewBox="0 0 32 32">
+            <line x1="16" y1="6" x2="16" y2="27" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            <line x1="7" y1="13" x2="25" y2="13" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+          </svg>
+        </NavLink>
+
+        <NavLink to="/bible" className="mobile-nav-btn" aria-label="Bible">
+          {navIcons.bible}
+        </NavLink>
+        <button 
+          className="mobile-nav-btn" 
+          onClick={() => navigate(user && !user?.is_anonymous ? "/profile" : "/login")}
+          aria-label="Profile"
+        >
+          {profile?.avatar_url ? (
+            <img className="sidebar-avatar" src={profile.avatar_url} alt="" />
+          ) : (
+            navIcons.account
+          )}
+        </button>
+      </nav>
     </>
   );
 }

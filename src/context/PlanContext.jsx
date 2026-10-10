@@ -26,10 +26,11 @@ const DEFAULT_CONFIG = {
 /** Turns generator output (per-day flat chapter entries) into flat
  * reading_schedule rows, each with a client-generated id so the UI can use
  * them immediately without a round-trip re-fetch after insert. */
-function scheduleToRows(scheduleDays) {
+function scheduleToRows(scheduleDays, preCompletedBooks = []) {
   const rows = [];
   for (const day of scheduleDays) {
     day.entries.forEach((entry, position) => {
+      const isCompleted = preCompletedBooks.includes(entry.bookId);
       rows.push({
         id: newId(),
         day_index: day.dayIndex,
@@ -39,8 +40,8 @@ function scheduleToRows(scheduleDays) {
         chapter: entry.chapter,
         category: entry.category,
         position,
-        completed: false,
-        completed_at: null
+        completed: isCompleted,
+        completed_at: isCompleted ? new Date().toISOString() : null
       });
     });
   }
@@ -55,7 +56,7 @@ export function PlanProvider({ children }) {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
 
-  const regenerate = useCallback(async (config) => {
+  const regenerate = useCallback(async (config, options = {}) => {
     setGenerating(true);
     setError("");
     try {
@@ -67,9 +68,10 @@ export function PlanProvider({ children }) {
         startDate: savedPlan.start_date,
         days: savedPlan.days,
         groups: savedPlan.book_groups,
-        orderMode: savedPlan.order_mode
+        orderMode: savedPlan.order_mode,
+        excludeBooks: options.excludeBooks || []
       });
-      const newRows = scheduleToRows(scheduleDays);
+      const newRows = scheduleToRows(scheduleDays, options.preCompletedBooks || []);
 
       const { error: replaceError } = await dataApi.replaceSchedule(savedPlan.id, newRows);
       if (replaceError) throw new Error(replaceError.message);

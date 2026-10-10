@@ -21,15 +21,17 @@ const GROUP_ORDER = ["ot", "dc", "nt"];
 /**
  * @param {string} translationId
  * @param {string[]} groups e.g. ["ot", "nt"]
+ * @param {string[]} excludeBooks e.g. ["GEN", "EXO"]
  * @returns {Promise<Record<string, Array<{bookId: string, bookName: string, chapter: number}>>>}
  *   one flat chapter list per requested group, in canonical order
  */
-async function buildGroupPools(translationId, groups) {
+async function buildGroupPools(translationId, groups, excludeBooks = []) {
   const books = await listBooks(translationId);
   const sorted = [...books].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   const pools = {};
   for (const group of groups) pools[group] = [];
   for (const book of sorted) {
+    if (excludeBooks.includes(book.id)) continue;
     const group = classifyBook(book.id);
     if (!groups.includes(group)) continue;
     const name = book.commonName || book.name || BOOK_NAMES[book.id] || book.id;
@@ -84,14 +86,14 @@ function addDays(dateStr, n) {
 }
 
 /**
- * @param {{translationId: string, startDate: string, days: number, groups: string[], orderMode: "overlap"|"inorder"}} config
+ * @param {{translationId: string, startDate: string, days: number, groups: string[], orderMode: "overlap"|"inorder", excludeBooks?: string[]}} config
  * @returns {Promise<Array<{dayIndex: number, date: string, entries: Array<{bookId,bookName,chapter,category}>}>>}
  *   flat per-chapter entries per day, ready to insert into reading_schedule
  *   (one row per entry) -- NOT yet grouped into display refs.
  */
-export async function generateSchedule({ translationId, startDate, days, groups, orderMode }) {
+export async function generateSchedule({ translationId, startDate, days, groups, orderMode, excludeBooks = [] }) {
   const orderedGroups = GROUP_ORDER.filter((g) => groups.includes(g));
-  const pools = await buildGroupPools(translationId, orderedGroups);
+  const pools = await buildGroupPools(translationId, orderedGroups, excludeBooks);
 
   const dayEntries = Array.from({ length: days }, () => []);
 

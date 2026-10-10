@@ -621,6 +621,48 @@ h3 {
   height: 100vh;
   position: sticky;
   top: 0;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.sidebar.collapsed {
+  width: var(--nav-width);
+}
+
+.sidebar.collapsed .sidebar-title,
+.sidebar.collapsed .sidebar-nav-label,
+.sidebar.collapsed .reading-plans-chevron,
+.sidebar.collapsed .mini-cal,
+.sidebar.collapsed .plan-panel {
+  display: none;
+}
+
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
+}
+
+.sidebar.collapsed .sidebar-brand {
+  display: none; /* Hide brand when collapsed */
+}
+
+.sidebar:not(.collapsed) .toggle-icon-open {
+  display: none;
+}
+
+.sidebar.collapsed .toggle-icon-close {
+  display: none;
+}
+
+.sidebar-toggle .toggle-icon-hover {
+  display: none;
+}
+
+.sidebar-toggle:hover .toggle-icon-close {
+  display: none;
+}
+
+.sidebar-toggle:hover .toggle-icon-hover {
+  display: block;
 }
 
 .sidebar-header {
@@ -648,6 +690,7 @@ h3 {
   font-weight: 600;
   font-size: 16px;
   color: var(--cream);
+  white-space: nowrap;
 }
 
 .sidebar-toggle,
@@ -798,6 +841,87 @@ h3 {
   width: 100%;
   margin-top: 12px;
   font-size: 12.5px;
+}
+
+/* --------------------------------------------------------------------------
+   MOBILE BOTTOM NAV
+   -------------------------------------------------------------------------- */
+
+.mobile-bottom-nav {
+  display: none; /* Hidden on desktop */
+}
+
+@media (max-width: 719px) {
+  .sidebar {
+    display: none;
+  }
+  
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: var(--night-2);
+    border-top: 1px solid var(--night-line);
+    z-index: 50;
+    align-items: center;
+    justify-content: space-around;
+    padding: 0 10px;
+  }
+  
+  .mobile-nav-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    color: var(--ink-soft);
+    border-radius: 50%;
+  }
+
+  .mobile-nav-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .mobile-nav-btn.active, .mobile-nav-btn:hover {
+    color: var(--gold-bright);
+    background: rgba(219, 181, 88, 0.1);
+  }
+
+  .mobile-nav-brand-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background: var(--gold);
+    color: var(--night);
+    border-radius: 50%;
+    transform: translateY(-10px);
+    box-shadow: 0 4px 12px var(--shadow);
+  }
+
+  .mobile-nav-brand-btn svg {
+    width: 26px;
+    height: 26px;
+  }
+  
+  .main-content {
+    padding-bottom: 80px; /* space for bottom nav */
+  }
+  
+  /* Make bible title truncated */
+  .reader-heading h1 {
+    font-size: 22px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}
   padding: 8px;
 }
 

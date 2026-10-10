@@ -7,6 +7,7 @@ import { useCalendarView } from "../context/CalendarViewContext";
 import { usePlan } from "../context/PlanContext";
 import { useTheme } from "../context/ThemeContext";
 import { dataApi } from "../lib/dataApi";
+import OnboardingModal from "../components/OnboardingModal";
 
 const MAX_VISIBLE_PILLS = 3;
 const TIME_FORMAT_KEY = "bible-plan-time-format";
@@ -76,6 +77,12 @@ export default function PlanPage() {
   const [now, setNow] = useState(new Date());
   const [timeFormat, setTimeFormat] = useState(() => localStorage.getItem(TIME_FORMAT_KEY) || "12h");
   const [numberPosition, setNumberPosition] = useState("right");
+  const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("bible-plan-onboarded"));
+
+  function handleOnboardingComplete() {
+    localStorage.setItem("bible-plan-onboarded", "true");
+    setShowOnboarding(false);
+  }
 
   useEffect(() => {
     dataApi.getSettings().then(({ data }) => {
@@ -158,11 +165,12 @@ export default function PlanPage() {
   });
 
   if (loading) {
-    return <p className="reader-loading">Building your plan…</p>;
+    return <p className="reader-loading" style={{ margin: "auto", display: "flex", width: "100%", justifyContent: "center", minHeight: "80vh", alignItems: "center" }}>Building your plan…</p>;
   }
 
   return (
     <div className="calendar-page">
+      {showOnboarding && <OnboardingModal onClose={handleOnboardingComplete} />}
       <div className="calendar-grid-wrap">
         <div className="calendar-weekdays">
           {WEEKDAY_LABELS.map((w) => (
