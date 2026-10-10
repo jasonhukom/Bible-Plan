@@ -24,6 +24,7 @@ export default function BiblePage() {
   const [chapterLoading, setChapterLoading] = useState(false);
   const [chapterError, setChapterError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(!routeBook);
+  const [sidebarWidth, setSidebarWidth] = useState(250);
   const [versionsSidebarOpen, setVersionsSidebarOpen] = useState(false);
   const [expandedBook, setExpandedBook] = useState(routeBook || null);
   const [savedVerses, setSavedVerses] = useState([]);
@@ -138,6 +139,36 @@ export default function BiblePage() {
     );
   }
 
+  const startResize = useCallback((e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+    
+    const onMouseMove = (moveEvent) => {
+      const delta = startX - moveEvent.clientX;
+      const newWidth = startWidth + delta;
+      
+      if (newWidth < 120) {
+        setSidebarOpen(false);
+        setSidebarWidth(250);
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+      } else if (newWidth > 600) {
+        setSidebarWidth(600);
+      } else {
+        setSidebarWidth(newWidth);
+      }
+    };
+    
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+    
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, [sidebarWidth, setSidebarOpen]);
+
   return (
     <div>
       <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
@@ -193,9 +224,7 @@ export default function BiblePage() {
       )}
 
       <div className={`bible-layout${!routeBook ? " home-mode" : ""}`}>
-        <aside className={`bible-sidebar${sidebarOpen ? "" : " collapsed"}`}>
-
-
+        <aside className={`bible-sidebar${sidebarOpen ? "" : " collapsed"}`} style={{ width: sidebarOpen ? sidebarWidth : 0, padding: sidebarOpen ? undefined : 0, border: sidebarOpen ? undefined : 'none' }}>
           {booksLoading && <p className="hint-text">Loading books…</p>}
 
           {(["ot", "dc", "nt"]).map((groupKey) =>
@@ -235,7 +264,15 @@ export default function BiblePage() {
           )}
         </aside>
 
-        <section className="reader">
+        {sidebarOpen && !(!routeBook) && (
+          <div 
+            className="sidebar-resize-handle" 
+            onMouseDown={startResize} 
+            title="Drag to resize sidebar"
+          />
+        )}
+
+        <section className="reader" style={{ flex: 1, minWidth: 0 }}>
           {!routeBook && <p className="reader-empty">Pick a book from the list to start reading.</p>}
 
           {routeBook && chapterLoading && <p className="reader-loading">Loading chapter…</p>}

@@ -1471,23 +1471,32 @@ h3 {
 
 .popup-chapter-list {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 2px 0 8px 24px;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 12px;
 }
 
 .popup-chapter-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 6px 8px;
-  border-radius: 6px;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: var(--night);
+  border: 1px solid var(--night-line);
   font-size: 13px;
-  cursor: grab;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .popup-chapter-row:hover {
-  background: rgba(219, 181, 88, 0.08);
+  background: var(--night-hover);
+  border-color: var(--brand);
+}
+.popup-chapter-row.completed {
+  background: var(--brand-hover);
+  border-color: var(--brand);
+  color: var(--gold-bright);
 }
 
 .popup-chapter-num {
@@ -1500,6 +1509,20 @@ h3 {
   gap: 6px;
   font-size: 12px;
   color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.plan-layout {
+  display: flex;
+  flex-direction: row-reverse;
+  height: 100vh;
+}
+.plan-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
 }
 
 /* --------------------------------------------------------------------------
@@ -1611,4 +1634,21 @@ h3 {
   background: var(--brand-hover);
   color: var(--gold-bright);
   font-weight: 500;
+}
+
+/* --------------------------------------------------------------------------
+   RESIZABLE SIDEBAR
+   -------------------------------------------------------------------------- */
+.sidebar-resize-handle {
+  width: 8px;
+  cursor: ew-resize;
+  background: transparent;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.sidebar-resize-handle:hover,
+.sidebar-resize-handle:active {
+  background: var(--brand);
 }

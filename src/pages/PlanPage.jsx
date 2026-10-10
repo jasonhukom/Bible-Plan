@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { DEFAULT_TRANSLATION_ID } from "../lib/youversion";
 import { GROUP_COLORS } from "../lib/bibleBooks";
@@ -138,6 +138,8 @@ export default function PlanPage() {
     setOverflowDate(null); // "left hold closes the popup" -- let the grid receive the drop
   }
 
+  const [sidebarWidth, setSidebarWidth] = useState(300);
+
   function handleDrop(e, date) {
     e.preventDefault();
     setDragOverDate(null);
@@ -145,6 +147,36 @@ export default function PlanPage() {
     if (!payload?.rowIds?.length) return;
     moveRowsToDate(payload.rowIds, date);
   }
+
+  const startResize = useCallback((e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startWidth = sidebarWidth;
+    
+    const onMouseMove = (moveEvent) => {
+      const delta = startX - moveEvent.clientX; // moving left increases width in row-reverse
+      const newWidth = startWidth + delta;
+      
+      if (newWidth < 120) {
+        setOverflowDate(null);
+        setSidebarWidth(300);
+        document.removeEventListener("mousemove", onMouseMove);
+        document.removeEventListener("mouseup", onMouseUp);
+      } else if (newWidth > 600) {
+        setSidebarWidth(600);
+      } else {
+        setSidebarWidth(newWidth);
+      }
+    };
+    
+    const onMouseUp = () => {
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+    };
+    
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+  }, [sidebarWidth, setOverflowDate]);
 
   const overflowRows = overflowDate ? scheduleByDate.get(overflowDate) || [] : [];
   const overflowByBook = useMemo(() => {
@@ -169,18 +201,90 @@ export default function PlanPage() {
   }
 
   return (
-    <div className="calendar-page">
+    <div className="plan-layout">
       {showOnboarding && <OnboardingModal onClose={handleOnboardingComplete} />}
-      <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div>
-            <h1 style={{ margin: 0 }}>Plan</h1>
+      
+      <aside className={`bible-sidebar${overflowDate ? "" : " collapsed"}`} style={{ width: overflowDate ? sidebarWidth : 0, padding: overflowDate ? undefined : 0, border: overflowDate ? undefined : 'none' }}>
+        {overflowDate && (
+          <>
+            <div className="cal-popup-header" style={{ paddingBottom: 16 }}>
+              <h2>{overflowDate}</h2>
+              <button className="btn-ghost btn" type="button" onClick={() => setOverflowDate(null)}>
+                Close
+              </button>
+            </div>
+
+            {overflowByBook.size === 0 && <p className="hint-text">Nothing scheduled this day.</p>}
+
+            <div className="popup-book-list">
+              {[...overflowByBook.entries()].map(([bookId, bookRows]) => {
+                const isOpen = expandedBooks.has(bookId);
+                return (
+                  <div className="popup-book-section" key={bookId}>
+                    <button type="button" className="popup-book-header" onClick={() => toggleBookExpanded(bookId)}>
+                      <span className={`popup-chevron${isOpen ? " open" : ""}`}>›</span>
+                      <span
+                        className="popup-book-dot"
+                        style={{ background: GROUP_COLORS[bookRows[0].category].bg }}
+                      />
+                      {bookRows[0].book_name || bookId}
+                    </button>
+                    {isOpen && (
+                      <div className="popup-chapter-list">
+                        {bookRows.map((row) => (
+                          <div
+                            key={row.id}
+                            className={`popup-chapter-row${row.completed ? " completed" : ""}`}
+                            draggable
+                            onDragStart={(e) => handleChapterDragStart(e, row)}
+                            onClick={() =>
+                              navigate(`/bible/${DEFAULT_TRANSLATION_ID}/${row.book}/${row.chapter}`)
+                            }
+                          >
+                            <span className="popup-chapter-num">{row.chapter}</span>
+                            <label
+                              className="popup-chapter-read"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={row.completed}
+                                onChange={() => toggleChapter(row)}
+                                style={{ display: 'none' }}
+                              />
+                              {row.completed ? "Read" : "Mark"}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </aside>
+
+      {overflowDate && (
+        <div 
+          className="sidebar-resize-handle" 
+          onMouseDown={startResize} 
+          title="Drag to resize sidebar"
+        />
+      )}
+
+      <section className="plan-main">
+        <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div>
+              <h1 style={{ margin: 0 }}>Plan</h1>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-        </div>
-      </div>
-      <div className="calendar-grid-wrap">
+        <div className="calendar-grid-wrap" style={{ flex: 1 }}>
         <div className="calendar-weekdays">
           {WEEKDAY_LABELS.map((w) => (
             <span key={w}>{w.toUpperCase()}</span>
@@ -307,67 +411,7 @@ export default function PlanPage() {
           </button>
         </div>
       </div>
-
-      {overflowDate && (
-        <div className="cal-overlay" onClick={() => setOverflowDate(null)}>
-          <div className="cal-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="cal-popup-header">
-              <h2>{overflowDate}</h2>
-              <button className="btn-ghost btn" type="button" onClick={() => setOverflowDate(null)}>
-                Close
-              </button>
-            </div>
-
-            {overflowByBook.size === 0 && <p className="hint-text">Nothing scheduled this day.</p>}
-
-            <div className="popup-book-list">
-              {[...overflowByBook.entries()].map(([bookId, bookRows]) => {
-                const isOpen = expandedBooks.has(bookId);
-                return (
-                  <div className="popup-book-section" key={bookId}>
-                    <button type="button" className="popup-book-header" onClick={() => toggleBookExpanded(bookId)}>
-                      <span className={`popup-chevron${isOpen ? " open" : ""}`}>›</span>
-                      <span
-                        className="popup-book-dot"
-                        style={{ background: GROUP_COLORS[bookRows[0].category].bg }}
-                      />
-                      {bookRows[0].book_name || bookId}
-                    </button>
-                    {isOpen && (
-                      <div className="popup-chapter-list">
-                        {bookRows.map((row) => (
-                          <div
-                            key={row.id}
-                            className="popup-chapter-row"
-                            draggable
-                            onDragStart={(e) => handleChapterDragStart(e, row)}
-                            onClick={() =>
-                              navigate(`/bible/${DEFAULT_TRANSLATION_ID}/${row.book}/${row.chapter}`)
-                            }
-                          >
-                            <span className="popup-chapter-num">{row.chapter}</span>
-                            <label
-                              className="popup-chapter-read"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={row.completed}
-                                onChange={() => toggleChapter(row)}
-                              />
-                              Read
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+    </section>
+  </div>
+);
 }
