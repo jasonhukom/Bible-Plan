@@ -139,14 +139,29 @@ export default function BiblePage() {
 
   return (
     <div>
-      <div className="page-header" style={{ alignItems: "center" }}>
-        <div>
-          <h1>Bible</h1>
-          {currentBook && (
-            <p className="page-subtitle">
-              {currentBook.commonName || currentBook.name} {routeChapter}
-            </p>
-          )}
+      <div className="page-header" style={{ 
+        alignItems: "center", 
+        position: "sticky", 
+        top: 0, 
+        background: "var(--night)", 
+        zIndex: 10,
+        paddingTop: "16px",
+        marginTop: "-16px"
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button className="icon-btn" onClick={() => navigate(-1)} title="Go back">
+            <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+              <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div>
+            <h1 style={{ margin: 0 }}>Bible</h1>
+            {currentBook && (
+              <p className="page-subtitle">
+                {currentBook.commonName || currentBook.name} {routeChapter}
+              </p>
+            )}
+          </div>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <select
@@ -232,9 +247,6 @@ export default function BiblePage() {
                   {chapterData.book.commonName || chapterData.book.name} {chapterData.chapter.number}
                 </h1>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                  <button className="back-link" onClick={() => setSidebarOpen(true)} type="button" style={{ margin: 0 }}>
-                    ← Books
-                  </button>
                   <div className="reader-nav">
                     <button className="btn btn-ghost" onClick={() => changeChapter(-1)} type="button">
                       ‹ Prev
@@ -243,6 +255,13 @@ export default function BiblePage() {
                       Next ›
                     </button>
                   </div>
+                  <button className="back-link" onClick={() => setSidebarOpen(true)} type="button" style={{ margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
+                    <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    Books
+                  </button>
                 </div>
               </div>
 
