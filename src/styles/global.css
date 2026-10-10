@@ -487,7 +487,9 @@ h3 {
   border-radius: 50%;
   object-fit: cover;
   background: var(--night);
-  border: 2px solid var(--night-line);
+  border: 2px solid var(--gold);
+  padding: 3px;
+  background-clip: content-box;
 }
 
 .avatar-upload-row {
@@ -939,11 +941,14 @@ h3 {
 }
 
 .sidebar-avatar {
-  width: 19px;
-  height: 19px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  border: 1px solid var(--gold);
+  padding: 1px;
+  background-clip: content-box;
 }
 
 .sidebar-icon-btn {

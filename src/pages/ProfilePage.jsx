@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { dataApi } from "../lib/dataApi";
 import LoginModal from "../components/LoginModal";
+import ImageCropperModal from "../components/ImageCropperModal";
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -18,6 +19,7 @@ export default function ProfilePage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState(null);
 
   useEffect(() => {
     Promise.all([dataApi.getProfile(), dataApi.listSavedVerses()]).then(
@@ -32,11 +34,24 @@ export default function ProfilePage() {
     );
   }, []);
 
-  async function handleAvatarChange(e) {
+  function handleAvatarChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
+    
+    const reader = new FileReader();
+    reader.addEventListener("load", () => setCropImageSrc(reader.result));
+    reader.readAsDataURL(file);
+    e.target.value = null;
+  }
+
+  async function handleCropComplete(croppedBlob) {
+    setCropImageSrc(null);
+    if (!croppedBlob) return;
+    
     setUploading(true);
     setError("");
+    
+    const file = new File([croppedBlob], "avatar.jpg", { type: "image/jpeg" });
     const { data, error } = await dataApi.uploadAvatar(file);
     if (error) {
       setError(error.message);
@@ -159,6 +174,14 @@ export default function ProfilePage() {
 
       {showLoginModal && (
         <LoginModal onClose={() => setShowLoginModal(false)} onSuccess={() => setShowLoginModal(false)} />
+      )}
+
+      {cropImageSrc && (
+        <ImageCropperModal
+          imageSrc={cropImageSrc}
+          onCropComplete={handleCropComplete}
+          onClose={() => setCropImageSrc(null)}
+        />
       )}
     </div>
   );
