@@ -646,6 +646,8 @@ h3 {
 
 .sidebar {
   width: 280px;
+  min-width: 200px;
+  max-width: 50vw;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -654,12 +656,15 @@ h3 {
   height: 100vh;
   position: sticky;
   top: 0;
-  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
+  resize: horizontal;
+  overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 .sidebar.collapsed {
-  width: var(--nav-width);
+  width: var(--nav-width) !important;
+  min-width: var(--nav-width);
+  resize: none;
 }
 
 .sidebar.collapsed .sidebar-title,
@@ -681,6 +686,10 @@ h3 {
 
 .sidebar:not(.collapsed) .toggle-icon-open {
   display: none;
+}
+
+.sidebar.collapsed .sidebar-footer {
+  flex-direction: column;
 }
 
 .sidebar.collapsed .toggle-icon-close {
@@ -1514,7 +1523,7 @@ h3 {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--night-2);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {

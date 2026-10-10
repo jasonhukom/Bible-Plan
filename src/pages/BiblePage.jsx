@@ -144,9 +144,7 @@ export default function BiblePage() {
         position: "sticky", 
         top: 0, 
         background: "var(--night)", 
-        zIndex: 10,
-        paddingTop: "16px",
-        marginTop: "-16px"
+        zIndex: 10
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <button className="icon-btn" onClick={() => navigate(-1)} title="Go back">
