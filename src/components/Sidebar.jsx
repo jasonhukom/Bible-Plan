@@ -143,8 +143,11 @@ export default function Sidebar() {
       <div className="panel-box">
         <div className="panel-box-title">Plan settings</div>
         {isMobile && (
-          <button type="button" className="btn btn-ghost" style={{ position: 'absolute', top: 12, right: 12, padding: '4px 8px' }} onClick={() => setShowMobilePlan(false)}>
-            Close
+          <button type="button" style={{ position: 'absolute', top: 12, right: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: '50%', color: 'var(--ink-soft)', background: 'transparent', border: 'none' }} onClick={() => setShowMobilePlan(false)} aria-label="Close">
+            <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+              <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+              <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
           </button>
         )}
 
