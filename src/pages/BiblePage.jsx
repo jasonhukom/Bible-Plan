@@ -286,6 +286,10 @@ export default function BiblePage() {
                   return null;
                 })}
               </div>
+              {chapterData.attribution && (
+                <p className="bible-attribution" style={{ marginTop: "32px", fontSize: "12px", color: "var(--ink-soft)", fontStyle: "italic", textAlign: "center" }} dangerouslySetInnerHTML={{ __html: chapterData.attribution }}>
+                </p>
+              )}
             </>
           )}
         </section>
