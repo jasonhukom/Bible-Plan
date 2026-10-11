@@ -228,13 +228,13 @@ export default function BiblePage() {
                   style={{
                     background: 'transparent',
                     border: 'none',
-                    color: 'var(--gold-bright, #f0cf7a)',
+                    color: '#ffffff',
                     cursor: 'pointer',
                     padding: 0,
                     fontSize: 'inherit',
                     fontFamily: 'inherit',
                     textDecoration: 'underline',
-                    opacity: 0.9
+                    opacity: 0.95
                   }}
                   title="Click to change Bible version"
                 >
@@ -249,7 +249,7 @@ export default function BiblePage() {
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button
-              className="btn btn-ghost"
+              className="btn btn-ghost version-picker-btn"
               type="button"
               onClick={() => setVersionsSidebarOpen(!versionsSidebarOpen)}
               style={{
@@ -262,14 +262,15 @@ export default function BiblePage() {
                 border: '1px solid var(--night-line)',
                 background: 'var(--night-2)',
                 borderRadius: '8px',
-                padding: '7px 12px'
+                padding: '7px 12px',
+                color: '#ffffff'
               }}
               title="Click to change Bible version"
             >
-              <span style={{ maxWidth: 190, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ maxWidth: 190, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#ffffff' }}>
                 {translations.find(t => t.id === translationId)?.label || translationId}
               </span>
-              <span style={{ fontSize: 9, opacity: 0.7, transform: versionsSidebarOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+              <span style={{ fontSize: 9, opacity: 0.8, color: '#ffffff', transform: versionsSidebarOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
                 ▼
               </span>
             </button>

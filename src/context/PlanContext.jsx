@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useAuth } from "./AuthContext";
 import { dataApi } from "../lib/dataApi";
 import { generateSchedule } from "../lib/planGenerator";
-import { DEFAULT_TRANSLATION_ID } from "../lib/youversion";
+import { DEFAULT_TRANSLATION_ID, getPreferredTranslation } from "../lib/bible";
 
 const PlanContext = createContext(null);
 
@@ -64,7 +64,7 @@ export function PlanProvider({ children }) {
       if (planError) throw new Error(planError.message);
 
       const scheduleDays = await generateSchedule({
-        translationId: DEFAULT_TRANSLATION_ID,
+        translationId: getPreferredTranslation() || DEFAULT_TRANSLATION_ID,
         startDate: savedPlan.start_date,
         days: savedPlan.days,
         groups: savedPlan.book_groups,

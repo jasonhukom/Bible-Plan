@@ -1620,7 +1620,7 @@ h3 {
 .version-list-btn {
   background: transparent;
   border: none;
-  color: var(--ink);
+  color: var(--cream, #ffffff);
   text-align: left;
   padding: 10px 12px;
   border-radius: 6px;
@@ -1635,8 +1635,12 @@ h3 {
 
 .version-list-btn.active {
   background: var(--brand-hover);
-  color: var(--gold-bright);
+  color: #ffffff;
   font-weight: 500;
+}
+
+.version-picker-btn {
+  color: #ffffff !important;
 }
 
 /* --------------------------------------------------------------------------

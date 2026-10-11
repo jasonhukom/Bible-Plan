@@ -45,21 +45,34 @@ export async function listTranslations() {
 }
 
 export async function listBooks(translationId) {
-  if (apibible.isApiBible(translationId)) {
-    return apibible.listBooks(translationId);
-  } else if (translationId && translationId.startsWith('yv-')) {
-    return youversion.listBooks(translationId.replace('yv-', ''));
-  } else {
-    return helloao.listBooks(translationId);
+  const tid = translationId || DEFAULT_TRANSLATION_ID;
+  try {
+    if (apibible.isApiBible(tid)) {
+      return await apibible.listBooks(tid);
+    } else if (tid.startsWith('yv-') || ['3034', '1', '12', '206', '111'].includes(String(tid))) {
+      const cleanYv = String(tid).replace('yv-', '');
+      return await youversion.listBooks(cleanYv);
+    } else {
+      return await helloao.listBooks(tid);
+    }
+  } catch (err) {
+    console.warn(`listBooks failed for ${tid}, falling back to BSB`, err);
+    try {
+      return await helloao.listBooks("BSB");
+    } catch {
+      return await apibible.listBooks("fallback");
+    }
   }
 }
 
 export async function getChapter(translationId, bookId, chapterNumber) {
-  if (apibible.isApiBible(translationId)) {
-    return apibible.getChapter(translationId, bookId, chapterNumber);
-  } else if (translationId && translationId.startsWith('yv-')) {
-    return youversion.getChapter(translationId.replace('yv-', ''), bookId, chapterNumber);
+  const tid = translationId || DEFAULT_TRANSLATION_ID;
+  if (apibible.isApiBible(tid)) {
+    return apibible.getChapter(tid, bookId, chapterNumber);
+  } else if (tid.startsWith('yv-') || ['3034', '1', '12', '206', '111'].includes(String(tid))) {
+    const cleanYv = String(tid).replace('yv-', '');
+    return youversion.getChapter(cleanYv, bookId, chapterNumber);
   } else {
-    return helloao.getChapter(translationId, bookId, chapterNumber);
+    return helloao.getChapter(tid, bookId, chapterNumber);
   }
 }
