@@ -14,6 +14,8 @@ export default function App() {
         <Route path="/" element={<Navigate to="/plan" replace />} />
         <Route path="/plan" element={<PlanPage />} />
         <Route path="/bible" element={<BiblePage />} />
+        <Route path="/bible/:translationId" element={<BiblePage />} />
+        <Route path="/bible/:translationId/:bookId" element={<BiblePage />} />
         <Route path="/bible/:translationId/:bookId/:chapter" element={<BiblePage />} />
         <Route path="/saves" element={<SavesPage />} />
         <Route path="/profile" element={<ProfilePage />} />

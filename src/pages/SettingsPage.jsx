@@ -3,7 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { dataApi } from "../lib/dataApi";
-import { DEFAULT_TRANSLATION_ID, listTranslations } from "../lib/bible";
+import { DEFAULT_TRANSLATION_ID, listTranslations, getPreferredTranslation, setPreferredTranslation } from "../lib/bible";
 
 export default function SettingsPage() {
   const { user, signOut, isConfigured } = useAuth();
@@ -11,7 +11,7 @@ export default function SettingsPage() {
   const navigate = useNavigate();
 
   const [translations, setTranslations] = useState([]);
-  const [defaultTranslation, setDefaultTranslation] = useState(DEFAULT_TRANSLATION_ID);
+  const [defaultTranslation, setDefaultTranslation] = useState(() => getPreferredTranslation());
   const [numberPosition, setNumberPosition] = useState("right");
   const [preferences, setPreferences] = useState({});
   const [message, setMessage] = useState("");
@@ -23,7 +23,10 @@ export default function SettingsPage() {
   useEffect(() => {
     if (!user) return;
     dataApi.getSettings().then(({ data }) => {
-      if (data?.translation) setDefaultTranslation(data.translation);
+      if (data?.translation) {
+        setDefaultTranslation(data.translation);
+        setPreferredTranslation(data.translation);
+      }
       if (data?.preferences) {
         setPreferences(data.preferences);
         if (data.preferences.dateNumberPosition) setNumberPosition(data.preferences.dateNumberPosition);
@@ -40,11 +43,12 @@ export default function SettingsPage() {
 
   async function handleTranslationChange(id) {
     setDefaultTranslation(id);
+    setPreferredTranslation(id);
     if (user) {
       await dataApi.saveSettings({ translation: id });
-      setMessage("Saved.");
-      setTimeout(() => setMessage(""), 2000);
     }
+    setMessage("Saved.");
+    setTimeout(() => setMessage(""), 2000);
   }
 
   async function handleSignOut() {

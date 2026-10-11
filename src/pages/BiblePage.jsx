@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import {
   DEFAULT_TRANSLATION_ID,
+  getPreferredTranslation,
+  setPreferredTranslation,
   listTranslations,
   listBooks,
   getChapter
@@ -15,7 +17,8 @@ export default function BiblePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const translationId = routeTranslation || DEFAULT_TRANSLATION_ID;
+  const [preferredTrans, setPreferredTrans] = useState(() => getPreferredTranslation());
+  const translationId = routeTranslation || preferredTrans || DEFAULT_TRANSLATION_ID;
 
   const [translations, setTranslations] = useState([]);
   const [books, setBooks] = useState([]);
@@ -29,6 +32,39 @@ export default function BiblePage() {
   const [expandedBook, setExpandedBook] = useState(routeBook || null);
   const [savedVerses, setSavedVerses] = useState([]);
   const [saveNotice, setSaveNotice] = useState("");
+
+  const dropdownRef = useRef(null);
+
+  // Close version dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setVersionsSidebarOpen(false);
+      }
+    }
+    if (versionsSidebarOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [versionsSidebarOpen]);
+
+  // Synchronize when settings change the version
+  useEffect(() => {
+    function onTranslationChanged(e) {
+      const nextId = e.detail;
+      if (!nextId) return;
+      setPreferredTrans(nextId);
+      if (routeBook && routeChapter) {
+        navigate(`/bible/${nextId}/${routeBook}/${routeChapter}`);
+      } else {
+        navigate(`/bible/${nextId}`);
+      }
+    }
+    window.addEventListener("bible-translation-changed", onTranslationChanged);
+    return () => window.removeEventListener("bible-translation-changed", onTranslationChanged);
+  }, [routeBook, routeChapter, navigate]);
 
   const grouped = useMemo(() => groupBooks(books), [books]);
   const currentBook = useMemo(() => books.find((b) => b.id === routeBook), [books, routeBook]);
@@ -80,10 +116,15 @@ export default function BiblePage() {
   }, [refreshSaved]);
 
   function goToTranslation(nextTranslation) {
+    setPreferredTranslation(nextTranslation);
+    setPreferredTrans(nextTranslation);
+    if (user) {
+      dataApi.saveSettings({ translation: nextTranslation }).catch(() => {});
+    }
     if (routeBook && routeChapter) {
       navigate(`/bible/${nextTranslation}/${routeBook}/${routeChapter}`);
     } else {
-      navigate("/bible");
+      navigate(`/bible/${nextTranslation}`);
     }
   }
 
@@ -143,11 +184,11 @@ export default function BiblePage() {
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = sidebarWidth;
-    
+
     const onMouseMove = (moveEvent) => {
       const delta = startX - moveEvent.clientX;
       const newWidth = startWidth + delta;
-      
+
       if (newWidth < 120) {
         setSidebarOpen(false);
         setSidebarWidth(250);
@@ -159,12 +200,12 @@ export default function BiblePage() {
         setSidebarWidth(newWidth);
       }
     };
-    
+
     const onMouseUp = () => {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };
-    
+
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
   }, [sidebarWidth, setSidebarOpen]);
@@ -176,16 +217,61 @@ export default function BiblePage() {
           <div>
             <h1 style={{ margin: 0 }}>Bible</h1>
             {currentBook && (
-              <p className="page-subtitle">
-                {currentBook.commonName || currentBook.name} {routeChapter}
+              <p className="page-subtitle" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
+                <span>
+                  {currentBook.commonName || currentBook.name} {routeChapter}
+                </span>
+                <span style={{ opacity: 0.4 }}>•</span>
+                <button
+                  type="button"
+                  onClick={() => setVersionsSidebarOpen((v) => !v)}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: 'var(--gold-bright, #f0cf7a)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    fontSize: 'inherit',
+                    fontFamily: 'inherit',
+                    textDecoration: 'underline',
+                    opacity: 0.9
+                  }}
+                  title="Click to change Bible version"
+                >
+                  {translations.find(t => t.id === translationId)?.shortName ||
+                   translations.find(t => t.id === translationId)?.label?.split(' ')[0] ||
+                   translationId}
+                </button>
               </p>
             )}
           </div>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <div style={{ position: 'relative' }}>
-            <button className="btn btn-ghost" onClick={() => setVersionsSidebarOpen(!versionsSidebarOpen)} style={{ maxWidth: 200, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {translations.find(t => t.id === translationId)?.label || translationId}
+          <div style={{ position: 'relative' }} ref={dropdownRef}>
+            <button
+              className="btn btn-ghost"
+              type="button"
+              onClick={() => setVersionsSidebarOpen(!versionsSidebarOpen)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                maxWidth: 240,
+                cursor: 'pointer',
+                fontWeight: 500,
+                border: '1px solid var(--night-line)',
+                background: 'var(--night-2)',
+                borderRadius: '8px',
+                padding: '7px 12px'
+              }}
+              title="Click to change Bible version"
+            >
+              <span style={{ maxWidth: 190, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {translations.find(t => t.id === translationId)?.label || translationId}
+              </span>
+              <span style={{ fontSize: 9, opacity: 0.7, transform: versionsSidebarOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                ▼
+              </span>
             </button>
             {versionsSidebarOpen && (
               <div className="versions-sidebar-dropdown">
@@ -194,12 +280,18 @@ export default function BiblePage() {
                 </div>
                 <div className="versions-sidebar-list">
                   {translations.map((t) => (
-                    <button 
-                      key={t.id} 
+                    <button
+                      key={t.id}
                       className={`version-list-btn${translationId === t.id ? ' active' : ''}`}
                       onClick={() => { goToTranslation(t.id); setVersionsSidebarOpen(false); }}
+                      style={{ display: 'flex', flexDirection: 'column', gap: 2 }}
                     >
-                      {t.label}
+                      <div style={{ fontWeight: 500 }}>{t.label}</div>
+                      {t.provider && (
+                        <span style={{ fontSize: 11, opacity: 0.6, textTransform: 'uppercase' }}>
+                          {t.provider === 'apibible' ? 'API.Bible' : t.provider === 'helloao' ? 'HelloAO' : 'YouVersion'}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -242,9 +334,8 @@ export default function BiblePage() {
                           <button
                             key={ch}
                             type="button"
-                            className={`chapter-grid-btn${
-                              routeBook === book.id && Number(routeChapter) === ch ? " active" : ""
-                            }`}
+                            className={`chapter-grid-btn${routeBook === book.id && Number(routeChapter) === ch ? " active" : ""
+                              }`}
                             onClick={() => openChapter(book.id, ch)}
                           >
                             {ch}
@@ -260,9 +351,9 @@ export default function BiblePage() {
         </aside>
 
         {sidebarOpen && !(!routeBook) && (
-          <div 
-            className="sidebar-resize-handle" 
-            onMouseDown={startResize} 
+          <div
+            className="sidebar-resize-handle"
+            onMouseDown={startResize}
             title="Drag to resize sidebar"
           />
         )}
@@ -288,13 +379,6 @@ export default function BiblePage() {
                       Next ›
                     </button>
                   </div>
-                  <button className="back-link" onClick={() => setSidebarOpen(true)} type="button" style={{ margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
-                    <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
-                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    Books
-                  </button>
                 </div>
               </div>
 

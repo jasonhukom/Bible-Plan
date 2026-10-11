@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { DEFAULT_TRANSLATION_ID } from "../lib/youversion";
+import { getPreferredTranslation } from "../lib/bible";
 import { GROUP_COLORS } from "../lib/bibleBooks";
 import { buildMonthGrid, monthLabel, WEEKDAY_LABELS } from "../lib/calendarGrid";
 import { useCalendarView } from "../context/CalendarViewContext";
@@ -238,7 +238,7 @@ export default function PlanPage() {
                             draggable
                             onDragStart={(e) => handleChapterDragStart(e, row)}
                             onClick={() =>
-                              navigate(`/bible/${DEFAULT_TRANSLATION_ID}/${row.book}/${row.chapter}`)
+                              navigate(`/bible/${getPreferredTranslation()}/${row.book}/${row.chapter}`)
                             }
                           >
                             <span className="popup-chapter-num">{row.chapter}</span>
