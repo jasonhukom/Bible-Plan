@@ -30,12 +30,6 @@ export const API_BIBLE_TRANSLATIONS = [
     provider: "apibible"
   },
   {
-    id: "b907c8622b59a1f7-01",
-    label: "New Living Translation Catholic Edition (NLT-CE)",
-    shortName: "NLT-CE",
-    provider: "apibible"
-  },
-  {
     id: "a556c5305ee15c3f-01",
     label: "Christian Standard Bible (CSB)",
     shortName: "CSB",

@@ -16,7 +16,7 @@
 import { listBooks } from "./bible";
 import { classifyBook, BOOK_NAMES } from "./bibleBooks";
 
-const GROUP_ORDER = ["ot", "dc", "nt"];
+const GROUP_ORDER = ["ot", "nt"];
 
 /**
  * @param {string} translationId
@@ -92,7 +92,8 @@ function addDays(dateStr, n) {
  *   (one row per entry) -- NOT yet grouped into display refs.
  */
 export async function generateSchedule({ translationId, startDate, days, groups, orderMode, excludeBooks = [] }) {
-  const orderedGroups = GROUP_ORDER.filter((g) => groups.includes(g));
+  const filteredGroups = (groups || []).filter((g) => g !== "dc");
+  const orderedGroups = GROUP_ORDER.filter((g) => filteredGroups.includes(g));
   const pools = await buildGroupPools(translationId, orderedGroups, excludeBooks);
 
   const dayEntries = Array.from({ length: days }, () => []);

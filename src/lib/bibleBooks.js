@@ -44,7 +44,7 @@ export const GROUP_LABELS = {
 
 /** Google-Calendar-style event colors per section, for the Plan page. */
 export const GROUP_COLORS = {
-  ot: { bg: "#4a3a12", text: "#f0cf7a" }, // gold
+  ot: { bg: "#f2b822", text: "#1a1202" }, // golden yellow
   dc: { bg: "#26402a", text: "#bfe0c3" }, // green
   nt: { bg: "#1f3a5c", text: "#c3dcf5" } // blue
 };

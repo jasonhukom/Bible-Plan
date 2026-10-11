@@ -130,7 +130,6 @@ export default function OnboardingModal({ onClose }) {
           <div className="plan-checkbox-row">
             <label><input type="checkbox" checked={groups.includes("ot")} onChange={() => toggleGroup("ot")} /> Old Testament</label>
             <label><input type="checkbox" checked={groups.includes("nt")} onChange={() => toggleGroup("nt")} /> New Testament</label>
-            <label><input type="checkbox" checked={groups.includes("dc")} onChange={() => toggleGroup("dc")} /> Deuterocanonical</label>
           </div>
 
           <label className="plan-field-label">Order</label>

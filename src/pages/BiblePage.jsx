@@ -315,8 +315,8 @@ export default function BiblePage() {
         <aside className={`bible-sidebar${sidebarOpen ? "" : " collapsed"}`} style={{ width: sidebarOpen ? sidebarWidth : 0, padding: sidebarOpen ? undefined : 0, border: sidebarOpen ? undefined : 'none' }}>
           {booksLoading && <p className="hint-text">Loading books…</p>}
 
-          {(["ot", "dc", "nt"]).map((groupKey) =>
-            grouped[groupKey].length ? (
+          {(["ot", "nt"]).map((groupKey) =>
+            grouped[groupKey]?.length ? (
               <div className="book-group" key={groupKey}>
                 <div className="book-group-label">{GROUP_LABELS[groupKey]}</div>
                 {grouped[groupKey].map((book) => (

@@ -33,15 +33,14 @@
 
 ### 🗓️ Interactive Calendar View
 - **Google Calendar-Style Grid**: Month view featuring color-coded event pills by testament:
-  - 🟨 **Old Testament** (Gold)
+  - 🟨 **Old Testament** (Golden Yellow)
   - 🟦 **New Testament** (Blue)
-  - 🟩 **Deuterocanonical** (Green)
 - **Drag-and-Drop Rescheduling**: Drag an entire book pill to another date, or click a pill to drag individual chapters between days.
 - **Progress Tracking**: Check off chapters as you read; progress is synced and saved instantly.
 
 ### 📅 Dynamic Reading Plan Generator
 - **Flexible Length & Start Date**: Generate schedules from 1 to 730 days starting on any specified date.
-- **Customizable Book Selection**: Select Old Testament, New Testament, and Deuterocanonical books.
+- **Customizable Book Selection**: Select Old Testament and New Testament books.
 - **Onboarding Filter**: Mark books you have already read to immediately exclude them from your schedule.
 - **Pacing Modes**:
   - **Overlap Mode**: Balanced daily reading across selected testaments.
@@ -49,7 +48,7 @@
 
 ### 📖 Integrated Multi-API Bible Reader
 - **Dual API Scripture Providers**:
-  - **API.Bible REST API**: Access copyrighted & modern translations including **NLT** (New Living Translation), **NLT-UK**, **NLT-CE**, **NIV** (New International Version 2011), and **CSB** (Christian Standard Bible).
+  - **API.Bible REST API**: Access copyrighted & modern translations including **NLT** (New Living Translation), **NLT-UK**, **NIV** (New International Version 2011), and **CSB** (Christian Standard Bible).
   - **HelloAO Bible API**: Instant access to 1000+ open and public-domain translations like **BSB** (Berean Standard Bible), **WEB**, **KJV**, and **ASV**.
 - **Interactive Version Picker**: Switch versions dynamically from the Bible header or subtitle. Preferences sync automatically with your account settings.
 - **Distraction-Free Reading Mode**: The sidebar automatically collapses when a chapter opens to keep your focus on Scripture.

@@ -94,7 +94,7 @@ export default function Sidebar() {
     if (!plan) return;
     setStartDate(plan.start_date);
     setDays(plan.days);
-    setGroups(plan.book_groups);
+    setGroups(plan.book_groups ? plan.book_groups.filter((g) => g !== "dc") : ["ot", "nt"]);
     setOrderMode(plan.order_mode);
   }, [plan]);
 
@@ -184,10 +184,6 @@ export default function Sidebar() {
           <label>
             <input type="checkbox" checked={groups.includes("nt")} onChange={() => toggleGroup("nt")} />
             New Testament
-          </label>
-          <label>
-            <input type="checkbox" checked={groups.includes("dc")} onChange={() => toggleGroup("dc")} />
-            Deuterocanonical
           </label>
         </div>
 
