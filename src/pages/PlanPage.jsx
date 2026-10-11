@@ -152,11 +152,11 @@ export default function PlanPage() {
     e.preventDefault();
     const startX = e.clientX;
     const startWidth = sidebarWidth;
-    
+
     const onMouseMove = (moveEvent) => {
       const delta = startX - moveEvent.clientX; // moving left increases width in row-reverse
       const newWidth = startWidth + delta;
-      
+
       if (newWidth < 120) {
         setOverflowDate(null);
         setSidebarWidth(300);
@@ -168,12 +168,12 @@ export default function PlanPage() {
         setSidebarWidth(newWidth);
       }
     };
-    
+
     const onMouseUp = () => {
       document.removeEventListener("mousemove", onMouseMove);
       document.removeEventListener("mouseup", onMouseUp);
     };
-    
+
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
   }, [sidebarWidth, setOverflowDate]);
@@ -203,7 +203,7 @@ export default function PlanPage() {
   return (
     <div className="plan-layout">
       {showOnboarding && <OnboardingModal onClose={handleOnboardingComplete} />}
-      
+
       <aside className={`bible-sidebar${overflowDate ? "" : " collapsed"}`} style={{ width: overflowDate ? sidebarWidth : 0, padding: overflowDate ? undefined : 0, border: overflowDate ? undefined : 'none' }}>
         {overflowDate && (
           <>
@@ -267,142 +267,151 @@ export default function PlanPage() {
       </aside>
 
       {overflowDate && (
-        <div 
-          className="sidebar-resize-handle" 
-          onMouseDown={startResize} 
+        <div
+          className="sidebar-resize-handle"
+          onMouseDown={startResize}
           title="Drag to resize sidebar"
         />
       )}
 
       <section className="plan-main">
+        <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div>
+              <h1 style={{ margin: 0 }}>Plan</h1>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          </div>
+        </div>
         <div className="calendar-grid-wrap" style={{ flex: 1 }}>
-        <div className="calendar-weekdays">
-          {WEEKDAY_LABELS.map((w) => (
-            <span key={w}>{w.toUpperCase()}</span>
-          ))}
-        </div>
+          <div className="calendar-weekdays">
+            {WEEKDAY_LABELS.map((w) => (
+              <span key={w}>{w.toUpperCase()}</span>
+            ))}
+          </div>
 
-        <div className="calendar-month-grid">
-          {cells.map((cell) => {
-            const rows = scheduleByDate.get(cell.date) || [];
-            const pills = pillsForDate(rows);
-            const visible = pills.slice(0, MAX_VISIBLE_PILLS);
-            const overflowCount = pills.length - visible.length;
-            const isToday = cell.date === todayString;
-            const isSelected = cell.date === selectedDate;
-            const isFullyRead = rows.length > 0 && rows.every((r) => r.completed);
+          <div className="calendar-month-grid">
+            {cells.map((cell) => {
+              const rows = scheduleByDate.get(cell.date) || [];
+              const pills = pillsForDate(rows);
+              const visible = pills.slice(0, MAX_VISIBLE_PILLS);
+              const overflowCount = pills.length - visible.length;
+              const isToday = cell.date === todayString;
+              const isSelected = cell.date === selectedDate;
+              const isFullyRead = rows.length > 0 && rows.every((r) => r.completed);
 
-            return (
-              <div
-                key={cell.date}
-                className={`cal-day-cell${cell.isCurrentMonth ? "" : " muted"}${isSelected ? " selected" : ""}${isFullyRead ? " done" : ""
-                  }${dragOverDate === cell.date ? " drag-over" : ""}`}
-                onClick={() => setSelectedDate(cell.date)}
-                onDragOver={(e) => {
-                  e.preventDefault();
-                  setDragOverDate(cell.date);
-                }}
-                onDragLeave={() => setDragOverDate((d) => (d === cell.date ? null : d))}
-                onDrop={(e) => handleDrop(e, cell.date)}
-              >
-                <div className={`cal-day-number-row pos-${numberPosition}`}>
-                  <span className={`cal-day-number${isToday ? " today" : ""}`}>{cell.day}</span>
-                </div>
-
-                {pills.length > 0 && (
-                  <div className="cal-day-events">
-                    {visible.map((pill) => (
-                      <button
-                        key={pill.bookId}
-                        type="button"
-                        draggable
-                        className="cal-event-pill"
-                        style={{ background: GROUP_COLORS[pill.category].bg, color: GROUP_COLORS[pill.category].text }}
-                        onDragStart={(e) => handlePillDragStart(e, pill)}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openDay(cell.date);
-                        }}
-                        title={`${pill.bookName} ${pill.rangeText}`}
-                      >
-                        <span className="cal-event-name">{pill.bookName}</span>
-                        <span className="cal-event-range">{pill.rangeText}</span>
-                      </button>
-                    ))}
-                    {overflowCount > 0 && (
-                      <button
-                        type="button"
-                        className="cal-day-more"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openDay(cell.date);
-                        }}
-                      >
-                        {overflowCount} more
-                      </button>
-                    )}
+              return (
+                <div
+                  key={cell.date}
+                  className={`cal-day-cell${cell.isCurrentMonth ? "" : " muted"}${isSelected ? " selected" : ""}${isFullyRead ? " done" : ""
+                    }${dragOverDate === cell.date ? " drag-over" : ""}`}
+                  onClick={() => setSelectedDate(cell.date)}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOverDate(cell.date);
+                  }}
+                  onDragLeave={() => setDragOverDate((d) => (d === cell.date ? null : d))}
+                  onDrop={(e) => handleDrop(e, cell.date)}
+                >
+                  <div className={`cal-day-number-row pos-${numberPosition}`}>
+                    <span className={`cal-day-number${isToday ? " today" : ""}`}>{cell.day}</span>
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
 
-      <div className="calendar-bottom-bar">
-        <div className="calendar-bottom-left">
-          <button
-            className="icon-btn theme-toggle-btn"
-            type="button"
-            onClick={() => setMode(mode === "dark" ? "light" : "dark")}
-            title="Toggle dark/light mode"
-          >
-            {mode === "dark" ? (
-              <svg viewBox="0 0 24 24" fill="none" width="17" height="17">
-                <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.7" />
-                <path
-                  d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinecap="round"
-                />
-              </svg>
-            ) : (
-              <svg viewBox="0 0 24 24" fill="none" width="17" height="17">
-                <path
-                  d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"
-                  stroke="currentColor"
-                  strokeWidth="1.7"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            )}
-          </button>
-          <span className="calendar-date-text">{dateLabel}</span>
-          <button
-            type="button"
-            className="time-format-btn"
-            onClick={() => setTimeFormat((f) => (f === "12h" ? "24h" : "12h"))}
-            title="Switch AM/PM \u2194 24-hour"
-          >
-            {timeLabel}
-          </button>
+                  {pills.length > 0 && (
+                    <div className="cal-day-events">
+                      {visible.map((pill) => (
+                        <button
+                          key={pill.bookId}
+                          type="button"
+                          draggable
+                          className="cal-event-pill"
+                          style={{ background: GROUP_COLORS[pill.category].bg, color: GROUP_COLORS[pill.category].text }}
+                          onDragStart={(e) => handlePillDragStart(e, pill)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDay(cell.date);
+                          }}
+                          title={`${pill.bookName} ${pill.rangeText}`}
+                        >
+                          <span className="cal-event-name">{pill.bookName}</span>
+                          <span className="cal-event-range">{pill.rangeText}</span>
+                        </button>
+                      ))}
+                      {overflowCount > 0 && (
+                        <button
+                          type="button"
+                          className="cal-day-more"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDay(cell.date);
+                          }}
+                        >
+                          {overflowCount} more
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
-        <div className="calendar-bottom-right">
-          <button className="icon-btn" type="button" onClick={goToPrevMonth} aria-label="Previous month">
-            ‹
-          </button>
-          <span className="calendar-bottom-title">{monthLabel(viewYear, viewMonth)}</span>
-          <button className="icon-btn" type="button" onClick={goToNextMonth} aria-label="Next month">
-            ›
-          </button>
-          <button className="btn today-btn" type="button" onClick={goToToday}>
-            Today
-          </button>
+        <div className="calendar-bottom-bar">
+          <div className="calendar-bottom-left">
+            <button
+              className="icon-btn theme-toggle-btn"
+              type="button"
+              onClick={() => setMode(mode === "dark" ? "light" : "dark")}
+              title="Toggle dark/light mode"
+            >
+              {mode === "dark" ? (
+                <svg viewBox="0 0 24 24" fill="none" width="17" height="17">
+                  <circle cx="12" cy="12" r="4.2" stroke="currentColor" strokeWidth="1.7" />
+                  <path
+                    d="M12 2.5v2M12 19.5v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M2.5 12h2M19.5 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" width="17" height="17">
+                  <path
+                    d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              )}
+            </button>
+            <span className="calendar-date-text">{dateLabel}</span>
+            <button
+              type="button"
+              className="time-format-btn"
+              onClick={() => setTimeFormat((f) => (f === "12h" ? "24h" : "12h"))}
+              title="Switch AM/PM \u2194 24-hour"
+            >
+              {timeLabel}
+            </button>
+          </div>
+
+          <div className="calendar-bottom-right">
+            <button className="icon-btn" type="button" onClick={goToPrevMonth} aria-label="Previous month">
+              ‹
+            </button>
+            <span className="calendar-bottom-title">{monthLabel(viewYear, viewMonth)}</span>
+            <button className="icon-btn" type="button" onClick={goToNextMonth} aria-label="Next month">
+              ›
+            </button>
+            <button className="btn today-btn" type="button" onClick={goToToday}>
+              Today
+            </button>
+          </div>
         </div>
-      </div>
-    </section>
-  </div>
-);
+      </section>
+    </div>
+  );
 }

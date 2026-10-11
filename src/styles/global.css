@@ -1487,6 +1487,7 @@ h3 {
   background: var(--night-hover);
   border-color: var(--brand);
 }
+
 .popup-chapter-row.completed {
   background: var(--brand-hover);
   border-color: var(--brand);
@@ -1510,7 +1511,10 @@ h3 {
   display: flex;
   flex-direction: row-reverse;
   height: 100vh;
+  width: 100%;
+  flex: 1;
 }
+
 .plan-main {
   flex: 1;
   min-width: 0;
@@ -1592,17 +1596,19 @@ h3 {
   background: var(--night-2);
   border: 1px solid var(--night-line);
   border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
   z-index: 100;
 }
+
 .versions-sidebar-header {
   padding: 12px 16px;
   border-bottom: 1px solid var(--night-line);
   background: var(--night);
   border-radius: 8px 8px 0 0;
 }
+
 .versions-sidebar-list {
   overflow-y: auto;
   padding: 8px;
@@ -1610,6 +1616,7 @@ h3 {
   flex-direction: column;
   gap: 4px;
 }
+
 .version-list-btn {
   background: transparent;
   border: none;
@@ -1621,9 +1628,11 @@ h3 {
   font-size: 14px;
   transition: background 0.15s ease;
 }
+
 .version-list-btn:hover {
   background: var(--night-hover);
 }
+
 .version-list-btn.active {
   background: var(--brand-hover);
   color: var(--gold-bright);
