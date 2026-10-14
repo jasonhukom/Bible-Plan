@@ -6,6 +6,7 @@ import SavesPage from "./pages/SavesPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
 import LicensesPage from "./pages/LicensesPage";
+import LoginPage from "./pages/LoginPage";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/bible/:translationId/:bookId/:chapter" element={<BiblePage />} />
         <Route path="/saves" element={<SavesPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="/licenses" element={<LicensesPage />} />
       </Route>

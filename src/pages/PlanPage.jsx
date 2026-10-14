@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPreferredTranslation } from "../lib/bible";
-import { GROUP_COLORS } from "../lib/bibleBooks";
+import { GROUP_COLORS, BOOK_NAMES, getShortBookName } from "../lib/bibleBooks";
 import { buildMonthGrid, monthLabel, WEEKDAY_LABELS } from "../lib/calendarGrid";
 import { useCalendarView } from "../context/CalendarViewContext";
 import { usePlan } from "../context/PlanContext";
@@ -36,9 +36,13 @@ function pillsForDate(rows) {
       }
     }
     const rangeText = runs.map((r) => (r.start === r.end ? `${r.start}` : `${r.start}-${r.end}`)).join(", ");
+    const bookFullName = sorted[0].book_name || BOOK_NAMES[bookId] || bookId;
+    const shortBookName = getShortBookName(bookId, bookFullName);
+
     pills.push({
       bookId,
-      bookName: sorted[0].book_name || bookId,
+      bookName: bookFullName,
+      shortBookName,
       category: sorted[0].category,
       rangeText,
       startChapter: sorted[0].chapter,
@@ -54,6 +58,14 @@ function parseDragPayload(e) {
   } catch {
     return null;
   }
+}
+
+function formatDetailDate(dateStr) {
+  if (!dateStr) return "";
+  const parts = dateStr.split("-").map(Number);
+  if (parts.length !== 3) return dateStr;
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
 }
 
 export default function PlanPage() {
@@ -72,12 +84,27 @@ export default function PlanPage() {
   const { scheduleByDate, loading, toggleChapter, moveRowsToDate } = usePlan();
 
   const [overflowDate, setOverflowDate] = useState(null);
-  const [expandedBooks, setExpandedBooks] = useState(new Set());
   const [dragOverDate, setDragOverDate] = useState(null);
   const [now, setNow] = useState(new Date());
   const [timeFormat, setTimeFormat] = useState(() => localStorage.getItem(TIME_FORMAT_KEY) || "12h");
   const [numberPosition, setNumberPosition] = useState("right");
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("bible-plan-onboarded"));
+  const [sidebarWidth, setSidebarWidth] = useState(300);
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 720);
+
+  // Touch swipe state for month navigation on mobile
+  const [touchStartX, setTouchStartX] = useState(null);
+  const [touchStartY, setTouchStartY] = useState(null);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 720);
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   function handleOnboardingComplete() {
     localStorage.setItem("bible-plan-onboarded", "true");
@@ -114,19 +141,7 @@ export default function PlanPage() {
   const cells = buildMonthGrid(viewYear, viewMonth);
 
   function openDay(date) {
-    const rows = scheduleByDate.get(date) || [];
-    const firstBook = rows[0]?.book;
-    setExpandedBooks(firstBook ? new Set([firstBook]) : new Set());
     setOverflowDate(date);
-  }
-
-  function toggleBookExpanded(bookId) {
-    setExpandedBooks((prev) => {
-      const next = new Set(prev);
-      if (next.has(bookId)) next.delete(bookId);
-      else next.add(bookId);
-      return next;
-    });
   }
 
   function handlePillDragStart(e, pill) {
@@ -135,10 +150,8 @@ export default function PlanPage() {
 
   function handleChapterDragStart(e, row) {
     e.dataTransfer.setData("text/plain", JSON.stringify({ type: "chapter", rowIds: [row.id] }));
-    setOverflowDate(null); // "left hold closes the popup" -- let the grid receive the drop
+    setOverflowDate(null);
   }
-
-  const [sidebarWidth, setSidebarWidth] = useState(300);
 
   function handleDrop(e, date) {
     e.preventDefault();
@@ -154,7 +167,7 @@ export default function PlanPage() {
     const startWidth = sidebarWidth;
 
     const onMouseMove = (moveEvent) => {
-      const delta = startX - moveEvent.clientX; // moving left increases width in row-reverse
+      const delta = startX - moveEvent.clientX;
       const newWidth = startWidth + delta;
 
       if (newWidth < 120) {
@@ -176,7 +189,44 @@ export default function PlanPage() {
 
     document.addEventListener("mousemove", onMouseMove);
     document.addEventListener("mouseup", onMouseUp);
-  }, [sidebarWidth, setOverflowDate]);
+  }, [sidebarWidth]);
+
+  // Touch handlers for mobile month swipe (spring back cleanly, never stuck in between)
+  function handleTouchStart(e) {
+    if (e.touches.length !== 1) return;
+    setTouchStartX(e.touches[0].clientX);
+    setTouchStartY(e.touches[0].clientY);
+    setIsSwiping(false);
+    setSwipeOffset(0);
+  }
+
+  function handleTouchMove(e) {
+    if (touchStartX === null || touchStartY === null) return;
+    const currentX = e.touches[0].clientX;
+    const currentY = e.touches[0].clientY;
+    const deltaX = currentX - touchStartX;
+    const deltaY = currentY - touchStartY;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 12) {
+      setIsSwiping(true);
+      const clamped = Math.sign(deltaX) * Math.min(Math.abs(deltaX) * 0.45, 75);
+      setSwipeOffset(clamped);
+    }
+  }
+
+  function handleTouchEnd() {
+    if (isSwiping) {
+      if (swipeOffset > 25) {
+        goToPrevMonth();
+      } else if (swipeOffset < -25) {
+        goToNextMonth();
+      }
+    }
+    setTouchStartX(null);
+    setTouchStartY(null);
+    setIsSwiping(false);
+    setSwipeOffset(0);
+  }
 
   const overflowRows = overflowDate ? scheduleByDate.get(overflowDate) || [] : [];
   const overflowByBook = useMemo(() => {
@@ -196,6 +246,94 @@ export default function PlanPage() {
     hour12: timeFormat === "12h"
   });
 
+  const renderScheduleDetails = () => {
+    if (overflowByBook.size === 0) {
+      return (
+        <div className="day-schedule-empty" style={{ padding: "30px 10px", textAlign: "center" }}>
+          <p className="hint-text" style={{ fontSize: 13 }}>No readings scheduled for this day.</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="day-schedule-list">
+        {[...overflowByBook.entries()].map(([bookId, bookRows]) => {
+          const bookCategory = bookRows[0]?.category || "ot";
+          const bookFullName = bookRows[0]?.book_name || BOOK_NAMES[bookId] || bookId;
+          const categoryColor = GROUP_COLORS[bookCategory] || GROUP_COLORS.ot;
+
+          return (
+            <div className="day-schedule-book-group" key={bookId}>
+              <div className="day-schedule-book-header">
+                <span className="popup-book-dot" style={{ background: categoryColor.bg }} />
+                <h3 className="day-schedule-book-title">{bookFullName}</h3>
+              </div>
+
+              <div className="day-schedule-chapters">
+                {bookRows.map((row) => (
+                  <div
+                    key={row.id}
+                    className={`day-schedule-chapter-item${row.completed ? " completed" : ""}`}
+                    draggable
+                    onDragStart={(e) => handleChapterDragStart(e, row)}
+                  >
+                    <span className="day-schedule-chapter-number">{row.chapter}</span>
+
+                    <div className="day-schedule-chapter-actions">
+                      <button
+                        type="button"
+                        className={`chapter-action-btn chapter-action-check${row.completed ? " active" : ""}`}
+                        onClick={() => toggleChapter(row)}
+                        title={row.completed ? "Mark as unread" : "Mark as read"}
+                        aria-label={`Mark chapter ${row.chapter} ${row.completed ? "unread" : "read"}`}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+                          <path
+                            d="M5 12.5l4.5 4.5L19 7.5"
+                            stroke="currentColor"
+                            strokeWidth="2.4"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </button>
+
+                      <button
+                        type="button"
+                        className="chapter-action-btn chapter-action-book"
+                        onClick={() =>
+                          navigate(`/bible/${getPreferredTranslation()}/${row.book}/${row.chapter}`)
+                        }
+                        title="Direct to Bible"
+                        aria-label={`Direct chapter ${row.chapter} to Bible`}
+                      >
+                        <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+                          <path
+                            d="M4 5.5C4 4.67 4.67 4 5.5 4H12V20H5.5C4.67 20 4 19.33 4 18.5V5.5Z"
+                            stroke="currentColor"
+                            strokeWidth="1.7"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M20 5.5C20 4.67 19.33 4 18.5 4H12V20H18.5C19.33 20 20 19.33 20 18.5V5.5Z"
+                            stroke="currentColor"
+                            strokeWidth="1.7"
+                            strokeLinejoin="round"
+                          />
+                          <line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" strokeWidth="1.7" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   if (loading) {
     return <p className="reader-loading" style={{ margin: "auto", display: "flex", width: "100%", justifyContent: "center", minHeight: "80vh", alignItems: "center" }}>Building your plan…</p>;
   }
@@ -204,69 +342,33 @@ export default function PlanPage() {
     <div className="plan-layout">
       {showOnboarding && <OnboardingModal onClose={handleOnboardingComplete} />}
 
-      <aside className={`bible-sidebar${overflowDate ? "" : " collapsed"}`} style={{ width: overflowDate ? sidebarWidth : 0, padding: overflowDate ? undefined : 0, border: overflowDate ? undefined : 'none' }}>
-        {overflowDate && (
-          <>
-            <div className="cal-popup-header" style={{ paddingBottom: 16 }}>
-              <h2>{overflowDate}</h2>
-              <button className="btn-ghost btn" type="button" onClick={() => setOverflowDate(null)}>
-                Close
-              </button>
-            </div>
+      {/* Desktop / PC Right Sidebar */}
+      {!isMobile && (
+        <aside
+          className={`bible-sidebar${overflowDate ? "" : " collapsed"}`}
+          style={{
+            width: overflowDate ? sidebarWidth : 0,
+            padding: overflowDate ? undefined : 0,
+            border: overflowDate ? undefined : "none"
+          }}
+        >
+          {overflowDate && (
+            <>
+              <div className="cal-popup-header" style={{ paddingBottom: 16 }}>
+                <h2>{formatDetailDate(overflowDate)}</h2>
+                <button className="btn-ghost btn" type="button" onClick={() => setOverflowDate(null)}>
+                  Close
+                </button>
+              </div>
 
-            {overflowByBook.size === 0 && <p className="hint-text">Nothing scheduled this day.</p>}
+              {renderScheduleDetails()}
+            </>
+          )}
+        </aside>
+      )}
 
-            <div className="popup-book-list">
-              {[...overflowByBook.entries()].map(([bookId, bookRows]) => {
-                const isOpen = expandedBooks.has(bookId);
-                return (
-                  <div className="popup-book-section" key={bookId}>
-                    <button type="button" className="popup-book-header" onClick={() => toggleBookExpanded(bookId)}>
-                      <span className={`popup-chevron${isOpen ? " open" : ""}`}>›</span>
-                      <span
-                        className="popup-book-dot"
-                        style={{ background: GROUP_COLORS[bookRows[0].category].bg }}
-                      />
-                      {bookRows[0].book_name || bookId}
-                    </button>
-                    {isOpen && (
-                      <div className="popup-chapter-list">
-                        {bookRows.map((row) => (
-                          <div
-                            key={row.id}
-                            className={`popup-chapter-row${row.completed ? " completed" : ""}`}
-                            draggable
-                            onDragStart={(e) => handleChapterDragStart(e, row)}
-                            onClick={() =>
-                              navigate(`/bible/${getPreferredTranslation()}/${row.book}/${row.chapter}`)
-                            }
-                          >
-                            <span className="popup-chapter-num">{row.chapter}</span>
-                            <label
-                              className="popup-chapter-read"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={row.completed}
-                                onChange={() => toggleChapter(row)}
-                                style={{ display: 'none' }}
-                              />
-                              {row.completed ? "Read" : "Mark"}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </aside>
-
-      {overflowDate && (
+      {/* Desktop Sidebar Resize Handle */}
+      {!isMobile && overflowDate && (
         <div
           className="sidebar-resize-handle"
           onMouseDown={startResize}
@@ -274,15 +376,50 @@ export default function PlanPage() {
         />
       )}
 
+      {/* Phone / Mobile Pop-up Dialog */}
+      {isMobile && overflowDate && (
+        <div className="cal-overlay" onClick={() => setOverflowDate(null)} style={{ zIndex: 100 }}>
+          <div className="cal-popup day-detail-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="cal-popup-header" style={{ paddingBottom: 12 }}>
+              <h2>{formatDetailDate(overflowDate)}</h2>
+              <button
+                className="icon-btn"
+                type="button"
+                onClick={() => setOverflowDate(null)}
+                aria-label="Close"
+                style={{ width: 30, height: 30 }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            {renderScheduleDetails()}
+          </div>
+        </div>
+      )}
+
       <section className="plan-main">
-        <div className="calendar-grid-wrap" style={{ flex: 1 }}>
+        <div
+          className="calendar-grid-wrap"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="calendar-weekdays">
             {WEEKDAY_LABELS.map((w) => (
               <span key={w}>{w.toUpperCase()}</span>
             ))}
           </div>
 
-          <div className="calendar-month-grid">
+          <div
+            className="calendar-month-grid"
+            style={{
+              transform: swipeOffset ? `translateX(${swipeOffset}px)` : "none",
+              transition: isSwiping ? "none" : "transform 0.22s cubic-bezier(0.2, 0.9, 0.4, 1)"
+            }}
+          >
             {cells.map((cell) => {
               const rows = scheduleByDate.get(cell.date) || [];
               const pills = pillsForDate(rows);
@@ -297,7 +434,10 @@ export default function PlanPage() {
                   key={cell.date}
                   className={`cal-day-cell${cell.isCurrentMonth ? "" : " muted"}${isSelected ? " selected" : ""}${isFullyRead ? " done" : ""
                     }${dragOverDate === cell.date ? " drag-over" : ""}`}
-                  onClick={() => setSelectedDate(cell.date)}
+                  onClick={() => {
+                    setSelectedDate(cell.date);
+                    openDay(cell.date);
+                  }}
                   onDragOver={(e) => {
                     e.preventDefault();
                     setDragOverDate(cell.date);
@@ -321,11 +461,14 @@ export default function PlanPage() {
                           onDragStart={(e) => handlePillDragStart(e, pill)}
                           onClick={(e) => {
                             e.stopPropagation();
+                            setSelectedDate(cell.date);
                             openDay(cell.date);
                           }}
                           title={`${pill.bookName} ${pill.rangeText}`}
                         >
-                          <span className="cal-event-name">{pill.bookName}</span>
+                          {/* Shortened for phone, full name for PC */}
+                          <span className="cal-event-name cal-event-name-full">{pill.bookName}</span>
+                          <span className="cal-event-name cal-event-name-short">{pill.shortBookName}</span>
                           <span className="cal-event-range">{pill.rangeText}</span>
                         </button>
                       ))}
@@ -335,10 +478,11 @@ export default function PlanPage() {
                           className="cal-day-more"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setSelectedDate(cell.date);
                             openDay(cell.date);
                           }}
                         >
-                          {overflowCount} more
+                          +{overflowCount} more
                         </button>
                       )}
                     </div>
@@ -349,6 +493,7 @@ export default function PlanPage() {
           </div>
         </div>
 
+        {/* Bottom Navigation Bar */}
         <div className="calendar-bottom-bar">
           <div className="calendar-bottom-left">
             <button
@@ -383,20 +528,25 @@ export default function PlanPage() {
               type="button"
               className="time-format-btn"
               onClick={() => setTimeFormat((f) => (f === "12h" ? "24h" : "12h"))}
-              title="Switch AM/PM \u2194 24-hour"
+              title="Switch AM/PM ↔ 24-hour"
             >
               {timeLabel}
             </button>
           </div>
 
-          <div className="calendar-bottom-right">
+          <div className="calendar-bottom-center">
             <button className="icon-btn" type="button" onClick={goToPrevMonth} aria-label="Previous month">
               ‹
             </button>
-            <span className="calendar-bottom-title">{monthLabel(viewYear, viewMonth)}</span>
+            {/* Shortened for phone ("Oct 2026"), full for PC ("October 2026") */}
+            <span className="calendar-bottom-title cal-title-pc">{monthLabel(viewYear, viewMonth, false)}</span>
+            <span className="calendar-bottom-title cal-title-mobile">{monthLabel(viewYear, viewMonth, true)}</span>
             <button className="icon-btn" type="button" onClick={goToNextMonth} aria-label="Next month">
               ›
             </button>
+          </div>
+
+          <div className="calendar-bottom-right">
             <button className="btn today-btn" type="button" onClick={goToToday}>
               Today
             </button>

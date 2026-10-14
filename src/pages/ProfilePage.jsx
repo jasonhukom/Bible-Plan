@@ -86,9 +86,14 @@ export default function ProfilePage() {
 
   return (
     <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 20px 40px" }}>
-      <div className="page-header page-header-sticky" style={{ alignItems: "center", justifyContent: "center", position: "relative" }}>
+      <div className="page-header page-header-sticky" style={{ alignItems: "center", justifyContent: "space-between", position: "relative" }}>
         <h1 style={{ margin: 0 }}>Profile</h1>
-        <div style={{ position: 'absolute', right: 0, display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          {(!user || user?.is_anonymous) ? (
+            <Link to="/login" className="btn" style={{ padding: "6px 14px", fontSize: 13, textDecoration: "none" }}>
+              Log In
+            </Link>
+          ) : null}
           <Link to="/settings" className="icon-btn" title="Settings" style={{ border: "1px solid var(--night-line)" }}>
             <svg viewBox="0 0 24 24" fill="none" width="18" height="18">
               <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.7" />
@@ -126,20 +131,25 @@ export default function ProfilePage() {
             onChange={handleAvatarChange}
           />
           <p className="hint-text" style={{ marginTop: 8 }}>
-            {user?.email || "Anonymous user"}
+            {user && !user?.is_anonymous ? user.email : "Guest / Anonymous user (Plan saved locally)"}
           </p>
         </div>
       </div>
 
-      {user?.is_anonymous && (
-        <div className="card" style={{ marginBottom: 24, padding: "16px", borderColor: "var(--gold)" }}>
-          <h2 style={{ fontSize: 15, color: "var(--gold-bright)", margin: "0 0 8px 0" }}>Secure Your Account</h2>
-          <p className="hint-text" style={{ marginBottom: 12 }}>
-            Sign in with an email to sync your data across devices and receive daily reminders.
+      {(!user || user?.is_anonymous) && (
+        <div className="card" style={{ marginBottom: 24, padding: "18px 20px", borderColor: "var(--gold)", background: "rgba(219, 181, 88, 0.08)" }}>
+          <h2 style={{ fontSize: 16, color: "var(--gold-bright)", margin: "0 0 6px 0" }}>Sign In or Register</h2>
+          <p className="hint-text" style={{ marginBottom: 14, lineHeight: 1.5 }}>
+            Your reading plan is currently saved in this browser's local cache. Sign in or create an account to sync your plan across PC and mobile.
           </p>
-          <button className="btn" type="button" onClick={() => setShowLoginModal(true)}>
-            Sign In / Register
-          </button>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <Link to="/login" className="btn" style={{ textDecoration: "none" }}>
+              Log In / Sign Up
+            </Link>
+            <button className="btn btn-ghost" type="button" onClick={() => setShowLoginModal(true)}>
+              Quick Login
+            </button>
+          </div>
         </div>
       )}
 

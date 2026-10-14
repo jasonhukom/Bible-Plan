@@ -111,31 +111,16 @@ export default function Sidebar() {
       book_groups: groups,
       order_mode: orderMode
     };
-    if (user?.is_anonymous) {
-      setPendingPlan(config);
-      setShowLoginModal(true);
-    } else {
-      regenerate(config);
-      setShowMobilePlan(false);
-    }
+    regenerate(config);
+    setShowMobilePlan(false);
   }
 
   function handleLoginModalClose() {
     setShowLoginModal(false);
-    if (pendingPlan) {
-      regenerate(pendingPlan);
-      setPendingPlan(null);
-    }
-    setShowMobilePlan(false);
   }
 
   function handleLoginModalSuccess() {
     setShowLoginModal(false);
-    if (pendingPlan) {
-      regenerate(pendingPlan);
-      setPendingPlan(null);
-    }
-    setShowMobilePlan(false);
   }
 
   const renderPlanForm = (isMobile) => (

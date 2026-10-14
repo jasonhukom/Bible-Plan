@@ -124,6 +124,21 @@ h3 {
   --layout-padding: clamp(8px, 1.5vw, 16px);
 }
 
+.main-content-flush {
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+@media (max-width: 719px) {
+  .main-content-flush {
+    height: calc(100dvh - 60px);
+    padding: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
 .page-header {
   display: flex;
   align-items: center;
@@ -1289,6 +1304,17 @@ h3 {
   white-space: nowrap;
 }
 
+.cal-event-name-short {
+  display: none;
+}
+
+.cal-event-name-full {
+  display: inline;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .cal-event-range {
   flex-shrink: 0;
   opacity: 0.9;
@@ -1323,13 +1349,20 @@ h3 {
   gap: 14px;
   padding: 10px 16px;
   flex-shrink: 0;
+  background: var(--night);
+  border-top: 1px solid var(--night-line);
 }
 
 .calendar-bottom-left,
+.calendar-bottom-center,
 .calendar-bottom-right {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.calendar-bottom-center {
+  justify-content: center;
 }
 
 .calendar-date-text {
@@ -1359,6 +1392,14 @@ h3 {
   font-size: 16px;
   font-weight: 600;
   margin: 0 4px;
+}
+
+.cal-title-mobile {
+  display: none;
+}
+
+.cal-title-pc {
+  display: inline;
 }
 
 .today-btn {
@@ -1470,41 +1511,122 @@ h3 {
   padding: 8px 12px;
 }
 
-.popup-chapter-row {
+/* Day schedule grouped list (PC Sidebar & Phone Pop-up) */
+.day-schedule-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 4px 2px;
+}
+
+.day-schedule-book-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.day-schedule-book-header {
   display: flex;
   align-items: center;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--night-line);
+}
+
+.day-schedule-book-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--cream);
+  letter-spacing: 0.02em;
+}
+
+.day-schedule-chapters {
+  display: flex;
+  flex-direction: column;
   gap: 6px;
-  padding: 6px 12px;
-  border-radius: 16px;
+}
+
+.day-schedule-chapter-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
   background: var(--night);
   border: 1px solid var(--night-line);
-  font-size: 13px;
+  border-radius: 9px;
+  transition: all 0.15s ease;
+}
+
+.day-schedule-chapter-item:hover {
+  border-color: rgba(219, 181, 88, 0.4);
+}
+
+.day-schedule-chapter-item.completed {
+  background: rgba(85, 104, 79, 0.14);
+  border-color: var(--sage);
+}
+
+.day-schedule-chapter-number {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.day-schedule-chapter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chapter-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--night-line);
+  background: var(--night-2);
+  color: var(--ink-soft);
+  transition: all 0.15s ease;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.popup-chapter-row:hover {
-  background: var(--night-hover);
-  border-color: var(--brand);
+.chapter-action-btn:hover {
+  transform: translateY(-1px);
 }
 
-.popup-chapter-row.completed {
-  background: var(--brand-hover);
-  border-color: var(--brand);
+.chapter-action-check:hover {
+  border-color: var(--sage);
+  color: var(--sage);
+  background: rgba(85, 104, 79, 0.15);
+}
+
+.chapter-action-check.active {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: #ffffff;
+}
+
+.chapter-action-book {
   color: var(--gold-bright);
 }
 
-.popup-chapter-num {
-  font-weight: 600;
+.chapter-action-book:hover {
+  border-color: var(--gold);
+  background: rgba(219, 181, 88, 0.15);
+  color: var(--gold-bright);
 }
 
-.popup-chapter-read {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--ink-soft);
-  cursor: pointer;
+.day-detail-popup {
+  width: min(420px, 92vw);
+  max-height: 82vh;
+  overflow-y: auto;
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--night-line);
 }
 
 .plan-layout {
@@ -1513,6 +1635,7 @@ h3 {
   height: 100vh;
   width: 100%;
   flex: 1;
+  overflow: hidden;
 }
 
 .plan-main {
@@ -1520,7 +1643,134 @@ h3 {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  overflow: hidden;
+}
+
+@media (max-width: 719px) {
+  .plan-layout {
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .plan-main {
+    height: 100%;
+    overflow: hidden;
+    justify-content: space-between;
+  }
+
+  .calendar-grid-wrap {
+    flex: 1;
+    min-height: 0;
+    padding: 6px 6px 0;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  .calendar-weekdays {
+    padding-bottom: 2px;
+  }
+
+  .calendar-weekdays span {
+    padding: 2px 0;
+    font-size: 11px;
+    text-align: center;
+  }
+
+  .calendar-month-grid {
+    flex: 1;
+    min-height: 0;
+    gap: 3px;
+    overflow: hidden;
+    touch-action: pan-y;
+  }
+
+  .cal-day-cell {
+    padding: 3px 4px;
+    border-radius: 6px;
+    min-height: 0;
+  }
+
+  .cal-day-number {
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+  }
+
+  .cal-day-number-row {
+    margin-bottom: 2px;
+  }
+
+  .cal-event-pill {
+    padding: 1.5px 3px;
+    font-size: 9.5px;
+    border-radius: 3px;
+    gap: 2px;
+    width: 100%;
+    margin: 0;
+  }
+
+  .cal-event-range {
+    font-size: 9px;
+  }
+
+  .cal-day-more {
+    font-size: 8.5px;
+    padding: 0 2px;
+  }
+
+  .cal-event-name-full {
+    display: none;
+  }
+
+  .cal-event-name-short {
+    display: inline;
+    font-size: 9.5px;
+    font-weight: 700;
+  }
+
+  .cal-title-pc {
+    display: none;
+  }
+
+  .cal-title-mobile {
+    display: inline;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .calendar-bottom-bar {
+    padding: 8px 12px;
+    gap: 8px;
+    background: var(--night-2);
+    border-top: 1px solid var(--night-line);
+    position: relative;
+    z-index: 20;
+  }
+
+  .calendar-date-text,
+  .time-format-btn {
+    display: none;
+  }
+
+  .calendar-bottom-left {
+    flex: 0 0 auto;
+  }
+
+  .calendar-bottom-center {
+    flex: 1;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .calendar-bottom-right {
+    flex: 0 0 auto;
+  }
+
+  .today-btn {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
 }
 
 /* --------------------------------------------------------------------------

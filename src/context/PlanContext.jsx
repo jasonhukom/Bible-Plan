@@ -48,11 +48,46 @@ function scheduleToRows(scheduleDays, preCompletedBooks = []) {
   return rows;
 }
 
+const LOCAL_PLAN_KEY = "bible-plan-local-active-plan";
+const LOCAL_SCHEDULE_KEY = "bible-plan-local-schedule-rows";
+
+function getLocalPlan() {
+  try {
+    const raw = localStorage.getItem(LOCAL_PLAN_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function setLocalPlan(plan) {
+  try {
+    if (plan) localStorage.setItem(LOCAL_PLAN_KEY, JSON.stringify(plan));
+    else localStorage.removeItem(LOCAL_PLAN_KEY);
+  } catch {}
+}
+
+function getLocalRows() {
+  try {
+    const raw = localStorage.getItem(LOCAL_SCHEDULE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function setLocalRows(rows) {
+  try {
+    if (rows && rows.length > 0) localStorage.setItem(LOCAL_SCHEDULE_KEY, JSON.stringify(rows));
+    else localStorage.removeItem(LOCAL_SCHEDULE_KEY);
+  } catch {}
+}
+
 export function PlanProvider({ children }) {
   const { user } = useAuth();
-  const [plan, setPlan] = useState(null);
-  const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [plan, setPlan] = useState(() => getLocalPlan());
+  const [rows, setRows] = useState(() => getLocalRows());
+  const [loading, setLoading] = useState(() => !getLocalPlan());
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState("");
 
@@ -60,8 +95,26 @@ export function PlanProvider({ children }) {
     setGenerating(true);
     setError("");
     try {
-      const { data: savedPlan, error: planError } = await dataApi.saveActivePlan(config);
-      if (planError) throw new Error(planError.message);
+      const planId = plan?.id || newId();
+      let savedPlan = {
+        id: planId,
+        name: config.name || "My reading plan",
+        start_date: config.start_date,
+        days: config.days,
+        book_groups: config.book_groups,
+        order_mode: config.order_mode,
+        is_active: true,
+        updated_at: new Date().toISOString()
+      };
+
+      if (user && !user.is_anonymous) {
+        try {
+          const { data: dbPlan } = await dataApi.saveActivePlan(config);
+          if (dbPlan) savedPlan = dbPlan;
+        } catch (dbErr) {
+          console.warn("[PlanContext] Could not save to cloud:", dbErr);
+        }
+      }
 
       const scheduleDays = await generateSchedule({
         translationId: getPreferredTranslation() || DEFAULT_TRANSLATION_ID,
@@ -73,11 +126,18 @@ export function PlanProvider({ children }) {
       });
       const newRows = scheduleToRows(scheduleDays, options.preCompletedBooks || []);
 
-      const { error: replaceError } = await dataApi.replaceSchedule(savedPlan.id, newRows);
-      if (replaceError) throw new Error(replaceError.message);
+      if (user && !user.is_anonymous && savedPlan.id) {
+        try {
+          await dataApi.replaceSchedule(savedPlan.id, newRows);
+        } catch (dbErr) {
+          console.warn("[PlanContext] Could not save schedule to cloud:", dbErr);
+        }
+      }
 
       setPlan(savedPlan);
       setRows(newRows);
+      setLocalPlan(savedPlan);
+      setLocalRows(newRows);
       return { data: savedPlan, error: null };
     } catch (err) {
       setError(err.message || "Couldn't generate the plan.");
@@ -85,27 +145,54 @@ export function PlanProvider({ children }) {
     } finally {
       setGenerating(false);
     }
-  }, []);
+  }, [plan?.id, user]);
 
   useEffect(() => {
-    if (!user) {
-      setPlan(null);
-      setRows([]);
-      setLoading(false);
-      return;
-    }
     let cancelled = false;
     (async () => {
-      setLoading(true);
-      const { data: existingPlan } = await dataApi.getActivePlan();
-      if (cancelled) return;
+      if (user && !user.is_anonymous) {
+        try {
+          const { data: existingPlan } = await dataApi.getActivePlan();
+          if (cancelled) return;
 
-      if (existingPlan) {
-        const { data: existingRows } = await dataApi.listSchedule(existingPlan.id);
-        if (cancelled) return;
-        setPlan(existingPlan);
-        setRows(existingRows || []);
-        setLoading(false);
+          if (existingPlan) {
+            const { data: existingRows } = await dataApi.listSchedule(existingPlan.id);
+            if (cancelled) return;
+            setPlan(existingPlan);
+            setRows(existingRows || []);
+            setLocalPlan(existingPlan);
+            setLocalRows(existingRows || []);
+            setLoading(false);
+            return;
+          } else {
+            const existingLocal = getLocalPlan();
+            const existingRows = getLocalRows();
+            if (existingLocal && existingRows.length > 0) {
+              const { data: syncedPlan } = await dataApi.saveActivePlan(existingLocal);
+              if (syncedPlan) {
+                await dataApi.replaceSchedule(syncedPlan.id, existingRows);
+                setPlan(syncedPlan);
+                setRows(existingRows);
+                setLocalPlan(syncedPlan);
+                setLocalRows(existingRows);
+                setLoading(false);
+                return;
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("[PlanContext] Cloud fetch error:", e);
+        }
+      }
+
+      const cachedPlan = getLocalPlan();
+      const cachedRows = getLocalRows();
+      if (cachedPlan && cachedRows.length > 0) {
+        if (!cancelled) {
+          setPlan(cachedPlan);
+          setRows(cachedRows);
+          setLoading(false);
+        }
       } else {
         await regenerate(DEFAULT_CONFIG);
         if (!cancelled) setLoading(false);
@@ -118,11 +205,19 @@ export function PlanProvider({ children }) {
 
   const toggleChapter = useCallback((row) => {
     const nextCompleted = !row.completed;
-    setRows((prev) =>
-      prev.map((r) => (r.id === row.id ? { ...r, completed: nextCompleted, completed_at: nextCompleted ? new Date().toISOString() : null } : r))
-    );
-    dataApi.setChapterCompleted(row.id, nextCompleted);
-  }, []);
+    setRows((prev) => {
+      const next = prev.map((r) =>
+        r.id === row.id
+          ? { ...r, completed: nextCompleted, completed_at: nextCompleted ? new Date().toISOString() : null }
+          : r
+      );
+      setLocalRows(next);
+      return next;
+    });
+    if (user && !user.is_anonymous) {
+      dataApi.setChapterCompleted(row.id, nextCompleted);
+    }
+  }, [user]);
 
   /**
    * Moves one or more rows to a new date, appending them after whatever is
@@ -147,11 +242,14 @@ export function PlanProvider({ children }) {
           return { ...r, ...move };
         });
 
-        dataApi.moveScheduleEntries(moves);
+        setLocalRows(updated);
+        if (user && !user.is_anonymous) {
+          dataApi.moveScheduleEntries(moves);
+        }
         return updated;
       });
     },
-    [plan]
+    [plan, user]
   );
 
   const scheduleByDate = useMemo(() => {

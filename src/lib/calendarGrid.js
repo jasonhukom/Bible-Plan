@@ -38,6 +38,9 @@ export function buildMonthGrid(year, month) {
   return cells;
 }
 
-export function monthLabel(year, month) {
-  return new Date(year, month, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+export function monthLabel(year, month, short = false) {
+  return new Date(year, month, 1).toLocaleDateString("en-US", {
+    month: short ? "short" : "long",
+    year: "numeric"
+  });
 }
