@@ -6,7 +6,8 @@ import {
   setPreferredTranslation,
   listTranslations,
   listBooks,
-  getChapter
+  getChapter,
+  getTranslationShortName
 } from "../lib/bible";
 import { groupBooks, GROUP_LABELS } from "../lib/bibleBooks";
 import { useAuth } from "../context/AuthContext";
@@ -68,6 +69,15 @@ export default function BiblePage() {
 
   const grouped = useMemo(() => groupBooks(books), [books]);
   const currentBook = useMemo(() => books.find((b) => b.id === routeBook), [books, routeBook]);
+  const currentTranslationObj = useMemo(
+    () => translations.find((t) => t.id === translationId),
+    [translations, translationId]
+  );
+  const translationShortName = useMemo(
+    () => getTranslationShortName(currentTranslationObj, translationId),
+    [currentTranslationObj, translationId]
+  );
+  const translationFullName = currentTranslationObj?.label || translationId;
 
   // Featured translation list for the picker.
   useEffect(() => {
@@ -211,66 +221,44 @@ export default function BiblePage() {
   }, [sidebarWidth, setSidebarOpen]);
 
   return (
-    <div>
-      <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div>
-            <h1 style={{ margin: 0 }}>Bible</h1>
-            {currentBook && (
-              <p className="page-subtitle" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0 }}>
-                <span>
-                  {currentBook.commonName || currentBook.name} {routeChapter}
-                </span>
-                <span style={{ opacity: 0.4 }}>•</span>
-                <button
-                  type="button"
-                  onClick={() => setVersionsSidebarOpen((v) => !v)}
-                  style={{
-                    background: 'transparent',
-                    border: 'none',
-                    color: '#ffffff',
-                    cursor: 'pointer',
-                    padding: 0,
-                    fontSize: 'inherit',
-                    fontFamily: 'inherit',
-                    textDecoration: 'underline',
-                    opacity: 0.95
-                  }}
-                  title="Click to change Bible version"
-                >
-                  {translations.find(t => t.id === translationId)?.shortName ||
-                   translations.find(t => t.id === translationId)?.label?.split(' ')[0] ||
-                   translationId}
-                </button>
-              </p>
-            )}
-          </div>
+    <div className="page-shell">
+      <div className="page-header page-header-sticky">
+        <div className="page-header-title-row">
+          <h1 className="page-title">Bible</h1>
+          {currentBook ? (
+            <p className="page-subtitle">
+              <span>
+                {currentBook.commonName || currentBook.name} {routeChapter}
+              </span>
+              <span className="page-subtitle-sep">•</span>
+              <button
+                type="button"
+                className="page-subtitle-trans-btn"
+                onClick={() => setVersionsSidebarOpen((v) => !v)}
+                title="Click to change Bible version"
+              >
+                {translationShortName}
+              </button>
+            </p>
+          ) : (
+            <p className="page-subtitle">Select a book and chapter</p>
+          )}
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div className="page-header-actions">
           <div style={{ position: 'relative' }} ref={dropdownRef}>
             <button
               className="btn btn-ghost version-picker-btn"
               type="button"
               onClick={() => setVersionsSidebarOpen(!versionsSidebarOpen)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                maxWidth: 240,
-                cursor: 'pointer',
-                fontWeight: 500,
-                border: '1px solid var(--night-line)',
-                background: 'var(--night-2)',
-                borderRadius: '8px',
-                padding: '7px 12px',
-                color: '#ffffff'
-              }}
               title="Click to change Bible version"
             >
-              <span style={{ maxWidth: 190, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#ffffff' }}>
-                {translations.find(t => t.id === translationId)?.label || translationId}
+              <span className="version-btn-label-pc">
+                {translationFullName}
               </span>
-              <span style={{ fontSize: 9, opacity: 0.8, color: '#ffffff', transform: versionsSidebarOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+              <span className="version-btn-label-mobile">
+                {translationShortName}
+              </span>
+              <span className={`version-btn-arrow${versionsSidebarOpen ? ' open' : ''}`}>
                 ▼
               </span>
             </button>
@@ -299,9 +287,11 @@ export default function BiblePage() {
               </div>
             )}
           </div>
-          <button className="btn btn-ghost bible-sidebar-toggle" onClick={() => setSidebarOpen((v) => !v)}>
-            {sidebarOpen ? "Hide books" : "Books"}
-          </button>
+          {Boolean(routeBook) && (
+            <button className="btn btn-ghost bible-sidebar-toggle" onClick={() => setSidebarOpen((v) => !v)}>
+              {sidebarOpen ? "Hide books" : "Books"}
+            </button>
+          )}
         </div>
       </div>
 

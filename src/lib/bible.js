@@ -15,6 +15,45 @@ export function setPreferredTranslation(translationId) {
   }
 }
 
+export function getTranslationShortName(translationObj, fallbackId = "") {
+  if (translationObj?.shortName) {
+    return translationObj.shortName;
+  }
+  const id = String(translationObj?.id || fallbackId || "");
+  const label = translationObj?.label || "";
+
+  // Common YouVersion IDs
+  if (id === "yv-1" || id === "1") return "KJV";
+  if (id === "yv-12" || id === "12") return "ASV";
+  if (id === "yv-206" || id === "206") return "WEB";
+  if (id === "yv-3034" || id === "3034") return "BSB";
+
+  // Check for acronym in parentheses: "New International Version (NIV)" -> "NIV"
+  // Exclude "(YouVersion)"
+  const parenMatch = label.match(/\((?!YouVersion)([A-Za-z0-9\-]+)\)/i);
+  if (parenMatch && parenMatch[1]) {
+    return parenMatch[1].toUpperCase();
+  }
+
+  // Common names
+  const lowerLabel = label.toLowerCase();
+  if (lowerLabel.includes("berean standard")) return "BSB";
+  if (lowerLabel.includes("king james")) return "KJV";
+  if (lowerLabel.includes("world english")) return "WEB";
+  if (lowerLabel.includes("american standard")) return "ASV";
+  if (lowerLabel.includes("new international")) return "NIV";
+  if (lowerLabel.includes("new living")) return "NLT";
+  if (lowerLabel.includes("christian standard")) return "CSB";
+  if (lowerLabel.includes("english standard")) return "ESV";
+
+  // If ID is short alphanumeric (e.g. "BSB", "KJV", "CPDV")
+  if (id.length <= 6 && !id.includes("-")) {
+    return id.toUpperCase();
+  }
+
+  return id.length <= 8 ? id.toUpperCase() : "BIBLE";
+}
+
 export async function listTranslations() {
   // 1. API.Bible translations (NLT, NIV, CSB, etc.)
   const apiBibleList = apibible.listTranslations();

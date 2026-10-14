@@ -2,16 +2,17 @@ import { Link } from "react-router-dom";
 
 export default function LicensesPage() {
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: "20px 20px 80px" }}>
-      <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div>
-            <h1 style={{ margin: 0 }}>Copyright & Licenses</h1>
-          </div>
+    <div className="page-shell">
+      <div className="page-header page-header-sticky">
+        <div className="page-header-title-row">
+          <h1 className="page-title">Licenses</h1>
+          <p className="page-subtitle">Copyright and translation permissions</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div className="page-header-actions">
         </div>
       </div>
+
+      <div className="page-container-narrow" style={{ paddingBottom: 80 }}>
 
       <div className="card" style={{ marginBottom: 20 }}>
         <h2 style={{ fontSize: 18, marginBottom: 14 }}>Bible Translations</h2>
@@ -54,6 +55,7 @@ export default function LicensesPage() {
         <Link to="/settings" className="btn btn-ghost">
           ← Back to Settings
         </Link>
+      </div>
       </div>
     </div>
   );

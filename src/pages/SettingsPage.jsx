@@ -57,33 +57,36 @@ export default function SettingsPage() {
   }
 
   return (
-    <div style={{ maxWidth: 480, margin: "0 auto", padding: "20px 20px 40px" }}>
-      <div className="page-header page-header-sticky" style={{ alignItems: "center", justifyContent: "center", position: "relative" }}>
-        <h1 style={{ margin: 0 }}>Settings</h1>
-        <div style={{ position: 'absolute', right: 0, display: 'flex', gap: '10px', alignItems: 'center' }}>
+    <div className="page-shell">
+      <div className="page-header page-header-sticky">
+        <div className="page-header-title-row">
+          <h1 className="page-title">Settings</h1>
+          <p className="page-subtitle">Appearance and preferences</p>
+        </div>
+        <div className="page-header-actions">
         </div>
       </div>
 
-      <div className="card" style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, marginBottom: 14 }}>Appearance</h2>
-        <div className="theme-options">
-          {[
-            ["dark", "Dark"],
-            ["light", "Light"],
-            ["device", "Device"]
-          ].map(([key, label]) => (
-            <button
-              key={key}
-              type="button"
-              className={`theme-option${mode === key ? " active" : ""}`}
-              onClick={() => setMode(key)}
-            >
-              {label}
-            </button>
-          ))}
+      <div className="page-container-narrow" style={{ paddingBottom: 40 }}>
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 15, marginBottom: 14 }}>Appearance</h2>
+          <div className="theme-options">
+            {[
+              ["dark", "Dark"],
+              ["light", "Light"],
+              ["device", "Device"]
+            ].map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                className={`theme-option${mode === key ? " active" : ""}`}
+                onClick={() => setMode(key)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-
-
 
         <div className="card" style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: 15, marginBottom: 14 }}>Calendar</h2>

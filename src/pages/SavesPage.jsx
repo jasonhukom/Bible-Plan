@@ -19,15 +19,13 @@ export default function SavesPage() {
   }
 
   return (
-    <div>
-      <div className="page-header page-header-sticky" style={{ alignItems: "center" }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div>
-            <h1 style={{ margin: 0 }}>Saved Verses</h1>
-            <p className="page-subtitle">In the order you saved them</p>
-          </div>
+    <div className="page-shell">
+      <div className="page-header page-header-sticky">
+        <div className="page-header-title-row">
+          <h1 className="page-title">Saved Verses</h1>
+          <p className="page-subtitle">In the order you saved them</p>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div className="page-header-actions">
         </div>
       </div>
 

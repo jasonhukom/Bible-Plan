@@ -85,10 +85,15 @@ export default function ProfilePage() {
   if (loading) return <p className="reader-loading">Loading profile…</p>;
 
   return (
-    <div style={{ maxWidth: 520, margin: "0 auto", padding: "20px 20px 40px" }}>
-      <div className="page-header page-header-sticky" style={{ alignItems: "center", justifyContent: "space-between", position: "relative" }}>
-        <h1 style={{ margin: 0 }}>Profile</h1>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+    <div className="page-shell">
+      <div className="page-header page-header-sticky">
+        <div className="page-header-title-row">
+          <h1 className="page-title">Profile</h1>
+          <p className="page-subtitle">
+            {user && !user?.is_anonymous ? user.email : "Local reading plan"}
+          </p>
+        </div>
+        <div className="page-header-actions">
           {(!user || user?.is_anonymous) ? (
             <Link to="/login" className="btn" style={{ padding: "6px 14px", fontSize: 13, textDecoration: "none" }}>
               Log In
@@ -108,7 +113,8 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="avatar-upload-row">
+      <div className="page-container-narrow" style={{ paddingBottom: 40 }}>
+        <div className="avatar-upload-row">
         {profile?.avatar_url ? (
           <img className="avatar-lg" src={profile.avatar_url} alt="Your avatar" />
         ) : (
@@ -195,6 +201,7 @@ export default function ProfilePage() {
           onClose={() => setCropImageSrc(null)}
         />
       )}
+      </div>
     </div>
   );
 }
