@@ -368,19 +368,28 @@ export default function BiblePage() {
           {chapterData && !chapterLoading && (
             <>
               <div className="reader-heading">
-                <h1>
-                  {chapterData.book.commonName || chapterData.book.name} {chapterData.chapter.number}
+                <h1 style={{ textAlign: "left" }}>
+                  {chapterData.book.name || chapterData.book.commonName} {chapterData.chapter.number}
                 </h1>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                  <div className="reader-nav">
-                    <button className="btn btn-ghost" onClick={() => changeChapter(-1)} type="button">
-                      ‹ Prev
-                    </button>
-                    <button className="btn btn-ghost" onClick={() => changeChapter(1)} type="button">
-                      Next ›
-                    </button>
-                  </div>
-                </div>
+              </div>
+
+              <div className="reader-nav-bar">
+                <button
+                  className="btn btn-ghost reader-nav-btn prev"
+                  onClick={() => changeChapter(-1)}
+                  type="button"
+                  disabled={Number(routeChapter) <= 1}
+                >
+                  ‹ Prev Chapter
+                </button>
+                <button
+                  className="btn btn-ghost reader-nav-btn next"
+                  onClick={() => changeChapter(1)}
+                  type="button"
+                  disabled={currentBook && Number(routeChapter) >= currentBook.numberOfChapters}
+                >
+                  Next Chapter ›
+                </button>
               </div>
 
               <div className="reader-text">
@@ -412,8 +421,28 @@ export default function BiblePage() {
                   return null;
                 })}
               </div>
+
+              <div className="reader-nav-bar reader-nav-bar-bottom">
+                <button
+                  className="btn btn-ghost reader-nav-btn prev"
+                  onClick={() => changeChapter(-1)}
+                  type="button"
+                  disabled={Number(routeChapter) <= 1}
+                >
+                  ‹ Prev Chapter
+                </button>
+                <button
+                  className="btn btn-ghost reader-nav-btn next"
+                  onClick={() => changeChapter(1)}
+                  type="button"
+                  disabled={currentBook && Number(routeChapter) >= currentBook.numberOfChapters}
+                >
+                  Next Chapter ›
+                </button>
+              </div>
+
               {chapterData.attribution && (
-                <p className="bible-attribution" style={{ marginTop: "32px", fontSize: "12px", color: "var(--ink-soft)", fontStyle: "italic", textAlign: "center" }} dangerouslySetInnerHTML={{ __html: chapterData.attribution }}>
+                <p className="bible-attribution" style={{ marginTop: "32px", fontSize: "12px", color: "var(--ink-soft)", fontStyle: "italic", textAlign: "left" }} dangerouslySetInnerHTML={{ __html: chapterData.attribution }}>
                 </p>
               )}
             </>

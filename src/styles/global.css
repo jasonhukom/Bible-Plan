@@ -273,6 +273,8 @@ h3 {
   gap: 20px;
   align-items: flex-start;
   flex-direction: row-reverse;
+  width: 100%;
+  max-width: 100%;
 }
 
 .bible-layout.home-mode {
@@ -281,8 +283,8 @@ h3 {
 
 .bible-layout.home-mode .bible-sidebar {
   width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 100%;
+  margin: 0;
   border: none;
   background: transparent;
   position: static;
@@ -433,43 +435,90 @@ h3 {
   flex: 1;
   min-width: 0;
   width: 100%;
+  max-width: 100%;
 }
 
 .reader-heading {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 18px;
+  justify-content: flex-start;
+  margin-bottom: 8px;
   flex-wrap: wrap;
   gap: 10px;
+  width: 100%;
 }
 
 .reader-heading h1 {
-  font-size: 28px;
+  font-size: clamp(34px, 3.2vw, 48px);
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--cream);
+  text-align: left;
+  letter-spacing: -0.01em;
 }
 
-.reader-nav {
+.reader-nav-bar {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 12px;
+  margin: 12px 0 24px;
+  padding: 0 4px;
+}
+
+.reader-nav-bar-bottom {
+  margin: 36px 0 24px;
+}
+
+.reader-nav-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border: 1px solid var(--night-line);
+  background: var(--night-2);
+  border-radius: 9px;
+  color: var(--cream);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.reader-nav-btn:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(219, 181, 88, 0.12);
+  color: var(--gold-bright);
+}
+
+.reader-nav-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .reader-text {
   font-family: var(--font-display);
-  font-size: 28px;
+  font-size: clamp(30px, 2.6vw, 40px);
   line-height: 1.85;
   color: var(--cream);
-  padding: 0 4px;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+  max-width: 100%;
 }
 
 .reader-heading-inline {
   display: block;
   font-family: var(--font-body);
   font-weight: 600;
-  font-size: 13px;
+  font-size: 15px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--gold-bright);
-  margin: 22px 0 8px;
+  margin: 28px 0 10px;
+  text-align: left;
 }
 
 .verse {
@@ -1181,12 +1230,21 @@ h3 {
 }
 
 .calendar-weekdays span {
-  padding: 4px 10px;
+  padding: 4px 6px;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 13.5px;
   font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--cream);
+  text-align: center;
+}
+
+.weekday-full {
+  display: inline;
+}
+
+.weekday-short {
+  display: none;
 }
 
 .calendar-month-grid {
@@ -1354,15 +1412,20 @@ h3 {
 }
 
 .calendar-bottom-left,
-.calendar-bottom-center,
 .calendar-bottom-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
 }
 
-.calendar-bottom-center {
-  justify-content: center;
+.calendar-bottom-center-mobile {
+  display: none;
+}
+
+.calendar-pc-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .calendar-date-text {
@@ -1391,15 +1454,21 @@ h3 {
   font-family: var(--font-display);
   font-size: 16px;
   font-weight: 600;
-  margin: 0 4px;
+  margin: 0;
+}
+
+.cal-title-pc {
+  display: inline-block;
+  width: 175px;
+  min-width: 175px;
+  max-width: 175px;
+  text-align: center;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .cal-title-mobile {
   display: none;
-}
-
-.cal-title-pc {
-  display: inline;
 }
 
 .today-btn {
@@ -1662,7 +1731,7 @@ h3 {
   .calendar-grid-wrap {
     flex: 1;
     min-height: 0;
-    padding: 6px 6px 0;
+    padding: 3px 4px 0;
     overflow: hidden;
     touch-action: pan-y;
   }
@@ -1672,38 +1741,49 @@ h3 {
   }
 
   .calendar-weekdays span {
-    padding: 2px 0;
-    font-size: 11px;
+    padding: 1px 0;
+    font-size: 10px;
     text-align: center;
+  }
+
+  .weekday-full {
+    display: none;
+  }
+
+  .weekday-short {
+    display: inline;
   }
 
   .calendar-month-grid {
     flex: 1;
     min-height: 0;
-    gap: 3px;
+    gap: 2px;
     overflow: hidden;
     touch-action: pan-y;
+    grid-template-rows: repeat(6, 1fr);
   }
 
   .cal-day-cell {
-    padding: 3px 4px;
-    border-radius: 6px;
+    padding: 2px 2.5px;
+    border-radius: 5px;
     min-height: 0;
+    max-height: 100%;
   }
 
   .cal-day-number {
-    width: 18px;
-    height: 18px;
-    font-size: 11px;
+    width: 15px;
+    height: 15px;
+    font-size: 10px;
   }
 
   .cal-day-number-row {
-    margin-bottom: 2px;
+    margin-bottom: 1px;
   }
 
   .cal-event-pill {
-    padding: 1.5px 3px;
-    font-size: 9.5px;
+    padding: 1px 2px;
+    font-size: 8.5px;
+    line-height: 1.25;
     border-radius: 3px;
     gap: 2px;
     width: 100%;
@@ -1711,12 +1791,13 @@ h3 {
   }
 
   .cal-event-range {
-    font-size: 9px;
+    font-size: 8px;
   }
 
   .cal-day-more {
-    font-size: 8.5px;
-    padding: 0 2px;
+    font-size: 7.5px;
+    padding: 0 1px;
+    line-height: 1;
   }
 
   .cal-event-name-full {
@@ -1725,8 +1806,20 @@ h3 {
 
   .cal-event-name-short {
     display: inline;
-    font-size: 9.5px;
+    font-size: 8.5px;
     font-weight: 700;
+  }
+
+  .calendar-pc-month-nav {
+    display: none;
+  }
+
+  .calendar-bottom-center-mobile {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
   }
 
   .cal-title-pc {
@@ -1734,14 +1827,18 @@ h3 {
   }
 
   .cal-title-mobile {
-    display: inline;
-    font-size: 15px;
+    display: inline-block;
+    width: 95px;
+    min-width: 95px;
+    max-width: 95px;
+    text-align: center;
+    font-size: 14.5px;
     font-weight: 700;
   }
 
   .calendar-bottom-bar {
-    padding: 8px 12px;
-    gap: 8px;
+    padding: 6px 10px;
+    gap: 6px;
     background: var(--night-2);
     border-top: 1px solid var(--night-line);
     position: relative;
@@ -1757,19 +1854,50 @@ h3 {
     flex: 0 0 auto;
   }
 
-  .calendar-bottom-center {
-    flex: 1;
-    justify-content: center;
-    gap: 10px;
-  }
-
   .calendar-bottom-right {
     flex: 0 0 auto;
   }
 
   .today-btn {
-    padding: 5px 12px;
-    font-size: 12px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+  }
+
+  /* Bible page decreased padding on phone */
+  .main-content-bible {
+    --layout-padding: 6px !important;
+    padding: 6px 8px 80px 8px !important;
+  }
+
+  .page-header-sticky {
+    margin-top: -6px;
+    margin-left: -8px;
+    margin-right: -8px;
+    padding: 8px 10px 10px 10px;
+    margin-bottom: 12px;
+  }
+
+  .reader-heading h1 {
+    font-size: 24px;
+    text-align: left;
+  }
+
+  .reader-text {
+    font-size: 22px;
+    line-height: 1.65;
+    padding: 0 2px;
+    text-align: left;
+  }
+
+  .reader-nav-bar {
+    gap: 8px;
+    margin: 10px 0 16px;
+    padding: 0;
+  }
+
+  .reader-nav-btn {
+    padding: 9px 10px;
+    font-size: 13px;
   }
 }
 

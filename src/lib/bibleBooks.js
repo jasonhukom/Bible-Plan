@@ -92,6 +92,12 @@ export const BOOK_SHORT_NAMES = {
   "2JN": "2John", "3JN": "3John", JUD: "Jude", REV: "Rev"
 };
 
+export function getLongBookName(bookId, fallbackName) {
+  const id = (bookId || "").toUpperCase();
+  if (BOOK_NAMES[id]) return BOOK_NAMES[id];
+  return fallbackName || id || "Book";
+}
+
 export function getShortBookName(bookId, fallbackName) {
   const id = (bookId || "").toUpperCase();
   if (BOOK_SHORT_NAMES[id]) return BOOK_SHORT_NAMES[id];

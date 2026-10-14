@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPreferredTranslation } from "../lib/bible";
-import { GROUP_COLORS, BOOK_NAMES, getShortBookName } from "../lib/bibleBooks";
-import { buildMonthGrid, monthLabel, WEEKDAY_LABELS } from "../lib/calendarGrid";
+import { GROUP_COLORS, BOOK_NAMES, getLongBookName, getShortBookName } from "../lib/bibleBooks";
+import { buildMonthGrid, monthLabel, WEEKDAY_SHORT_LABELS, WEEKDAY_FULL_LABELS } from "../lib/calendarGrid";
 import { useCalendarView } from "../context/CalendarViewContext";
 import { usePlan } from "../context/PlanContext";
 import { useTheme } from "../context/ThemeContext";
@@ -36,7 +36,7 @@ function pillsForDate(rows) {
       }
     }
     const rangeText = runs.map((r) => (r.start === r.end ? `${r.start}` : `${r.start}-${r.end}`)).join(", ");
-    const bookFullName = sorted[0].book_name || BOOK_NAMES[bookId] || bookId;
+    const bookFullName = getLongBookName(bookId, sorted[0].book_name);
     const shortBookName = getShortBookName(bookId, bookFullName);
 
     pills.push({
@@ -408,8 +408,11 @@ export default function PlanPage() {
           onTouchEnd={handleTouchEnd}
         >
           <div className="calendar-weekdays">
-            {WEEKDAY_LABELS.map((w) => (
-              <span key={w}>{w.toUpperCase()}</span>
+            {WEEKDAY_SHORT_LABELS.map((w, idx) => (
+              <span key={w}>
+                <span className="weekday-full">{WEEKDAY_FULL_LABELS[idx].toUpperCase()}</span>
+                <span className="weekday-short">{w.toUpperCase()}</span>
+              </span>
             ))}
           </div>
 
@@ -534,19 +537,28 @@ export default function PlanPage() {
             </button>
           </div>
 
-          <div className="calendar-bottom-center">
+          {/* Mobile-only center month navigation (above navbar) */}
+          <div className="calendar-bottom-center-mobile">
             <button className="icon-btn" type="button" onClick={goToPrevMonth} aria-label="Previous month">
               ‹
             </button>
-            {/* Shortened for phone ("Oct 2026"), full for PC ("October 2026") */}
-            <span className="calendar-bottom-title cal-title-pc">{monthLabel(viewYear, viewMonth, false)}</span>
             <span className="calendar-bottom-title cal-title-mobile">{monthLabel(viewYear, viewMonth, true)}</span>
             <button className="icon-btn" type="button" onClick={goToNextMonth} aria-label="Next month">
               ›
             </button>
           </div>
 
+          {/* PC right side navigation (month arrows + fixed-width month text + Today button) */}
           <div className="calendar-bottom-right">
+            <div className="calendar-pc-month-nav">
+              <button className="icon-btn" type="button" onClick={goToPrevMonth} aria-label="Previous month">
+                ‹
+              </button>
+              <span className="calendar-bottom-title cal-title-pc">{monthLabel(viewYear, viewMonth, false)}</span>
+              <button className="icon-btn" type="button" onClick={goToNextMonth} aria-label="Next month">
+                ›
+              </button>
+            </div>
             <button className="btn today-btn" type="button" onClick={goToToday}>
               Today
             </button>
