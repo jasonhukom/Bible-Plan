@@ -4,7 +4,8 @@ export default function BibleFloatingNav({
   hasPrev,
   hasNext,
   prevLabel = "Previous chapter",
-  nextLabel = "Next chapter"
+  nextLabel = "Next chapter",
+  leftOffset
 }) {
   return (
     <div className="bible-floating-nav-container" aria-label="Chapter navigation">
@@ -16,6 +17,7 @@ export default function BibleFloatingNav({
         disabled={!hasPrev}
         title={prevLabel}
         aria-label={prevLabel}
+        style={leftOffset ? { left: leftOffset } : undefined}
       >
         <svg
           width="20"

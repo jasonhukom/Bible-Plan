@@ -1,9 +1,20 @@
+import { useEffect } from "react";
+
 export default function BibleFontSheet({
   isOpen,
   onClose,
   settings,
   onUpdateSettings
 }) {
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const fontSizes = [18, 20, 22, 25, 28];

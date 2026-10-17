@@ -45,6 +45,16 @@ export default function BibleBooksSheet({
     }
   }, [isOpen, initialTab, currentBookId]);
 
+  // Close sheet on Escape key press
+  useEffect(() => {
+    if (!isOpen) return;
+    function handleKeyDown(e) {
+      if (e.key === "Escape") onClose();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   // Focus search input when switching to books tab with query
   useEffect(() => {
     if (isOpen && tab === "books" && searchInputRef.current) {

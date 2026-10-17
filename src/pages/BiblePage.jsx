@@ -18,13 +18,14 @@ import {
   getExtraBooksToggles,
   setExtraBooksToggles
 } from "../lib/extraBooksApi";
-import { EXTRA_COLLECTIONS } from "../lib/extraBooksRegistry";
+import { EXTRA_COLLECTIONS, matchesBookSearch } from "../lib/extraBooksRegistry";
 
 import BibleMobileTopBar from "../components/BibleMobileTopBar";
 import BibleFloatingNav from "../components/BibleFloatingNav";
 import BibleBooksSheet from "../components/BibleBooksSheet";
 import BibleTranslationsSheet from "../components/BibleTranslationsSheet";
 import BibleFontSheet from "../components/BibleFontSheet";
+import AdditionalBooksSheet from "../components/AdditionalBooksSheet";
 
 export default function BiblePage() {
   const { translationId: routeTranslation, bookId: routeBook, chapter: routeChapter } = useParams();
@@ -48,11 +49,17 @@ export default function BiblePage() {
   const [saveNotice, setSaveNotice] = useState("");
   const [hideBookPrompt, setHideBookPrompt] = useState(null);
 
-  // Mobile Bottom Sheets & State
+  // Desktop Sidebar State & Controls
+  const [sidebarSearchQuery, setSidebarSearchQuery] = useState("");
+  const [sidebarTestament, setSidebarTestament] = useState("all");
+  const [sidebarOrderMode, setSidebarOrderMode] = useState("traditional");
+
+  // Bottom Sheets & Dialogs State
   const [isBooksSheetOpen, setIsBooksSheetOpen] = useState(false);
   const [sheetTab, setSheetTab] = useState("books");
   const [isTranslationsSheetOpen, setIsTranslationsSheetOpen] = useState(false);
   const [isFontSheetOpen, setIsFontSheetOpen] = useState(false);
+  const [isAdditionalBooksOpen, setIsAdditionalBooksOpen] = useState(false);
 
   // Reader Appearance Settings (persisted)
   const [readerSettings, setReaderSettings] = useState(() => {
@@ -121,6 +128,32 @@ export default function BiblePage() {
     [currentTranslationObj, translationId]
   );
   const translationFullName = currentTranslationObj?.label || translationId;
+
+  const activeExtraCollectionsCount = useMemo(() => {
+    const toggles = getExtraBooksToggles();
+    return Object.values(toggles).filter(Boolean).length;
+  }, [books]);
+
+  const desktopFilteredBooks = useMemo(() => {
+    const q = sidebarSearchQuery.trim();
+    if (!q) return null;
+    return books.filter((b) => matchesBookSearch(b, q));
+  }, [books, sidebarSearchQuery]);
+
+  const desktopAlphabeticalBooks = useMemo(() => {
+    if (sidebarOrderMode !== "alphabetical") return [];
+    let list = [...books];
+    if (sidebarTestament === "ot") {
+      list = list.filter((b) => (grouped.ot || []).some((item) => item.id === b.id));
+    } else if (sidebarTestament === "nt") {
+      list = list.filter((b) => (grouped.nt || []).some((item) => item.id === b.id));
+    }
+    return list.sort((a, b) => {
+      const nameA = a.commonName || a.name || "";
+      const nameB = b.commonName || b.name || "";
+      return nameA.localeCompare(nameB);
+    });
+  }, [books, grouped, sidebarTestament, sidebarOrderMode]);
 
   // Featured translation list for the picker.
   useEffect(() => {
@@ -296,6 +329,31 @@ export default function BiblePage() {
     }
   }
 
+  // PC Keyboard Arrow Navigation (Left/Right to change chapter)
+  useEffect(() => {
+    function handleKeyDown(e) {
+      if (
+        ["INPUT", "TEXTAREA", "SELECT"].includes(e.target?.tagName) ||
+        e.target?.isContentEditable
+      ) {
+        return;
+      }
+      if (e.key === "ArrowLeft") {
+        if (hasPrevChapter) {
+          e.preventDefault();
+          changeChapter(-1);
+        }
+      } else if (e.key === "ArrowRight") {
+        if (hasNextChapter) {
+          e.preventDefault();
+          changeChapter(1);
+        }
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [hasPrevChapter, hasNextChapter]);
+
   function handleSelectHistory(item) {
     navigate(`/bible/${item.translationId || translationId}/${item.bookId}/${item.chapter}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -389,6 +447,46 @@ export default function BiblePage() {
     ? `${currentBook.commonName || currentBook.name} ${routeChapter}`
     : "Select Book";
 
+  function renderDesktopBookItem(book) {
+    const isExpanded = expandedBook === book.id;
+    const isCurrent = routeBook === book.id;
+    return (
+      <div key={book.id} className="desktop-book-item">
+        <button
+          className={`book-list-btn${isExpanded ? " active" : ""}${isCurrent ? " current" : ""}`}
+          onClick={() => openBook(book.id)}
+          type="button"
+        >
+          <span className="desktop-book-name">{book.commonName || book.name}</span>
+          <div className="desktop-book-meta">
+            {book.isExtra && book.primaryBadge && (
+              <span className="bible-extra-chip">{book.primaryBadge}</span>
+            )}
+            <span className="desktop-book-chs">
+              {book.numberOfChapters} {book.numberOfChapters === 1 ? "ch" : "chs"}
+            </span>
+          </div>
+        </button>
+        {isExpanded && (
+          <div className="chapter-grid">
+            {Array.from({ length: book.numberOfChapters }, (_, i) => i + 1).map((ch) => (
+              <button
+                key={ch}
+                type="button"
+                className={`chapter-grid-btn${
+                  routeBook === book.id && Number(routeChapter) === ch ? " active" : ""
+                }`}
+                onClick={() => openChapter(book.id, ch)}
+              >
+                {ch}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className={`page-shell theme-${readerSettings.readerTheme || "dark"}`}>
       {/* --------------------------------------------------------------------------
@@ -421,25 +519,30 @@ export default function BiblePage() {
         <div className="page-header-title-row">
           <h1 className="page-title">Bible</h1>
           {currentBook ? (
-            <p className="page-subtitle">
-              <span>
-                {currentBook.commonName || currentBook.name} {routeChapter}
-              </span>
-              <span className="page-subtitle-sep">•</span>
+            <div className="desktop-passage-capsule">
               <button
                 type="button"
-                className="page-subtitle-trans-btn"
+                className="desktop-passage-chip"
+                onClick={() => setSidebarOpen(true)}
+                title="Select Book and Chapter"
+              >
+                {currentBook.commonName || currentBook.name} {routeChapter}
+              </button>
+              <button
+                type="button"
+                className="desktop-version-chip"
                 onClick={() => setVersionsSidebarOpen((v) => !v)}
-                title="Click to change Bible version"
+                title="Change Bible version"
               >
                 {translationShortName}
               </button>
-            </p>
+            </div>
           ) : (
             <p className="page-subtitle">Select a book and chapter</p>
           )}
         </div>
         <div className="page-header-actions">
+          {/* Version Picker Dropdown */}
           <div style={{ position: "relative" }} ref={dropdownRef}>
             <button
               className="btn btn-ghost version-picker-btn"
@@ -485,6 +588,71 @@ export default function BiblePage() {
               </div>
             )}
           </div>
+
+          {/* Additional Books Button (PC) */}
+          <button
+            type="button"
+            className={`btn btn-ghost desktop-header-btn${activeExtraCollectionsCount > 0 ? " has-active-extras" : ""}`}
+            onClick={() => setIsAdditionalBooksOpen(true)}
+            title="Configure Additional Books (Catholic, Orthodox, Ethiopian, etc.)"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+            <span className="desktop-btn-text">Additional Books</span>
+            {activeExtraCollectionsCount > 0 && (
+              <span className="desktop-extras-badge">{activeExtraCollectionsCount}</span>
+            )}
+          </button>
+
+          {/* Reading History Button (PC) */}
+          <button
+            type="button"
+            className="btn btn-ghost desktop-header-icon-btn"
+            onClick={() => {
+              setSheetTab("history");
+              setIsBooksSheetOpen(true);
+            }}
+            title="Reading History"
+            aria-label="Reading History"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width="17"
+              height="17"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <polyline points="12 7 12 12 15 15" />
+            </svg>
+          </button>
+
+          {/* Reader Appearance & Font Settings ("Aa") Button (PC) */}
+          <button
+            type="button"
+            className="btn btn-ghost desktop-header-icon-btn"
+            onClick={() => setIsFontSheetOpen(true)}
+            title="Reader Font & Appearance Settings"
+            aria-label="Reader Font & Appearance Settings"
+          >
+            <span style={{ fontFamily: "serif", fontWeight: 700, fontSize: "16px", lineHeight: 1 }}>Aa</span>
+          </button>
+
+          {/* Toggle sidebar button */}
           {Boolean(routeBook) && (
             <button className="btn btn-ghost bible-sidebar-toggle" onClick={() => setSidebarOpen((v) => !v)}>
               {sidebarOpen ? "Hide books" : "Books"}
@@ -537,43 +705,153 @@ export default function BiblePage() {
             border: sidebarOpen ? undefined : "none"
           }}
         >
-          {booksLoading && <p className="hint-text">Loading books…</p>}
+          {/* Desktop Sidebar Header */}
+          <div className="desktop-sidebar-header">
+            <div className="desktop-sidebar-title-row">
+              <span className="desktop-sidebar-title">Books</span>
+              <span className="desktop-sidebar-count">{books.length}</span>
+            </div>
+            <button
+              type="button"
+              className="desktop-sidebar-extras-btn"
+              onClick={() => setIsAdditionalBooksOpen(true)}
+              title="Configure Additional Books"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="13"
+                height="13"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+              <span>Extras</span>
+              {activeExtraCollectionsCount > 0 && (
+                <span className="desktop-sidebar-extras-dot" title={`${activeExtraCollectionsCount} collections active`} />
+              )}
+            </button>
+          </div>
 
-          {["ot", "nt"].map((groupKey) =>
-            grouped[groupKey]?.length ? (
-              <div className="book-group" key={groupKey}>
-                <div className="book-group-label">{GROUP_LABELS[groupKey]}</div>
-                {grouped[groupKey].map((book) => (
-                  <div key={book.id}>
-                    <button
-                      className={`book-list-btn${expandedBook === book.id ? " active" : ""}`}
-                      onClick={() => openBook(book.id)}
-                      type="button"
-                      style={expandedBook !== book.id && routeBook ? { color: "var(--ink-soft)" } : {}}
-                    >
-                      {book.commonName || book.name}
-                    </button>
-                    {expandedBook === book.id && (
-                      <div className="chapter-grid">
-                        {Array.from({ length: book.numberOfChapters }, (_, i) => i + 1).map((ch) => (
-                          <button
-                            key={ch}
-                            type="button"
-                            className={`chapter-grid-btn${
-                              routeBook === book.id && Number(routeChapter) === ch ? " active" : ""
-                            }`}
-                            onClick={() => openChapter(book.id, ch)}
-                          >
-                            {ch}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+          {/* Desktop Search input with alias support */}
+          <div className="desktop-sidebar-search">
+            <svg
+              className="desktop-search-icon"
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              className="desktop-search-input"
+              placeholder="Search books & aliases…"
+              value={sidebarSearchQuery}
+              onChange={(e) => setSidebarSearchQuery(e.target.value)}
+              aria-label="Search books"
+            />
+            {sidebarSearchQuery && (
+              <button
+                type="button"
+                className="desktop-search-clear"
+                onClick={() => setSidebarSearchQuery("")}
+                title="Clear search"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          {/* Filter tabs: All, OT, NT & Trad / A-Z (when not searching) */}
+          {!sidebarSearchQuery && (
+            <div className="desktop-sidebar-controls">
+              <div className="desktop-testament-tabs">
+                <button
+                  type="button"
+                  className={`desktop-tab-btn${sidebarTestament === "all" ? " active" : ""}`}
+                  onClick={() => setSidebarTestament("all")}
+                >
+                  All
+                </button>
+                <button
+                  type="button"
+                  className={`desktop-tab-btn${sidebarTestament === "ot" ? " active" : ""}`}
+                  onClick={() => setSidebarTestament("ot")}
+                >
+                  OT
+                </button>
+                <button
+                  type="button"
+                  className={`desktop-tab-btn${sidebarTestament === "nt" ? " active" : ""}`}
+                  onClick={() => setSidebarTestament("nt")}
+                >
+                  NT
+                </button>
               </div>
-            ) : null
+
+              <div className="desktop-order-tabs">
+                <button
+                  type="button"
+                  className={`desktop-order-btn${sidebarOrderMode === "traditional" ? " active" : ""}`}
+                  onClick={() => setSidebarOrderMode("traditional")}
+                  title="Traditional order"
+                >
+                  Trad
+                </button>
+                <button
+                  type="button"
+                  className={`desktop-order-btn${sidebarOrderMode === "alphabetical" ? " active" : ""}`}
+                  onClick={() => setSidebarOrderMode("alphabetical")}
+                  title="Alphabetical order"
+                >
+                  A–Z
+                </button>
+              </div>
+            </div>
           )}
+
+          {/* Book List Body */}
+          <div className="desktop-sidebar-body">
+            {booksLoading && <p className="hint-text">Loading books…</p>}
+
+            {desktopFilteredBooks ? (
+              desktopFilteredBooks.length === 0 ? (
+                <p className="hint-text" style={{ textAlign: "center", padding: "16px 8px" }}>
+                  No books matching "{sidebarSearchQuery}"
+                </p>
+              ) : (
+                <div className="desktop-book-group">
+                  {desktopFilteredBooks.map((book) => renderDesktopBookItem(book))}
+                </div>
+              )
+            ) : sidebarOrderMode === "alphabetical" ? (
+              <div className="desktop-book-group">
+                {desktopAlphabeticalBooks.map((book) => renderDesktopBookItem(book))}
+              </div>
+            ) : (
+              (sidebarTestament === "all" ? ["ot", "nt"] : sidebarTestament === "ot" ? ["ot"] : ["nt"]).map(
+                (groupKey) =>
+                  grouped[groupKey]?.length ? (
+                    <div className="book-group" key={groupKey}>
+                      <div className="book-group-label">{GROUP_LABELS[groupKey]}</div>
+                      {grouped[groupKey].map((book) => renderDesktopBookItem(book))}
+                    </div>
+                  ) : null
+              )
+            )}
+          </div>
         </aside>
 
         {sidebarOpen && !(!routeBook) && (
@@ -817,8 +1095,9 @@ export default function BiblePage() {
           onNext={() => changeChapter(1)}
           hasPrev={hasPrevChapter}
           hasNext={hasNextChapter}
-          prevLabel="Previous chapter"
-          nextLabel="Next chapter"
+          prevLabel="Previous chapter (←)"
+          nextLabel="Next chapter (→)"
+          leftOffset={sidebarOpen && routeBook ? `calc(${sidebarWidth}px + 20px)` : undefined}
         />
       )}
 
@@ -859,6 +1138,12 @@ export default function BiblePage() {
         onClose={() => setIsFontSheetOpen(false)}
         settings={readerSettings}
         onUpdateSettings={handleUpdateReaderSettings}
+      />
+
+      {/* Additional Books Modal (Desktop PC & Mobile) */}
+      <AdditionalBooksSheet
+        isOpen={isAdditionalBooksOpen}
+        onClose={() => setIsAdditionalBooksOpen(false)}
       />
 
       {/* Confirmation banner if extra book collection was turned off while reading */}
