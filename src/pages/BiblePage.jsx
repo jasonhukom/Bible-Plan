@@ -48,6 +48,8 @@ export default function BiblePage() {
   const [savedVerses, setSavedVerses] = useState([]);
   const [saveNotice, setSaveNotice] = useState("");
   const [hideBookPrompt, setHideBookPrompt] = useState(null);
+  const [inlineBooksOpen, setInlineBooksOpen] = useState(() => !routeBook);
+  const [inlineChaptersOpen, setInlineChaptersOpen] = useState(false);
 
   // Desktop Sidebar State & Controls
   const [sidebarSearchQuery, setSidebarSearchQuery] = useState("");
@@ -497,6 +499,27 @@ export default function BiblePage() {
           On the far right, a bold "Aa" icon (font settings) [BUTTON].
           A thin divider line separates the bar from the text.
           -------------------------------------------------------------------------- */}
+      <div className="bible-inline-mobile-header">
+        <h1>Bible</h1>
+        <div className="bible-inline-selectors">
+          <button type="button" className="bible-inline-text-button" onClick={() => { setInlineBooksOpen((open) => !open); setInlineChaptersOpen(false); }}>{currentBook?.commonName || currentBook?.name || "Select book"} <span aria-hidden="true">⌄</span></button>
+          <span className="bible-inline-selector-divider">·</span>
+          <button type="button" className="bible-inline-text-button" disabled={!currentBook} onClick={() => { setInlineChaptersOpen((open) => !open); setInlineBooksOpen(false); }}>{routeChapter ? `Chapter ${routeChapter}` : "Chapter"} <span aria-hidden="true">⌄</span></button>
+        </div>
+        <div className="bible-inline-header-tools">
+          <button type="button" className="bible-inline-text-button" onClick={() => setIsTranslationsSheetOpen(true)}>{translationShortName}</button>
+          <button type="button" className="bible-inline-icon-button" onClick={() => { setSheetTab("history"); setIsBooksSheetOpen(true); }} aria-label="Reading history">◷</button>
+          <button type="button" className="bible-inline-icon-button" onClick={() => setIsFontSheetOpen(true)} aria-label="Reader appearance">Aa</button>
+        </div>
+        {inlineBooksOpen && <div className="bible-inline-book-list">
+          <input type="search" value={sidebarSearchQuery} onChange={(e) => setSidebarSearchQuery(e.target.value)} placeholder="Search Bible books" aria-label="Search Bible books" />
+          {books.filter((book) => matchesBookSearch(book, sidebarSearchQuery.trim())).map((book) => <div className="bible-inline-book-item" key={book.id}>
+            <button type="button" className={"bible-inline-book-name" + (routeBook === book.id ? " active" : "")} onClick={() => { setExpandedBook((prev) => prev === book.id ? null : book.id); setInlineChaptersOpen(false); }}><span>{book.commonName || book.name}</span><span className="bible-inline-chevron">{expandedBook === book.id ? "−" : "+"}</span></button>
+            {expandedBook === book.id && <div className="bible-inline-chapters">{Array.from({ length: book.numberOfChapters }, (_, i) => i + 1).map((chapter) => <button key={chapter} type="button" className={"bible-inline-chapter" + (routeBook === book.id && Number(routeChapter) === chapter ? " active" : "")} onClick={() => { openChapter(book.id, chapter); setInlineBooksOpen(false); setSidebarSearchQuery(""); }}>{chapter}</button>)}</div>}
+          </div>)}
+        </div>}
+        {inlineChaptersOpen && currentBook && <div className="bible-inline-chapters bible-inline-chapter-picker">{Array.from({ length: currentBook.numberOfChapters }, (_, i) => i + 1).map((chapter) => <button key={chapter} type="button" className={"bible-inline-chapter" + (Number(routeChapter) === chapter ? " active" : "")} onClick={() => { openChapter(currentBook.id, chapter); setInlineChaptersOpen(false); }}>{chapter}</button>)}</div>}
+      </div>
       <BibleMobileTopBar
         bookTitle={mobileBookTitle}
         translationShortName={translationShortName}
