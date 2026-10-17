@@ -3802,4 +3802,123 @@ h3 {
   color: var(--ink-soft);
   font-weight: 400;
 }
-
+
+
+/* Theme selector: responsive on desktop and mobile. */
+.theme-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.theme-option-swatch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  justify-content: flex-start;
+  text-align: left;
+  min-width: 0;
+  min-height: 52px;
+  padding: 9px 10px;
+  border: 1px solid var(--night-line);
+  border-radius: 9px;
+  background: var(--night);
+  color: var(--cream);
+  overflow-wrap: anywhere;
+}
+.theme-option-swatch.active {
+  border-color: var(--gold-bright);
+  box-shadow: inset 0 0 0 1px var(--gold-bright);
+}
+.theme-swatch {
+  display: inline-flex;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  border-radius: 7px;
+  border: 1px solid var(--night-line);
+}
+.theme-swatch span { flex: 1; min-width: 0; }
+@media (max-width: 719px) {
+  .theme-options-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+  .theme-option-swatch { flex-direction: column; align-items: flex-start; gap: 6px; padding: 9px 7px; font-size: 12px; }
+}
+:root[data-theme="red-white"] {
+  --night: #fffafa; --night-2: #ffffff; --night-line: #efb9b9;
+  --paper: #fffafa; --paper-dim: #ffe9e9; --cream: #311515; --ink: #311515;
+  --ink-soft: #765454; --gold: #c62828; --gold-bright: #b71c1c;
+  --sage: #2e7d32; --sage-bg: #e4f3e5; --rust: #b71c1c; --rust-bg: #ffe3e3;
+  --shadow: rgba(60, 0, 0, .14);
+  color-scheme: light;
+}
+:root[data-theme="sky-yellow"] {
+  --night: #e5f5ff; --night-2: #f3fbff; --night-line: #b8dced;
+  --paper: #e5f5ff; --paper-dim: #fff2b2; --cream: #183447; --ink: #183447;
+  --ink-soft: #4f6b7a; --gold: #b58a00; --gold-bright: #876700;
+  --sage: #3e7868; --sage-bg: #d9f0e6; --rust: #a33d3d; --rust-bg: #f7dede;
+  --shadow: rgba(15, 45, 65, .14);
+  color-scheme: light;
+}
+:root[data-theme="navy-black"] {
+  --night: #05080f; --night-2: #0b1424; --night-line: #1c3554;
+  --paper: #05080f; --paper-dim: #0b1424; --cream: #e8f0ff; --ink: #e8f0ff;
+  --ink-soft: #a1b3cc; --gold: #1b4c83; --gold-bright: #78baff;
+  --sage: #6d9b84; --sage-bg: #1b302a; --rust: #ff8a80; --rust-bg: #3a1b22;
+  --shadow: rgba(0, 0, 0, .4);
+  color-scheme: dark;
+}
+:root[data-theme="gray"] {
+  --night: #34363b; --night-2: #41444a; --night-line: #5a5e66;
+  --paper: #e7e8eb; --paper-dim: #d4d6db; --cream: #f2f3f5; --ink: #25272b;
+  --ink-soft: #c1c4ca; --gold: #858b96; --gold-bright: #d5d9e0;
+  --sage: #84958a; --sage-bg: #333c37; --rust: #e5a09a; --rust-bg: #49302f;
+  --shadow: rgba(0, 0, 0, .24);
+  color-scheme: dark;
+}
+:root[data-theme="neon"] {
+  --night: #0b0b18; --night-2: #141429; --night-line: #3b2864;
+  --paper: #0b0b18; --paper-dim: #141429; --cream: #f2f0ff; --ink: #f2f0ff;
+  --ink-soft: #b7afd6; --gold: #9b4dff; --gold-bright: #39ffb6;
+  --sage: #39ffb6; --sage-bg: #153c36; --rust: #ff4fd8; --rust-bg: #401b3a;
+  --shadow: rgba(0, 0, 0, .42);
+  color-scheme: dark;
+}
+:root[data-theme="device"] {
+  --night: #1e303c; --night-2: #1e303c; --night-line: #2e4150;
+  --paper: #f1e7d2; --paper-dim: #e3d5b8; --cream: #ede4d0; --ink: #2b2013;
+  --ink-soft: #6c5c45; --gold: #b3862e; --gold-bright: #dbb558;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="device"] {
+    --night: #f1e7d2; --night-2: #e3d5b8; --night-line: #d9c8a0;
+    --cream: #2b2013; --ink: #2b2013; --ink-soft: #6c5c45;
+    --gold: #96690b; --gold-bright: #7a5209; --shadow: rgba(43,32,19,.18);
+    color-scheme: light;
+  }
+}
+
+
+.theme-modal-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; background: rgba(0, 0, 0, .62);
+}
+.theme-modal {
+  width: min(100%, 520px); max-height: min(82dvh, 720px);
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--night-2); color: var(--cream);
+  box-shadow: 0 24px 80px rgba(0,0,0,.35);
+}
+.theme-modal > p { margin: 0 0 18px; }
+.theme-welcome-actions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.theme-welcome-actions .btn { grid-column: 1 / -1; }
+.theme-modal-list {
+  display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 8px; overflow-y: auto; min-height: 0; padding: 2px 3px 8px;
+}
+.theme-modal-close { margin-top: 14px; padding: 8px; color: var(--ink-soft); font-size: 13px; }
+@media (max-width: 420px) {
+  .theme-welcome-actions, .theme-modal-list { grid-template-columns: minmax(0,1fr); }
+  .theme-modal { padding: 16px; }
+}

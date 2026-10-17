@@ -24,11 +24,13 @@ export default function LoginPage() {
       if (mode === "sign-in") {
         const { error: signInErr } = await signInWithPassword(loginEmail, password);
         if (signInErr) throw signInErr;
+        localStorage.setItem("bible-plan-show-theme-picker", "1");
         navigate("/profile");
       } else {
         const { error: signUpErr, data } = await signUpWithPassword(loginEmail, password);
         if (signUpErr) throw signUpErr;
         if (data?.session) {
+          localStorage.setItem("bible-plan-show-theme-picker", "1");
           navigate("/profile");
         } else {
           setInfo("Account created! Check your email to confirm, then sign in.");
