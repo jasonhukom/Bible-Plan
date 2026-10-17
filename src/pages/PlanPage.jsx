@@ -401,6 +401,13 @@ export default function PlanPage() {
       )}
 
       <section className="plan-main">
+        <div className="phone-calendar-heading">
+          <h1>{monthLabel(viewYear, viewMonth, false)}</h1>
+          <div className="phone-calendar-arrows">
+            <button className="icon-btn" type="button" onClick={goToPrevMonth} aria-label="Previous month">‹</button>
+            <button className="icon-btn" type="button" onClick={goToNextMonth} aria-label="Next month">›</button>
+          </div>
+        </div>
         <div
           className="calendar-grid-wrap"
           onTouchStart={handleTouchStart}
