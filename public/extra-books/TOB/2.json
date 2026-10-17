@@ -1,0 +1,111 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "World English Bible",
+    "shortName": "EXTRA",
+    "englishName": "World English Bible",
+    "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c",
+    "sourceName": "World English Bible"
+  },
+  "book": {
+    "id": "TOB",
+    "translationId": "EXTRA",
+    "name": "Tobit",
+    "commonName": "Tobit",
+    "numberOfChapters": 14
+  },
+  "chapter": {
+    "number": 2,
+    "content": [
+      {
+        "type": "heading",
+        "text": "Tobit's Affliction and Blindness"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "Now when I was come home again, and my wife Anna was restored to me, and my son Tobias, in the feast of Pentecost, which is the holy feast of the seven weeks, there was a good dinner prepared me, and I sat down to eat.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "And I saw abundance of meat, and I said to my son, Go and bring what poor man soever you shall find of our brethren, who is mindful of the Lord; and, lo, I tarry for you.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "And he came, and said, Father, one of our race is strangled, and is cast out in the marketplace.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 4,
+        "text": "And before I had tasted any meat, I sprang up, and took him up into a chamber until the sun was set.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 5,
+        "text": "And I returned, and washed myself, and ate my bread in heaviness,",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 6,
+        "text": "and remembered the prophecy of Amos, as he said, Your feasts shall be turned into mourning, and all your mirth into lamentation.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 7,
+        "text": "And I wept: and when the sun was set, I went and made a grave, and buried him.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 8,
+        "text": "And my neighbors mocked me, and said, He is no longer afraid to be put to death for this matter: and yet he fled away: and, lo, he buries the dead again.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 9,
+        "text": "And the same night I returned from burying him, and slept by the wall of my courtyard, being polluted; and my face was uncovered:",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 10,
+        "text": "and I knew not that there were sparrows in the wall; and, my eyes being open, the sparrows muted warm dung into my eyes, and white films came in my eyes; and I went to the physicians, and they helped me not: but Ahikar did nourish me, until I went into Elymais.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 11,
+        "text": "And my wife Anna did spin yarn in the women's chambers,",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 12,
+        "text": "and sent the work back to the owners, and they also gave her wages, and gave her also besides a kid of the goats.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 13,
+        "text": "But when it came to my house, it began to cry, and I said to her, From where is this kid? is it stolen? render it to the owners; for it is not lawful to eat anything that is stolen.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 14,
+        "text": "But she said, It hath been given me for a gift more than the wages. And I did not believe her, and I bade her render it to the owners; and I was abashed at her. But she answered and said to me, Where are your alms and your righteous deeds? behold, you and all your works are known.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: World English Bible. Public domain or explicitly free to use."
+}

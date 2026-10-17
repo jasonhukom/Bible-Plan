@@ -1,0 +1,45 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "R.H. Charles (1912)",
+    "shortName": "EXTRA",
+    "englishName": "R.H. Charles (1912)",
+    "licenseUrl": "https://www.sacred-texts.com/bib/boe/index.htm",
+    "sourceName": "R.H. Charles (1912)"
+  },
+  "book": {
+    "id": "ENO",
+    "translationId": "EXTRA",
+    "name": "1 Enoch",
+    "commonName": "1 Enoch",
+    "numberOfChapters": 108
+  },
+  "chapter": {
+    "number": 2,
+    "content": [
+      {
+        "type": "heading",
+        "text": "The Order and Constancy of Nature"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "Observe ye everything that takes place in the heaven, how they do not change their orbits, and the luminaries which are in the heaven, how they all rise and set in order each in its season, and transgress not against their appointed order.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "Behold ye the earth, and give heed to the things which take place upon it from first to last, how steadfast they are, how none of the things upon earth change, but all the works of God appear to you.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "Behold the summer and the winter, how the whole earth is filled with water, and clouds and dew and rain lie upon it.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: R.H. Charles (1912). Public domain or explicitly free to use."
+}

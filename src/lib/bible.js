@@ -83,29 +83,39 @@ export async function listTranslations() {
   return [...apiBibleList, ...haoMapped, ...yvMapped];
 }
 
-export async function listBooks(translationId) {
+import { isExtraBook, getExtraChapter, getExtraBooksToggles } from "./extraBooksApi";
+import { mergeBooksWithExtras } from "./extraBooksRegistry";
+
+export async function listBooks(translationId, activeToggles = null) {
   const tid = translationId || DEFAULT_TRANSLATION_ID;
+  let canonicalList = [];
   try {
     if (apibible.isApiBible(tid)) {
-      return await apibible.listBooks(tid);
+      canonicalList = await apibible.listBooks(tid);
     } else if (tid.startsWith('yv-') || ['3034', '1', '12', '206', '111'].includes(String(tid))) {
       const cleanYv = String(tid).replace('yv-', '');
-      return await youversion.listBooks(cleanYv);
+      canonicalList = await youversion.listBooks(cleanYv);
     } else {
-      return await helloao.listBooks(tid);
+      canonicalList = await helloao.listBooks(tid);
     }
   } catch (err) {
     console.warn(`listBooks failed for ${tid}, falling back to BSB`, err);
     try {
-      return await helloao.listBooks("BSB");
+      canonicalList = await helloao.listBooks("BSB");
     } catch {
-      return await apibible.listBooks("fallback");
+      canonicalList = await apibible.listBooks("fallback");
     }
   }
+
+  const toggles = activeToggles !== null ? activeToggles : getExtraBooksToggles();
+  return mergeBooksWithExtras(canonicalList, toggles);
 }
 
 export async function getChapter(translationId, bookId, chapterNumber) {
   const tid = translationId || DEFAULT_TRANSLATION_ID;
+  if (isExtraBook(bookId)) {
+    return await getExtraChapter(tid, bookId, chapterNumber);
+  }
   if (apibible.isApiBible(tid)) {
     return apibible.getChapter(tid, bookId, chapterNumber);
   } else if (tid.startsWith('yv-') || ['3034', '1', '12', '206', '111'].includes(String(tid))) {

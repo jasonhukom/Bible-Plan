@@ -1,0 +1,153 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "World English Bible",
+    "shortName": "EXTRA",
+    "englishName": "World English Bible",
+    "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c",
+    "sourceName": "World English Bible"
+  },
+  "book": {
+    "id": "TOB",
+    "translationId": "EXTRA",
+    "name": "Tobit",
+    "commonName": "Tobit",
+    "numberOfChapters": 14
+  },
+  "chapter": {
+    "number": 1,
+    "content": [
+      {
+        "type": "heading",
+        "text": "Tobit's Faithfulness in Exile"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "The book of the words of Tobit, the son of Tobiel, the son of Ananiel, the son of Aduel, the son of Gabael, of the seed of Asiel, of the tribe of Naphtali;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "who in the days of Shalmaneser king of the Assyrians was carried away captive out of Thisbe, which is on the right hand of Kedesh Naphtali in Galilee above Asher.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "I, Tobit, walked in the ways of truth and righteousness all the days of my life, and I did many almsdeeds to my brethren and my nation, who went with me into the land of the Assyrians, to Nineveh.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 4,
+        "text": "And when I was in my own country, in the land of Israel, while I was yet young, all the tribe of Naphtali my father fell away from the house of Jerusalem, which was chosen out of all the tribes of Israel, that all the tribes should sacrifice there, where the temple of the habitation of the Most High was hallowed and built for all ages.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 5,
+        "text": "And all the tribes which fell away together sacrificed to the heifer Baal, and so did the house of Naphtali my father.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 6,
+        "text": "And I alone went often to Jerusalem at the feasts, as it has been ordained to all Israel by an everlasting decree, having the first fruits and the tenths of my increase, and that which was first shorn; and I gave them at the altar to the priests the sons of Aaron.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 7,
+        "text": "The tenth part of all my increase I gave to the sons of Levi, who ministered at Jerusalem; and the second tenth part I sold away, and went, and spent it each year at Jerusalem;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 8,
+        "text": "and the third I gave to those to whom it was fitting, as Deborah my father's mother had commanded me, because I was left an orphan by my father.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 9,
+        "text": "And when I became a man, I took to wife Anna of the seed of our own family, and of her I begat Tobias.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 10,
+        "text": "And when I was carried away captive to Nineveh, all my brethren and those who were of my kindred ate of the bread of the Gentiles;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 11,
+        "text": "but I kept myself from eating, because I remembered God with all my soul.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 12,
+        "text": "And the Most High gave me grace and favor in the sight of Shalmaneser, so that I was his purveyor.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 13,
+        "text": "And I went into Media, and left in trust with Gabael, the brother of Gabrias, at Rages of Media, ten talents of silver.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 14,
+        "text": "And when Shalmaneser was dead, Sennacherib his son reigned in his place; and in his time the highways were troubled, and I could no more go into Media.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 15,
+        "text": "And in the days of Shalmaneser I did many almsdeeds to my brethren: I gave my bread to the hungry,",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 16,
+        "text": "and my garments to the naked; and if I saw any of my nation dead, and cast forth behind the wall of Nineveh, I buried him.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 17,
+        "text": "And if Sennacherib the king slew any, when he came fleeing from Judea, I buried them privately; for in his wrath he slew many, and the bodies were sought for by the king, and were not found.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 18,
+        "text": "But one of the Ninevites went and showed to the king concerning me, how that I buried them, and hid myself; and when I knew that I was sought for to be put to death, I withdrew myself for fear.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 19,
+        "text": "And all my goods were forcibly taken away, and there was nothing left me, save my wife Anna and my son Tobias.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 20,
+        "text": "And there passed not five and fifty days, before two of his sons slew him, and they fled into the mountains of Ararat. And Esarhaddon his son reigned in his place; and he appointed Ahikar my brother Ananiel's son over all the accounts of his kingdom, and over all his affairs.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 21,
+        "text": "And Ahikar besought for me, and I came to Nineveh. Now Ahikar was cupbearer, and keeper of the signet, and steward, and overseer of the accounts; and Esarhaddon appointed him next to himself: and he was my brother's son.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: World English Bible. Public domain or explicitly free to use."
+}

@@ -12,6 +12,13 @@ import {
 import { groupBooks, GROUP_LABELS } from "../lib/bibleBooks";
 import { useAuth } from "../context/AuthContext";
 import { dataApi } from "../lib/dataApi";
+import {
+  isExtraBook,
+  getExtraBookMeta,
+  getExtraBooksToggles,
+  setExtraBooksToggles
+} from "../lib/extraBooksApi";
+import { EXTRA_COLLECTIONS } from "../lib/extraBooksRegistry";
 
 import BibleMobileTopBar from "../components/BibleMobileTopBar";
 import BibleFloatingNav from "../components/BibleFloatingNav";
@@ -39,6 +46,7 @@ export default function BiblePage() {
   const [expandedBook, setExpandedBook] = useState(routeBook || null);
   const [savedVerses, setSavedVerses] = useState([]);
   const [saveNotice, setSaveNotice] = useState("");
+  const [hideBookPrompt, setHideBookPrompt] = useState(null);
 
   // Mobile Bottom Sheets & State
   const [isBooksSheetOpen, setIsBooksSheetOpen] = useState(false);
@@ -128,6 +136,35 @@ export default function BiblePage() {
       .finally(() => setBooksLoading(false));
   }, [translationId]);
 
+  // Synchronize when additional books toggles change
+  useEffect(() => {
+    function onExtraBooksChanged(e) {
+      const updatedToggles = e.detail;
+      listBooks(translationId, updatedToggles)
+        .then((newBooks) => {
+          setBooks(newBooks);
+          // If currently reading an extra book that was just turned off, prompt the user
+          if (routeBook && isExtraBook(routeBook)) {
+            const isStillVisible = newBooks.some((b) => b.id === routeBook);
+            if (!isStillVisible) {
+              const meta = getExtraBookMeta(routeBook);
+              const anchor = meta?.anchorAfter || "GEN";
+              const anchorBook = newBooks.find((b) => b.id === anchor);
+              setHideBookPrompt({
+                bookName: meta?.name || routeBook,
+                anchorId: anchor,
+                anchorName: anchorBook?.commonName || anchorBook?.name || anchor
+              });
+            }
+          }
+        })
+        .catch(() => {});
+    }
+
+    window.addEventListener("bible-extra-books-changed", onExtraBooksChanged);
+    return () => window.removeEventListener("bible-extra-books-changed", onExtraBooksChanged);
+  }, [translationId, routeBook]);
+
   // Chapter content.
   useEffect(() => {
     if (!routeBook || !routeChapter) {
@@ -213,12 +250,50 @@ export default function BiblePage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  const currentBookIndex = useMemo(() => {
+    if (!routeBook || !books.length) return -1;
+    return books.findIndex((b) => b.id === routeBook);
+  }, [books, routeBook]);
+
+  const hasPrevChapter = useMemo(() => {
+    if (!routeBook || !routeChapter) return false;
+    const ch = Number(routeChapter);
+    if (ch > 1) return true;
+    return currentBookIndex > 0;
+  }, [routeBook, routeChapter, currentBookIndex]);
+
+  const hasNextChapter = useMemo(() => {
+    if (!routeBook || !routeChapter || !currentBook) return false;
+    const ch = Number(routeChapter);
+    if (ch < currentBook.numberOfChapters) return true;
+    return currentBookIndex >= 0 && currentBookIndex < books.length - 1;
+  }, [routeBook, routeChapter, currentBook, currentBookIndex, books.length]);
+
   function changeChapter(delta) {
-    if (!currentBook) return;
-    const next = Number(routeChapter) + delta;
-    if (next < 1 || next > currentBook.numberOfChapters) return;
-    navigate(`/bible/${translationId}/${routeBook}/${next}`);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (!currentBook && currentBookIndex === -1) return;
+    const ch = Number(routeChapter);
+    const next = ch + delta;
+
+    if (delta > 0) {
+      if (currentBook && next <= currentBook.numberOfChapters) {
+        navigate(`/bible/${translationId}/${routeBook}/${next}`);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (currentBookIndex >= 0 && currentBookIndex < books.length - 1) {
+        const nextBook = books[currentBookIndex + 1];
+        navigate(`/bible/${translationId}/${nextBook.id}/1`);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    } else if (delta < 0) {
+      if (next >= 1) {
+        navigate(`/bible/${translationId}/${routeBook}/${next}`);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (currentBookIndex > 0) {
+        const prevBook = books[currentBookIndex - 1];
+        const lastCh = prevBook.numberOfChapters || 1;
+        navigate(`/bible/${translationId}/${prevBook.id}/${lastCh}`);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
   }
 
   function handleSelectHistory(item) {
@@ -527,8 +602,35 @@ export default function BiblePage() {
             </div>
           )}
 
-          {routeBook && chapterLoading && <p className="reader-loading">Loading chapter…</p>}
-          {routeBook && chapterError && <p className="error-text">{chapterError}</p>}
+          {routeBook && chapterLoading && (
+            <div className="reader-skeleton-wrap" aria-label="Loading chapter content">
+              <div className="reader-skeleton-line short" />
+              <div className="reader-skeleton-line" />
+              <div className="reader-skeleton-line" />
+              <div className="reader-skeleton-line mid" />
+              <div className="reader-skeleton-line" />
+              <div className="reader-skeleton-line short" />
+            </div>
+          )}
+          {routeBook && chapterError && (
+            <div className="reader-coming-soon-banner" style={{ borderColor: "rgba(220, 60, 60, 0.4)" }}>
+              <p className="error-text" style={{ margin: "0 0 10px 0" }}>{chapterError}</p>
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                onClick={() => {
+                  setChapterLoading(true);
+                  setChapterError("");
+                  getChapter(translationId, routeBook, Number(routeChapter))
+                    .then(setChapterData)
+                    .catch(() => setChapterError("Couldn't load that chapter. Try another one."))
+                    .finally(() => setChapterLoading(false));
+                }}
+              >
+                Retry
+              </button>
+            </div>
+          )}
 
           {chapterData && !chapterLoading && (
             <>
@@ -539,13 +641,69 @@ export default function BiblePage() {
                 </h1>
               </div>
 
+              {/* Source attribution line if different from selected translation */}
+              {(() => {
+                const isDiff =
+                  isExtraBook(routeBook) ||
+                  chapterData.isComingSoon ||
+                  (chapterData.sourceName && chapterData.sourceName !== translationFullName);
+                if (!isDiff) return null;
+                const srcName =
+                  chapterData.sourceName ||
+                  chapterData.translation?.sourceName ||
+                  "World English Bible";
+                return (
+                  <div className="reader-source-line">
+                    Source: {srcName}
+                  </div>
+                );
+              })()}
+
+              {/* Prompt if viewing an extra book whose collection toggle is turned off */}
+              {isExtraBook(routeBook) && !currentBook && (
+                <div className="reader-coming-soon-banner" style={{ borderColor: "var(--gold)" }}>
+                  <span className="reader-coming-soon-badge">Collection Off</span>
+                  <p style={{ marginBottom: 10 }}>
+                    This book belongs to an optional collection that is currently turned off.
+                  </p>
+                  {(() => {
+                    const meta = getExtraBookMeta(routeBook);
+                    const primaryCol = meta?.collections?.[0];
+                    const colInfo = EXTRA_COLLECTIONS[primaryCol];
+                    if (!colInfo) return null;
+                    return (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => {
+                          const toggles = getExtraBooksToggles();
+                          setExtraBooksToggles({ ...toggles, [primaryCol]: true });
+                        }}
+                      >
+                        Turn on {colInfo.name} ({colInfo.shortLabel})
+                      </button>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* Graceful Coming Soon banner for unpopulated books */}
+              {chapterData.isComingSoon && (
+                <div className="reader-coming-soon-banner">
+                  <span className="reader-coming-soon-badge">Coming soon</span>
+                  <p>
+                    This book is in the public domain pipeline and will be available soon.
+                  </p>
+                </div>
+              )}
+
               {/* Desktop top nav (hidden on mobile) */}
               <div className="reader-nav-bar">
                 <button
                   className="btn btn-ghost reader-nav-btn prev"
                   onClick={() => changeChapter(-1)}
                   type="button"
-                  disabled={Number(routeChapter) <= 1}
+                  disabled={!hasPrevChapter}
                 >
                   ‹ Prev Chapter
                 </button>
@@ -553,7 +711,7 @@ export default function BiblePage() {
                   className="btn btn-ghost reader-nav-btn next"
                   onClick={() => changeChapter(1)}
                   type="button"
-                  disabled={currentBook && Number(routeChapter) >= currentBook.numberOfChapters}
+                  disabled={!hasNextChapter}
                 >
                   Next Chapter ›
                 </button>
@@ -615,7 +773,7 @@ export default function BiblePage() {
                   className="btn btn-ghost reader-nav-btn prev"
                   onClick={() => changeChapter(-1)}
                   type="button"
-                  disabled={Number(routeChapter) <= 1}
+                  disabled={!hasPrevChapter}
                 >
                   ‹ Prev Chapter
                 </button>
@@ -623,7 +781,7 @@ export default function BiblePage() {
                   className="btn btn-ghost reader-nav-btn next"
                   onClick={() => changeChapter(1)}
                   type="button"
-                  disabled={currentBook && Number(routeChapter) >= currentBook.numberOfChapters}
+                  disabled={!hasNextChapter}
                 >
                   Next Chapter ›
                 </button>
@@ -657,8 +815,8 @@ export default function BiblePage() {
         <BibleFloatingNav
           onPrev={() => changeChapter(-1)}
           onNext={() => changeChapter(1)}
-          hasPrev={Number(routeChapter) > 1}
-          hasNext={Boolean(currentBook && Number(routeChapter) < currentBook.numberOfChapters)}
+          hasPrev={hasPrevChapter}
+          hasNext={hasNextChapter}
           prevLabel="Previous chapter"
           nextLabel="Next chapter"
         />
@@ -702,6 +860,37 @@ export default function BiblePage() {
         settings={readerSettings}
         onUpdateSettings={handleUpdateReaderSettings}
       />
+
+      {/* Confirmation banner if extra book collection was turned off while reading */}
+      {hideBookPrompt && (
+        <div className="bible-confirm-banner" role="alert">
+          <div className="bible-confirm-content">
+            <p>
+              This book will be hidden from the list.
+            </p>
+            <div className="bible-confirm-actions">
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={() => {
+                  const dest = hideBookPrompt.anchorId;
+                  setHideBookPrompt(null);
+                  navigate(`/bible/${translationId}/${dest}/1`);
+                }}
+              >
+                Go to {hideBookPrompt.anchorName} 1
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm"
+                onClick={() => setHideBookPrompt(null)}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

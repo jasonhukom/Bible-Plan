@@ -1,0 +1,63 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "J.B. Lightfoot (1891)",
+    "shortName": "EXTRA",
+    "englishName": "J.B. Lightfoot (1891)",
+    "licenseUrl": "https://www.earlychristianwritings.com/didache.html",
+    "sourceName": "J.B. Lightfoot (1891)"
+  },
+  "book": {
+    "id": "DID",
+    "translationId": "EXTRA",
+    "name": "Didache",
+    "commonName": "Didache",
+    "numberOfChapters": 16
+  },
+  "chapter": {
+    "number": 2,
+    "content": [
+      {
+        "type": "heading",
+        "text": "The Second Commandment: Gross Sins Forbidden"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "And the second commandment of the Teaching: You shall not commit murder, you shall not commit adultery, you shall not commit pederasty, you shall not commit fornication, you shall not steal, you shall not practice magic, you shall not practice sorcery, you shall not murder a child by abortion nor kill that which is begotten.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "You shall not covet the things of your neighbor, you shall not swear falsely, you shall not bear false witness, you shall not speak evil, you shall not bear a grudge.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "You shall not be double-minded nor double-tongued; for the double tongue is a snare of death.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 4,
+        "text": "Your speech shall not be false, nor empty, but fulfilled by deed.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 5,
+        "text": "You shall not be covetous, nor extortionate, nor a hypocrite, nor malicious, nor arrogant. You shall not take wicked counsel against your neighbor.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 6,
+        "text": "You shall not hate any man; but some you shall reprove, and concerning some you shall pray, and some you shall love more than your own life.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: J.B. Lightfoot (1891). Public domain or explicitly free to use."
+}

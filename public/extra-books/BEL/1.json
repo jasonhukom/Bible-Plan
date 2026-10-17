@@ -1,0 +1,111 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "World English Bible",
+    "shortName": "EXTRA",
+    "englishName": "World English Bible",
+    "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c",
+    "sourceName": "World English Bible"
+  },
+  "book": {
+    "id": "BEL",
+    "translationId": "EXTRA",
+    "name": "Bel and the Dragon",
+    "commonName": "Bel and the Dragon",
+    "numberOfChapters": 1
+  },
+  "chapter": {
+    "number": 1,
+    "content": [
+      {
+        "type": "heading",
+        "text": "Daniel Destroys the Idol Bel and the Dragon"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "And king Astyages was gathered to his fathers, and Cyrus of Persia received his kingdom.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "And Daniel conversed with the king, and was honored above all his friends.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "Now the Babylonians had an idol, called Bel, and there were spent upon him every day twelve great measures of fine flour, and forty sheep, and six vessels of wine.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 4,
+        "text": "And the king worshipped it, and went daily to adore it: but Daniel worshipped his own God. And the king said unto him, Why do you not worship Bel?",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 5,
+        "text": "He answered and said, Because I may not worship idols made with hands, but the living God, who has created the heaven and the earth, and has sovereignty over all flesh.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 6,
+        "text": "Then said the king to him, Thinkest you not that Bel is a living God? Seest you not how much he eats and drinks every day?",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 7,
+        "text": "Then Daniel smiled, and said, O king, be not deceived: for this is but clay within, and brass without, and did never eat or drink anything.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 8,
+        "text": "So the king was wroth, and called for his priests, and said to them, If you tell me not who this is that devours these expenses, you shall die.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 9,
+        "text": "But if you can certify me that Bel devours them, then Daniel shall die: for he has spoken blasphemy against Bel. And Daniel said to the king, Let it be according to your word.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 10,
+        "text": "Then Daniel commanded his servants to bring ashes, and they strewed all the temple with them in the presence of the king alone: then went they out, and shut the door, and sealed it with the king's signet, and so departed.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 11,
+        "text": "Now in the night came the priests with their wives and children, as they were wont to do, and did eat and drink up all.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 12,
+        "text": "In the morning arose the king, and Daniel with him. And the seals were found unbroken, but looking upon the pavement, Daniel laughed and said, Behold the footsteps of men, women, and children!",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 13,
+        "text": "Then the king was wroth, and took the priests with their wives and children, who showed the secret doors, where they came in, and consumed such things as were upon the table.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 14,
+        "text": "Therefore the king slew them, and delivered Bel into Daniel's power, who destroyed him and his temple.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: World English Bible. Public domain or explicitly free to use."
+}

@@ -1,0 +1,141 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "M.R. James (1924)",
+    "shortName": "EXTRA",
+    "englishName": "M.R. James (1924)",
+    "licenseUrl": "https://www.earlychristianwritings.com/laodiceans.html",
+    "sourceName": "M.R. James (1924)"
+  },
+  "book": {
+    "id": "LAO",
+    "translationId": "EXTRA",
+    "name": "Letter to the Laodiceans",
+    "commonName": "Laodiceans",
+    "numberOfChapters": 1
+  },
+  "chapter": {
+    "number": 1,
+    "content": [
+      {
+        "type": "heading",
+        "text": "Paul's Epistle to the Laodiceans"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "Paul, an apostle, not of men, neither by man, but by Jesus Christ, unto the brethren that are at Laodicea.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "Grace be unto you, and peace, from God the Father and our Lord Jesus Christ.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "I thank my God in all my remembrance of you, that ye continue and abide in his works, looking for the promise in the day of judgment.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 4,
+        "text": "Neither let the vain speeches of any trouble you, which pervert the truth, that they may turn you away from the truth of the gospel which is preached of me.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 5,
+        "text": "And now God shall grant that they that are of me shall be to the furtherance of the truth of the gospel and doing the service of goodness which becometh the salvation of life eternal.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 6,
+        "text": "And now are my bonds manifest, which I suffer in Christ, wherein I rejoice and am glad.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 7,
+        "text": "And this shall turn to my salvation through your prayers and the supply of the Holy Ghost, whether through life or through death.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 8,
+        "text": "For unto me to live is Christ, and to die is joy.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 9,
+        "text": "And in this very thing he will work in you his mercy, that ye may have the same love, and be of one mind.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 10,
+        "text": "Wherefore, dearly beloved, as ye have heard of my presence, so hold fast and do in the fear of God, and it shall be unto you life eternal.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 11,
+        "text": "For it is God that worketh in you.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 12,
+        "text": "And do without wavering whatsoever ye do.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 13,
+        "text": "And for the rest, dearly beloved, rejoice in Christ, and beware of them that are shameful in gain.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 14,
+        "text": "Let all your requests be made known unto God, and be ye firm in the mind of Christ.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 15,
+        "text": "And what things are honest, and true, and of good report, and chaste, and just, and lovely, these things do.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 16,
+        "text": "And what ye have heard and received, hold fast in your heart, and peace shall be with you.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 17,
+        "text": "The saints salute you.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 18,
+        "text": "The grace of the Lord Jesus Christ be with your spirit. Amen.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 19,
+        "text": "Cause this epistle to be read unto the Colossians, and that of the Colossians to be read unto you.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: M.R. James (1924). Public domain or explicitly free to use."
+}

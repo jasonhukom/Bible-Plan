@@ -1,0 +1,153 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "World English Bible",
+    "shortName": "EXTRA",
+    "englishName": "World English Bible",
+    "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c",
+    "sourceName": "World English Bible"
+  },
+  "book": {
+    "id": "SUS",
+    "translationId": "EXTRA",
+    "name": "Susanna",
+    "commonName": "Susanna",
+    "numberOfChapters": 1
+  },
+  "chapter": {
+    "number": 1,
+    "content": [
+      {
+        "type": "heading",
+        "text": "The History of Susanna and the Judgment of Daniel"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "There lived a man in Babylon, and his name was Joakim.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "And he took a wife, whose name was Susanna, the daughter of Hilkiah, a very fair woman, and one who feared the Lord.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "Her parents also were righteous, and taught their daughter according to the law of Moses.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 4,
+        "text": "Now Joakim was a great rich man, and had a fair garden joining to his house: and to him resorted the Jews; because he was more honorable than all others.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 5,
+        "text": "The same year were appointed two of the ancients of the people to be judges, such as the Lord spoke of, that wickedness came from Babylon from ancient judges, who seemed to govern the people.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 6,
+        "text": "These kept much at Joakim's house: and all that had any suits in law came to them.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 7,
+        "text": "Now when the people departed away at noon, Susanna went into her husband's garden to walk.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 8,
+        "text": "And the two elders saw her going in every day, and walking; so that their lust was inflamed toward her.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 9,
+        "text": "And they perverted their own mind, and turned away their eyes, that they might not look to heaven, nor remember just judgments.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 10,
+        "text": "And while they watched a fit time, she went in as before with two maids only, and she was desirous to wash herself in the garden: for it was hot.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 11,
+        "text": "And there was nobody there save the two elders, that had hid themselves, and watched her.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 12,
+        "text": "Then she said to her maids, Bring me oil and washing balls, and shut the garden doors, that I may wash me.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 13,
+        "text": "Now when the maids were gone forth, the two elders rose up, and ran to her, saying,",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 14,
+        "text": "Behold, the garden doors are shut, that no man can see us, and we are in love with you; therefore consent to us, and lie with us.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 15,
+        "text": "If you will not, we will bear witness against you, that a young man was with you: and therefore you sent away your maids from you.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 16,
+        "text": "Then Susanna sighed, and said, I am straitened on every side: for if I do this thing, it is death to me: and if I do it not, I cannot escape your hands.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 17,
+        "text": "It is better for me to fall into your hands, and not do it, than to sin in the sight of the Lord.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 18,
+        "text": "With that Susanna cried with a loud voice: and the two elders cried out against her.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 19,
+        "text": "Then Daniel stood up and said: Are ye such fools, ye sons of Israel, that without examination or knowledge of the truth ye have condemned a daughter of Israel?",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 20,
+        "text": "Return again to the place of judgment: for they have borne false witness against her.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 21,
+        "text": "And through the wisdom of Daniel the innocent woman was delivered, and the false elders were condemned according to the law of Moses.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: World English Bible. Public domain or explicitly free to use."
+}

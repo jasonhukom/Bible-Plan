@@ -1,0 +1,63 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "J.B. Lightfoot (1891)",
+    "shortName": "EXTRA",
+    "englishName": "J.B. Lightfoot (1891)",
+    "licenseUrl": "https://www.earlychristianwritings.com/didache.html",
+    "sourceName": "J.B. Lightfoot (1891)"
+  },
+  "book": {
+    "id": "DID",
+    "translationId": "EXTRA",
+    "name": "Didache",
+    "commonName": "Didache",
+    "numberOfChapters": 16
+  },
+  "chapter": {
+    "number": 1,
+    "content": [
+      {
+        "type": "heading",
+        "text": "The Two Ways and the First Commandment"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "There are two ways, one of life and one of death, but a great difference between the two ways.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "The way of life, then, is this: First, you shall love God who made you; second, love your neighbor as yourself, and do not do to another whatever for your part you would not wish for yourself.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "And of these sayings the teaching is this: Bless those who curse you, and pray for your enemies, and fast for those who persecute you. For what credit is it if you love those who love you? Do not even the Gentiles do the same? But love those who hate you, and you will not have an enemy.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 4,
+        "text": "Abstain from fleshly and worldly lusts. If someone gives you a blow upon your right cheek, turn to him the other also; and you shall be perfect. If someone compels you to go one mile, go with him two. If someone takes your cloak, give him your coat also. If someone takes from you what is yours, ask it not back, for indeed you cannot.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 5,
+        "text": "Give to everyone who asks you, and not ask it back; for the Father wills that to all should be given of our own blessings. Blessed is he who gives according to the commandment, for he is guiltless. Woe to him who receives; for if one receives having need, he is guiltless; but he that receives not having need shall pay the penalty, why he received and for what. And coming into confinement, he shall not depart from there until he has paid back the last penny.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 6,
+        "text": "Yea, indeed, concerning this it has been said: Let your alms sweat in your hands, until you know to whom you should give.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: J.B. Lightfoot (1891). Public domain or explicitly free to use."
+}

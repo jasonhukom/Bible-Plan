@@ -1,0 +1,81 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "R.H. Charles (1912)",
+    "shortName": "EXTRA",
+    "englishName": "R.H. Charles (1912)",
+    "licenseUrl": "https://www.sacred-texts.com/bib/boe/index.htm",
+    "sourceName": "R.H. Charles (1912)"
+  },
+  "book": {
+    "id": "ENO",
+    "translationId": "EXTRA",
+    "name": "1 Enoch",
+    "commonName": "1 Enoch",
+    "numberOfChapters": 108
+  },
+  "chapter": {
+    "number": 1,
+    "content": [
+      {
+        "type": "heading",
+        "text": "The Parable of Enoch on the Future Lot of the Wicked and the Righteous"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "The words of the blessing of Enoch, wherewith he blessed the elect and righteous, who will be living in the day of tribulation, when all the wicked and godless are to be removed.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "And he took up his parable and said: Enoch a righteous man, whose eyes were opened by God, saw the vision of the Holy One in the heavens, which the angels showed me, and from them I heard everything, and from them I understood as I saw, but not for this generation, but for a remote one which is for to come.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "Concerning the elect I said, and took up my parable concerning them: The Holy Great One will come forth from His dwelling,",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 4,
+        "text": "And the eternal God will tread upon the earth, even on Mount Sinai, and appear from His camp, and appear in the strength of His might from the heaven of heavens.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 5,
+        "text": "And all shall be smitten with fear, and the Watchers shall quake, and great fear and trembling shall seize them unto the ends of the earth.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 6,
+        "text": "And the high mountains shall be shaken, and the high hills shall be made low, and shall melt like wax before the flame.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 7,
+        "text": "And the earth shall be wholly rent in sunder, and all that is upon the earth shall perish, and there shall be a judgment upon all men.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 8,
+        "text": "But with the righteous He will make peace, and will protect the elect, and mercy shall be upon them, and they shall all belong to God, and they shall be prospered, and they shall all be blessed, and He will help them all, and light shall appear unto them, and He will make peace with them.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 9,
+        "text": "And behold! He cometh with ten thousands of His holy ones to execute judgment upon all, and to destroy all the ungodly: and to convict all flesh of all the works of their ungodliness which they have ungodly committed, and of all the hard things which ungodly sinners have spoken against Him.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: R.H. Charles (1912). Public domain or explicitly free to use."
+}

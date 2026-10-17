@@ -1,0 +1,123 @@
+{
+  "translation": {
+    "id": "EXTRA",
+    "name": "World English Bible",
+    "shortName": "EXTRA",
+    "englishName": "World English Bible",
+    "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c",
+    "sourceName": "World English Bible"
+  },
+  "book": {
+    "id": "MAN",
+    "translationId": "EXTRA",
+    "name": "Prayer of Manasseh",
+    "commonName": "Prayer of Manasseh",
+    "numberOfChapters": 1
+  },
+  "chapter": {
+    "number": 1,
+    "content": [
+      {
+        "type": "heading",
+        "text": "The Prayer of Manasseh King of Judah in Captivity"
+      },
+      {
+        "type": "verse",
+        "number": 1,
+        "text": "O Lord Almighty, God of our fathers, of Abraham and Isaac and Jacob, and of their righteous seed;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 2,
+        "text": "who have made heaven and earth, with all their adornment;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 3,
+        "text": "who have bound the sea by the word of your commandment; who have shut up the deep, and sealed it by your terrible and glorious name;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 4,
+        "text": "whom all things fear, yes, tremble before your power;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 5,
+        "text": "for the majesty of your glory cannot be borne, and the anger of your threatening toward sinners is intolerable;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 6,
+        "text": "and your merciful promise is unmeasurable and unsearchable;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 7,
+        "text": "for you are the Lord Most High, of great compassion, long-suffering, abundant in mercy, and repent of the evils of men.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 8,
+        "text": "You, O Lord, according to your great goodness have promised repentance and forgiveness to those who have sinned against you: and of your infinite mercies have appointed repentance unto sinners, that they may be saved.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 9,
+        "text": "You therefore, O Lord, that are the God of the just, have not appointed repentance to the just, as to Abraham, and Isaac, and Jacob, which have not sinned against you; but you have appointed repentance to me that am a sinner:",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 10,
+        "text": "for I have sinned above the number of the sands of the sea. My transgressions, O Lord, are multiplied: my transgressions are multiplied, and I am not worthy to behold and see the height of heaven for the multitude of my iniquities.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 11,
+        "text": "I am bowed down with many iron bands, that I cannot lift up my head, neither have any release: for I have provoked your wrath, and done evil before you: I did not your will, neither kept I your commandments: I have set up abominations, and have multiplied detestable things.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 12,
+        "text": "Now therefore I bow the knee of my heart, beseeching you of grace.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 13,
+        "text": "I have sinned, O Lord, I have sinned, and I acknowledge my iniquities:",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 14,
+        "text": "wherefore, I humbly beseech you, forgive me, O Lord, forgive me, and destroy me not with my iniquities. Be not angry with me for ever, by reserving evil for me; neither condemn me into the lower parts of the earth. For you are the God, even the God of them that repent;",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 15,
+        "text": "and in me you will show all your goodness: for you will save me, that am unworthy, according to your great mercy.",
+        "footnotes": []
+      },
+      {
+        "type": "verse",
+        "number": 16,
+        "text": "Therefore I will praise you for ever all the days of my life: for all the host of heaven does praise you, and yours is the glory for ever and ever. Amen.",
+        "footnotes": []
+      }
+    ]
+  },
+  "attribution": "Source: World English Bible. Public domain or explicitly free to use."
+}

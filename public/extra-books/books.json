@@ -1,0 +1,68 @@
+{
+  "books": [
+    {
+      "id": "TOB",
+      "name": "Tobit",
+      "commonName": "Tobit",
+      "numberOfChapters": 14,
+      "sourceName": "World English Bible",
+      "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c"
+    },
+    {
+      "id": "DID",
+      "name": "Didache",
+      "commonName": "Didache",
+      "numberOfChapters": 16,
+      "sourceName": "J.B. Lightfoot (1891)",
+      "licenseUrl": "https://www.earlychristianwritings.com/didache.html"
+    },
+    {
+      "id": "ENO",
+      "name": "1 Enoch",
+      "commonName": "1 Enoch",
+      "numberOfChapters": 108,
+      "sourceName": "R.H. Charles (1912)",
+      "licenseUrl": "https://www.sacred-texts.com/bib/boe/index.htm"
+    },
+    {
+      "id": "PS2",
+      "name": "Psalm 151",
+      "commonName": "Psalm 151",
+      "numberOfChapters": 1,
+      "sourceName": "World English Bible",
+      "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c"
+    },
+    {
+      "id": "MAN",
+      "name": "Prayer of Manasseh",
+      "commonName": "Prayer of Manasseh",
+      "numberOfChapters": 1,
+      "sourceName": "World English Bible",
+      "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c"
+    },
+    {
+      "id": "LAO",
+      "name": "Letter to the Laodiceans",
+      "commonName": "Laodiceans",
+      "numberOfChapters": 1,
+      "sourceName": "M.R. James (1924)",
+      "licenseUrl": "https://www.earlychristianwritings.com/laodiceans.html"
+    },
+    {
+      "id": "SUS",
+      "name": "Susanna",
+      "commonName": "Susanna",
+      "numberOfChapters": 1,
+      "sourceName": "World English Bible",
+      "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c"
+    },
+    {
+      "id": "BEL",
+      "name": "Bel and the Dragon",
+      "commonName": "Bel and the Dragon",
+      "numberOfChapters": 1,
+      "sourceName": "World English Bible",
+      "licenseUrl": "https://ebible.org/Scriptures/details.php?id=eng-web-c"
+    }
+  ]
+}

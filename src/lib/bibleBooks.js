@@ -27,12 +27,18 @@ export const NT_IDS = new Set([
 
 /**
  * @param {string} bookId
+ * @param {string} [anchor]
  * @returns {"ot" | "dc" | "nt"}
  */
-export function classifyBook(bookId) {
+export function classifyBook(bookId, anchor = null) {
   const id = (bookId || "").toUpperCase();
   if (OT_IDS.has(id)) return "ot";
   if (NT_IDS.has(id)) return "nt";
+  if (anchor) {
+    const aId = anchor.toUpperCase();
+    if (OT_IDS.has(aId)) return "ot";
+    if (NT_IDS.has(aId)) return "nt";
+  }
   return "dc";
 }
 
@@ -115,7 +121,8 @@ export function getShortBookName(bookId, fallbackName) {
 export function groupBooks(books) {
   const groups = { ot: [], dc: [], nt: [] };
   for (const book of books || []) {
-    groups[classifyBook(book.id)].push(book);
+    const anchor = book.resolvedAnchor || book.anchorAfter || null;
+    groups[classifyBook(book.id, anchor)].push(book);
   }
   return groups;
 }
