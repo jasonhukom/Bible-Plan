@@ -9,7 +9,7 @@ import {
   getChapter,
   getTranslationShortName
 } from "../lib/bible";
-import { groupBooks, GROUP_LABELS } from "../lib/bibleBooks";
+import { groupBooks, GROUP_LABELS, getLongBookName } from "../lib/bibleBooks";
 import { useAuth } from "../context/AuthContext";
 import { dataApi } from "../lib/dataApi";
 import {
@@ -502,7 +502,7 @@ export default function BiblePage() {
       <div className="bible-inline-mobile-header">
         <h1>Bible</h1>
         <div className="bible-inline-selectors">
-          <button type="button" className="bible-inline-text-button" onClick={() => { setInlineBooksOpen((open) => !open); setInlineChaptersOpen(false); }}>{currentBook?.commonName || currentBook?.name || "Select book"} <span aria-hidden="true">⌄</span></button>
+          <button type="button" className="bible-inline-text-button" onClick={() => { setInlineBooksOpen((open) => !open); setInlineChaptersOpen(false); }}>{currentBook ? getLongBookName(currentBook.id, currentBook.commonName || currentBook.name) : "Select book"} <span aria-hidden="true">⌄</span></button>
           <span className="bible-inline-selector-divider">·</span>
           <button type="button" className="bible-inline-text-button" disabled={!currentBook} onClick={() => { setInlineChaptersOpen((open) => !open); setInlineBooksOpen(false); }}>{routeChapter ? `Chapter ${routeChapter}` : "Chapter"} <span aria-hidden="true">⌄</span></button>
         </div>
@@ -514,7 +514,7 @@ export default function BiblePage() {
         {inlineBooksOpen && <div className="bible-inline-book-list">
           <input type="search" value={sidebarSearchQuery} onChange={(e) => setSidebarSearchQuery(e.target.value)} placeholder="Search Bible books" aria-label="Search Bible books" />
           {books.filter((book) => matchesBookSearch(book, sidebarSearchQuery.trim())).map((book) => <div className="bible-inline-book-item" key={book.id}>
-            <button type="button" className={"bible-inline-book-name" + (routeBook === book.id ? " active" : "")} onClick={() => { setExpandedBook((prev) => prev === book.id ? null : book.id); setInlineChaptersOpen(false); }}><span>{book.commonName || book.name}</span><span className="bible-inline-chevron">{expandedBook === book.id ? "−" : "+"}</span></button>
+            <button type="button" className={"bible-inline-book-name" + (routeBook === book.id ? " active" : "")} onClick={() => { setExpandedBook((prev) => prev === book.id ? null : book.id); setInlineChaptersOpen(false); }}><span>{getLongBookName(book.id, book.commonName || book.name)}</span><span className="bible-inline-chevron">{expandedBook === book.id ? "−" : "+"}</span></button>
             {expandedBook === book.id && <div className="bible-inline-chapters">{Array.from({ length: book.numberOfChapters }, (_, i) => i + 1).map((chapter) => <button key={chapter} type="button" className={"bible-inline-chapter" + (routeBook === book.id && Number(routeChapter) === chapter ? " active" : "")} onClick={() => { openChapter(book.id, chapter); setInlineBooksOpen(false); setSidebarSearchQuery(""); }}>{chapter}</button>)}</div>}
           </div>)}
         </div>}
@@ -938,7 +938,7 @@ export default function BiblePage() {
               {/* Desktop heading (hidden on mobile) */}
               <div className="reader-heading">
                 <h1 style={{ textAlign: "left" }}>
-                  {chapterData.book.name || chapterData.book.commonName} {chapterData.chapter.number}
+                  {getLongBookName(routeBook, chapterData.book.name || chapterData.book.commonName)} {chapterData.chapter.number}
                 </h1>
               </div>
 
