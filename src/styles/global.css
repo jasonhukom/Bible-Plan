@@ -4114,3 +4114,92 @@ h3 {
   .calendar-bottom-title { color: var(--cream); font-size: 22px; font-weight: 700; }
   .calendar-bottom-right { display: none; }
 }
+
+
+/* Mobile month view based on the supplied calendar reference */
+.phone-calendar-heading { display:none; }
+@media (max-width: 719px) {
+  .main-content:has(.plan-main) { background: var(--paper); color: var(--ink); }
+  .plan-main { padding: 0 12px 20px; }
+  .phone-calendar-heading {
+    display:flex; align-items:center; justify-content:space-between;
+    gap:14px; padding:14px 6px 20px;
+  }
+  .phone-calendar-heading h1 {
+    margin:0; font-family:var(--font-body); font-size:clamp(27px,7vw,38px);
+    font-weight:750; letter-spacing:-.04em; color:var(--ink);
+  }
+  .phone-calendar-arrows { display:flex; gap:10px; }
+  .phone-calendar-arrows .icon-btn {
+    width:48px; height:48px; border-radius:50%;
+    display:grid; place-items:center; background:var(--night-2); color:var(--ink);
+    border:1px solid var(--night-line); box-shadow:0 3px 10px var(--shadow);
+    font-size:30px; line-height:1;
+  }
+  .calendar-grid-wrap {
+    background:var(--night-2); border:1px solid var(--night-line);
+    border-radius:30px; padding:16px 10px 20px;
+    box-shadow:0 7px 18px var(--shadow); overflow:hidden;
+  }
+  .calendar-weekdays {
+    display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:5px;
+    margin:0 0 12px; color:var(--ink-soft); text-align:center;
+  }
+  .calendar-weekdays > span { font-size:12px; font-weight:700; }
+  .calendar-month-grid { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:7px 5px; }
+  .cal-day-cell {
+    min-width:0; min-height:clamp(55px,13vw,78px); padding:0;
+    display:flex; flex-direction:column; align-items:stretch;
+    background:transparent; border:0; border-radius:0; box-shadow:none; color:var(--ink);
+  }
+  .cal-day-number-row { justify-content:center; padding:0; margin-bottom:4px; }
+  .cal-day-number {
+    display:flex; align-items:center; justify-content:center; width:100%;
+    min-height:24px; font-size:13px; color:var(--ink-soft);
+  }
+  .cal-day-cell.selected .cal-day-number { color:var(--ink); font-weight:800; }
+  .cal-day-cell.today .cal-day-number, .cal-day-number.today {
+    outline:2px solid var(--ink); outline-offset:1px; border-radius:999px;
+  }
+  .cal-day-events { width:100%; min-width:0; overflow:hidden; }
+  .cal-event-pill { display:block; width:100%; min-width:0; padding:3px 2px; border-radius:7px; font-size:9px; line-height:1.15; text-align:center; overflow:hidden; }
+  .cal-event-name-full { display:none; }
+  .cal-event-name-short { display:block; }
+  .calendar-bottom-bar { display:none; }
+  .calendar-weekdays .weekday-full { display:none; }
+  .calendar-weekdays .weekday-short { display:inline; }
+}
+/* Inline Bible mobile navigation */
+.bible-inline-mobile-header { display:none; }
+@media (max-width:719px) {
+  .bible-inline-mobile-header {
+    display:block; position:relative; padding:12px 2px 16px; margin-bottom:18px;
+    border-bottom:1px solid var(--night-line); background:var(--night);
+  }
+  .bible-inline-mobile-header > h1 { font-family:var(--font-body); font-size:30px; font-weight:750; margin:0 0 7px; color:var(--cream); }
+  .bible-inline-selectors { display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+  .bible-inline-text-button { padding:0; color:var(--gold-bright); font-size:15px; font-weight:650; text-align:left; }
+  .bible-inline-text-button:disabled { opacity:.45; }
+  .bible-inline-selector-divider { color:var(--ink-soft); }
+  .bible-inline-header-tools { display:flex; align-items:center; gap:16px; margin-top:12px; }
+  .bible-inline-header-tools .bible-inline-text-button { font-size:12px; }
+  .bible-inline-icon-button { color:var(--cream); font-size:17px; padding:2px; }
+  .bible-inline-book-list {
+    margin-top:14px; max-height:45dvh; overflow-y:auto; border-top:1px solid var(--night-line);
+    padding-top:10px; overscroll-behavior:contain;
+  }
+  .bible-inline-book-list > input {
+    width:100%; padding:10px 12px; border:1px solid var(--night-line);
+    border-radius:10px; background:var(--night-2); color:var(--cream); margin-bottom:8px;
+  }
+  .bible-inline-book-item { border-bottom:1px solid var(--night-line); }
+  .bible-inline-book-name { display:flex; justify-content:space-between; align-items:center; width:100%; padding:11px 4px; color:var(--cream); text-align:left; }
+  .bible-inline-book-name.active { color:var(--gold-bright); font-weight:700; }
+  .bible-inline-chevron { color:var(--gold-bright); font-size:18px; padding:0 8px; }
+  .bible-inline-chapters { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:7px; padding:4px 0 12px; }
+  .bible-inline-chapter { min-height:38px; border:1px solid var(--night-line); border-radius:9px; color:var(--cream); }
+  .bible-inline-chapter.active { background:var(--gold); color:var(--night); border-color:var(--gold-bright); font-weight:800; }
+  .bible-inline-chapter-picker { margin-top:12px; padding:12px; border:1px solid var(--night-line); border-radius:12px; background:var(--night-2); }
+  .bible-page-header { display:none; }
+  .bible-layout.home-mode .bible-sidebar { display:none; }
+}
