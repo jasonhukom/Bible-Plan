@@ -7,7 +7,7 @@ import { DEFAULT_TRANSLATION_ID, listTranslations, getPreferredTranslation, setP
 
 export default function SettingsPage() {
   const { user, signOut, isConfigured } = useAuth();
-  const { mode, setMode } = useTheme();
+  const { mode, setMode, themes } = useTheme();
   const navigate = useNavigate();
 
   const [translations, setTranslations] = useState([]);
@@ -70,19 +70,19 @@ export default function SettingsPage() {
       <div className="page-container-narrow" style={{ paddingBottom: 40 }}>
         <div className="card" style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: 15, marginBottom: 14 }}>Appearance</h2>
-          <div className="theme-options">
-            {[
-              ["dark", "Dark"],
-              ["light", "Light"],
-              ["device", "Device"]
-            ].map(([key, label]) => (
+          <div className="theme-options theme-options-grid">
+            {themes.map((theme) => (
               <button
-                key={key}
+                key={theme.id}
                 type="button"
-                className={`theme-option${mode === key ? " active" : ""}`}
-                onClick={() => setMode(key)}
+                className={`theme-option theme-option-swatch${mode === theme.id ? " active" : ""}`}
+                onClick={() => setMode(theme.id)}
+                aria-pressed={mode === theme.id}
               >
-                {label}
+                <span className="theme-swatch" aria-hidden="true">
+                  {theme.swatches.map((color) => <span key={color} style={{ background: color }} />)}
+                </span>
+                <span>{theme.label}</span>
               </button>
             ))}
           </div>
