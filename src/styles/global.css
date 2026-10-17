@@ -4203,3 +4203,8 @@ h3 {
   .bible-page-header { display:none; }
   .bible-layout.home-mode .bible-sidebar { display:none; }
 }
+
+
+@media (max-width:719px) {
+  .bible-mobile-top-bar { display:none !important; }
+}
