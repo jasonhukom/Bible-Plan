@@ -3922,3 +3922,88 @@ h3 {
   .theme-welcome-actions, .theme-modal-list { grid-template-columns: minmax(0,1fr); }
   .theme-modal { padding: 16px; }
 }
+
+
+/* Additional appearance palettes */
+:root[data-theme="full-dark"] {
+  --night:#000000; --night-2:#101010; --night-line:#333333;
+  --paper:#050505; --paper-dim:#171717; --cream:#f5f5f5; --ink:#f5f5f5;
+  --ink-soft:#c4c4c4; --gold:#777777; --gold-bright:#ffffff;
+  --sage:#8bd5a4; --sage-bg:#102218; --rust:#ff9b9b; --rust-bg:#2b1010;
+  --shadow:rgba(0,0,0,.6); color-scheme:dark;
+}
+:root[data-theme="full-light"] {
+  --night:#ffffff; --night-2:#ffffff; --night-line:#d9d9d9;
+  --paper:#ffffff; --paper-dim:#f5f5f5; --cream:#171717; --ink:#171717;
+  --ink-soft:#555555; --gold:#555555; --gold-bright:#111111;
+  --sage:#246b3d; --sage-bg:#e3f3e8; --rust:#a32121; --rust-bg:#ffebeb;
+  --shadow:rgba(0,0,0,.12); color-scheme:light;
+}
+:root[data-theme="cream-paper"] {
+  --night:#f5ecd6; --night-2:#fff8e8; --night-line:#ddcda8;
+  --paper:#f5ecd6; --paper-dim:#e9dcbc; --cream:#382d1d; --ink:#382d1d;
+  --ink-soft:#75654a; --gold:#96702c; --gold-bright:#6c4b14;
+  --sage:#47704c; --sage-bg:#e3ead9; --rust:#a94a35; --rust-bg:#f3dfd4;
+  --shadow:rgba(67,49,22,.14); color-scheme:light;
+}
+:root[data-theme="green-outline"] {
+  --night:#ffffff; --night-2:#ffffff; --night-line:#25834a;
+  --paper:#ffffff; --paper-dim:#f5fbf6; --cream:#173c25; --ink:#173c25;
+  --ink-soft:#4f705a; --gold:#23834a; --gold-bright:#176b39;
+  --sage:#237b45; --sage-bg:#e4f4e9; --rust:#a33b32; --rust-bg:#fbe8e6;
+  --shadow:rgba(24,94,49,.1); color-scheme:light;
+}
+:root[data-theme="orange-white"] {
+  --night:#ffffff; --night-2:#fffaf5; --night-line:#f5b47e;
+  --paper:#ffffff; --paper-dim:#fff1e4; --cream:#43230d; --ink:#43230d;
+  --ink-soft:#80583a; --gold:#f07822; --gold-bright:#c6530c;
+  --sage:#39734a; --sage-bg:#e4f2e6; --rust:#c6530c; --rust-bg:#ffead9;
+  --shadow:rgba(120,63,19,.12); color-scheme:light;
+}
+:root[data-theme="yellow-brown"] {
+  --night:#4a2c18; --night-2:#5a3921; --night-line:#a98628;
+  --paper:#4a2c18; --paper-dim:#624329; --cream:#fff2b8; --ink:#fff2b8;
+  --ink-soft:#e3d09a; --gold:#d5a900; --gold-bright:#ffe45c;
+  --sage:#b5d39b; --sage-bg:#30472b; --rust:#ffc09b; --rust-bg:#60301f;
+  --shadow:rgba(0,0,0,.3); color-scheme:dark;
+}
+:root[data-theme="neon-yellow"] {
+  --night:#101010; --night-2:#191919; --night-line:#666600;
+  --paper:#090909; --paper-dim:#171717; --cream:#ffffb3; --ink:#ffffb3;
+  --ink-soft:#e3e3a1; --gold:#dada00; --gold-bright:#faff00;
+  --sage:#a8ff60; --sage-bg:#19300c; --rust:#ff7373; --rust-bg:#3d1111;
+  --shadow:rgba(0,0,0,.45); color-scheme:dark;
+}
+:root[data-theme="neon-green"] {
+  --night:#06120b; --night-2:#0c1b12; --night-line:#1b6732;
+  --paper:#050d08; --paper-dim:#102016; --cream:#d6ffe0; --ink:#d6ffe0;
+  --ink-soft:#9acbaa; --gold:#20b94a; --gold-bright:#39ff14;
+  --sage:#39ff14; --sage-bg:#10351a; --rust:#ff6b6b; --rust-bg:#3d1212;
+  --shadow:rgba(0,0,0,.5); color-scheme:dark;
+}
+:root[data-theme="neon-purple"] {
+  --night:#10081c; --night-2:#1a1030; --night-line:#61338b;
+  --paper:#0c0615; --paper-dim:#1a1030; --cream:#f5e5ff; --ink:#f5e5ff;
+  --ink-soft:#c5a6df; --gold:#a13be5; --gold-bright:#d66bff;
+  --sage:#68ffd1; --sage-bg:#10342c; --rust:#ff70b7; --rust-bg:#42152f;
+  --shadow:rgba(0,0,0,.48); color-scheme:dark;
+}
+:root[data-theme="high-contrast"] {
+  --night:#000000; --night-2:#000000; --night-line:#ffff00;
+  --paper:#000000; --paper-dim:#111111; --cream:#ffffff; --ink:#ffffff;
+  --ink-soft:#ffffff; --gold:#ffff00; --gold-bright:#ffff00;
+  --sage:#00ff66; --sage-bg:#001a08; --rust:#ff5555; --rust-bg:#240000;
+  --shadow:rgba(0,0,0,.7); color-scheme:dark;
+}
+:root[data-theme="high-contrast"] button,
+:root[data-theme="high-contrast"] input,
+:root[data-theme="high-contrast"] select,
+:root[data-theme="high-contrast"] textarea,
+:root[data-theme="high-contrast"] a {
+  outline-color:#ffff00;
+  border-color:#ffff00;
+}
+:root[data-theme="high-contrast"] :focus-visible {
+  outline:3px solid #ffff00;
+  outline-offset:3px;
+}
