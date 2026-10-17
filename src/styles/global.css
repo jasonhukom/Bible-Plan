@@ -4208,3 +4208,35 @@ h3 {
 @media (max-width:719px) {
   .bible-mobile-top-bar { display:none !important; }
 }
+
+
+@media (max-width:719px) {
+  .calendar-month-grid { gap:10px 5px; }
+  .cal-day-cell {
+    position:relative; min-height:clamp(82px,20vw,112px);
+    display:block; padding:0; overflow:visible;
+  }
+  .cal-day-cell::before {
+    content:""; position:absolute; inset:0 0 auto; height:68%;
+    border-radius:clamp(10px,3.5vw,17px);
+    background:var(--paper-dim); border:1px solid transparent;
+  }
+  .cal-day-cell.muted::before { opacity:.35; }
+  .cal-day-cell.selected::before { border:2px solid var(--ink); }
+  .cal-day-number-row {
+    position:absolute; left:0; right:0; bottom:0; z-index:2;
+    display:flex; justify-content:center; margin:0; padding:0;
+  }
+  .cal-day-number {
+    width:100%; min-height:24px; font-size:clamp(11px,3.2vw,14px);
+    color:var(--ink-soft); outline:none !important;
+  }
+  .cal-day-cell.selected .cal-day-number { color:var(--ink); font-weight:800; }
+  .cal-day-cell.today::before { border:2px solid var(--gold-bright); }
+  .cal-day-cell .cal-day-events {
+    position:absolute; z-index:1; inset:5px 3px auto; width:auto;
+    max-height:calc(68% - 8px); overflow:hidden;
+  }
+  .cal-day-cell .cal-event-pill { font-size:clamp(8px,2.2vw,10px); padding:2px 1px; }
+  .cal-day-cell .cal-day-more { font-size:8px; }
+}
