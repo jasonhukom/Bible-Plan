@@ -3897,3 +3897,28 @@ h3 {
     color-scheme: light;
   }
 }
+
+
+.theme-modal-backdrop {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: center; justify-content: center;
+  padding: 18px; background: rgba(0, 0, 0, .62);
+}
+.theme-modal {
+  width: min(100%, 520px); max-height: min(82dvh, 720px);
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--night-2); color: var(--cream);
+  box-shadow: 0 24px 80px rgba(0,0,0,.35);
+}
+.theme-modal > p { margin: 0 0 18px; }
+.theme-welcome-actions { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.theme-welcome-actions .btn { grid-column: 1 / -1; }
+.theme-modal-list {
+  display: grid; grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 8px; overflow-y: auto; min-height: 0; padding: 2px 3px 8px;
+}
+.theme-modal-close { margin-top: 14px; padding: 8px; color: var(--ink-soft); font-size: 13px; }
+@media (max-width: 420px) {
+  .theme-welcome-actions, .theme-modal-list { grid-template-columns: minmax(0,1fr); }
+  .theme-modal { padding: 16px; }
+}
