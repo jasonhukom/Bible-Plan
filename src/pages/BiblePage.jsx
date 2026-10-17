@@ -446,7 +446,7 @@ export default function BiblePage() {
 
   // Book title display for mobile top bar
   const mobileBookTitle = currentBook
-    ? `${currentBook.commonName || currentBook.name} ${routeChapter}`
+    ? `${getLongBookName(currentBook.id, currentBook.commonName || currentBook.name)} ${routeChapter}`
     : "Select Book";
 
   function renderDesktopBookItem(book) {
@@ -459,7 +459,7 @@ export default function BiblePage() {
           onClick={() => openBook(book.id)}
           type="button"
         >
-          <span className="desktop-book-name">{book.commonName || book.name}</span>
+          <span className="desktop-book-name">{getLongBookName(book.id, book.commonName || book.name)}</span>
           <div className="desktop-book-meta">
             {book.isExtra && book.primaryBadge && (
               <span className="bible-extra-chip">{book.primaryBadge}</span>
@@ -549,7 +549,7 @@ export default function BiblePage() {
                 onClick={() => setSidebarOpen(true)}
                 title="Select Book and Chapter"
               >
-                {currentBook.commonName || currentBook.name} {routeChapter}
+                {getLongBookName(currentBook.id, currentBook.commonName || currentBook.name)} {routeChapter}
               </button>
               <button
                 type="button"
