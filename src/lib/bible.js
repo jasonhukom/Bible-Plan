@@ -1,6 +1,8 @@
-import * as helloao from './helloao';
-import * as youversion from './youversion';
-import * as apibible from './apibible';
+import * as helloao from './helloao.js';
+import * as youversion from './youversion.js';
+import * as apibible from './apibible.js';
+import { isExtraBook, getExtraChapter, getExtraBooksToggles } from "./extraBooksApi.js";
+import { mergeBooksWithExtras } from "./extraBooksRegistry.js";
 
 export const DEFAULT_TRANSLATION_ID = "BSB";
 
@@ -83,9 +85,6 @@ export async function listTranslations() {
   return [...apiBibleList, ...haoMapped, ...yvMapped];
 }
 
-import { isExtraBook, getExtraChapter, getExtraBooksToggles } from "./extraBooksApi";
-import { mergeBooksWithExtras } from "./extraBooksRegistry";
-
 export async function listBooks(translationId, activeToggles = null) {
   const tid = translationId || DEFAULT_TRANSLATION_ID;
   let canonicalList = [];
@@ -94,7 +93,14 @@ export async function listBooks(translationId, activeToggles = null) {
       canonicalList = await apibible.listBooks(tid);
     } else if (tid.startsWith('yv-') || ['3034', '1', '12', '206', '111'].includes(String(tid))) {
       const cleanYv = String(tid).replace('yv-', '');
-      canonicalList = await youversion.listBooks(cleanYv);
+      try {
+        canonicalList = await youversion.listBooks(cleanYv);
+      } catch (yvErr) {
+        console.warn(`YouVersion listBooks failed for ${cleanYv}, falling back to HelloAO:`, yvErr);
+        const fallbackMap = { "3034": "BSB", "206": "WEB", "1": "KJV", "12": "ASV" };
+        const haoFallback = fallbackMap[cleanYv] || DEFAULT_TRANSLATION_ID;
+        canonicalList = await helloao.listBooks(haoFallback);
+      }
     } else {
       canonicalList = await helloao.listBooks(tid);
     }
@@ -120,7 +126,14 @@ export async function getChapter(translationId, bookId, chapterNumber) {
     return apibible.getChapter(tid, bookId, chapterNumber);
   } else if (tid.startsWith('yv-') || ['3034', '1', '12', '206', '111'].includes(String(tid))) {
     const cleanYv = String(tid).replace('yv-', '');
-    return youversion.getChapter(cleanYv, bookId, chapterNumber);
+    try {
+      return await youversion.getChapter(cleanYv, bookId, chapterNumber);
+    } catch (yvErr) {
+      console.warn(`YouVersion getChapter failed for ${cleanYv}/${bookId}/${chapterNumber}, falling back to HelloAO:`, yvErr);
+      const fallbackMap = { "3034": "BSB", "206": "WEB", "1": "KJV", "12": "ASV" };
+      const haoFallback = fallbackMap[cleanYv] || DEFAULT_TRANSLATION_ID;
+      return await helloao.getChapter(haoFallback, bookId, chapterNumber);
+    }
   } else {
     return helloao.getChapter(tid, bookId, chapterNumber);
   }

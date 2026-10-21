@@ -13,17 +13,29 @@ export function AuthProvider({ children }) {
       return;
     }
 
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        setSession(data.session);
-        setLoading(false);
-      } else {
-        supabase.auth.signInAnonymously().then(({ data: anonData }) => {
-          setSession(anonData.session);
+    supabase.auth
+      .getSession()
+      .then(({ data, error }) => {
+        if (!error && data?.session) {
+          setSession(data.session);
           setLoading(false);
-        });
-      }
-    });
+        } else {
+          supabase.auth
+            .signInAnonymously()
+            .then(({ data: anonData }) => {
+              setSession(anonData?.session || null);
+              setLoading(false);
+            })
+            .catch((err) => {
+              console.warn("[AuthContext] signInAnonymously failed:", err);
+              setLoading(false);
+            });
+        }
+      })
+      .catch((err) => {
+        console.warn("[AuthContext] getSession failed:", err);
+        setLoading(false);
+      });
 
     const { data: subscription } = supabase.auth.onAuthStateChange((_event, newSession) => {
       setSession(newSession);

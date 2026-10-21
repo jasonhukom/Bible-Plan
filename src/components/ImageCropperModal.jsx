@@ -50,7 +50,7 @@ export default function ImageCropperModal({ imageSrc, onCropComplete, onClose })
             max={3}
             step={0.1}
             aria-labelledby="Zoom"
-            onChange={(e) => setZoom(e.target.value)}
+            onChange={(e) => setZoom(Number(e.target.value))}
             style={{ flex: 1, accentColor: "var(--gold)" }}
           />
         </div>

@@ -11,7 +11,7 @@
 // user_id filters below are a second pair of hands, not the lock itself.
 // ============================================================================
 
-import { supabase, isSupabaseConfigured } from "./supabaseClient";
+import { supabase, isSupabaseConfigured } from "./supabaseClient.js";
 
 const SAVED_VERSE_COLUMNS =
   "id, user_id, translation, book, book_name, chapter, verse, verse_text, note, created_at";

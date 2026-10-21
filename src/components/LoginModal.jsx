@@ -26,7 +26,7 @@ export default function LoginModal({ onClose, onSuccess }) {
       } else {
         const { error, data } = await signUpWithPassword(loginEmail, password);
         if (error) throw error;
-        if (data.session) {
+        if (data?.session) {
           onSuccess?.();
           onClose();
         } else {

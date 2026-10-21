@@ -7,7 +7,7 @@
 // 3. Fallback with graceful "coming soon" support for unpopulated books
 // ============================================================================
 
-import { EXTRA_BOOKS, EXTRA_COLLECTIONS } from "./extraBooksRegistry";
+import { EXTRA_BOOKS, EXTRA_COLLECTIONS } from "./extraBooksRegistry.js";
 
 const TOGGLES_STORAGE_KEY = "bible-additional-books-toggles";
 const CACHE_PREFIX = "bible-extra-chapter-v1-";

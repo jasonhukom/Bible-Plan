@@ -76,7 +76,6 @@ export default function Sidebar() {
   const [orderMode, setOrderMode] = useState("overlap");
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showMobilePlan, setShowMobilePlan] = useState(false);
-  const [pendingPlan, setPendingPlan] = useState(null);
 
   useEffect(() => {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, open ? "open" : "closed");

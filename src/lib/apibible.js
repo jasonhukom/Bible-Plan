@@ -5,7 +5,7 @@
 // Endpoint: https://rest.api.bible (or https://api.scripture.api.bible)
 // ============================================================================
 
-import { BOOK_NAMES } from "./bibleBooks";
+import { BOOK_NAMES } from "./bibleBooks.js";
 
 const BASE_URL = "https://rest.api.bible/v1";
 const FALLBACK_URL = "https://api.scripture.api.bible/v1";
@@ -63,7 +63,7 @@ function cleanBibleId(id) {
 }
 
 async function fetchApiBible(endpoint) {
-  const apiKey = import.meta.env.VITE_API_BIBLE_KEY;
+  const apiKey = import.meta.env?.VITE_API_BIBLE_KEY;
   if (!apiKey) {
     throw new Error(
       "Missing API.Bible key. Please set VITE_API_BIBLE_KEY in .env.local or Vercel Environment Variables."

@@ -6,7 +6,7 @@
 
 import { ApiClient } from "@youversion/platform-core";
 
-const API_KEY = "S6kifuJ2rYUWbGGIGKwXOdTJVyK9aFnZFyAK73XrLmwyTGJd";
+const API_KEY = import.meta.env?.VITE_YOUVERSION_API_KEY || "S6kifuJ2rYUWbGGIGKwXOdTJVyK9aFnZFyAK73XrLmwyTGJd";
 export const DEFAULT_TRANSLATION_ID = "3034"; 
 
 export const TRANSLATION_NAMES = {
@@ -18,6 +18,9 @@ export const TRANSLATION_NAMES = {
 const apiClient = new ApiClient({
   appKey: API_KEY,
 });
+
+const booksCache = new Map();
+const versionCache = new Map();
 
 async function fetchYv(endpoint) {
   const path = endpoint.startsWith('/') ? `/v1${endpoint}` : `/v1/${endpoint}`;
@@ -51,8 +54,11 @@ export async function listFeaturedTranslations() {
 }
 
 export async function listBooks(translationId) {
+  if (booksCache.has(translationId)) {
+    return booksCache.get(translationId);
+  }
   const res = await fetchYv(`/bibles/${translationId}/books`);
-  return (res.data || []).map(b => {
+  const books = (res.data || []).map(b => {
     // Some books have an Intro chapter or chapter 0. Count valid chapters.
     let count = b.chapters ? b.chapters.length : 0;
     if (b.chapters && b.chapters.length > 0 && (b.chapters[0].title === "Intro" || b.chapters[0].title === "0")) {
@@ -66,6 +72,8 @@ export async function listBooks(translationId) {
       numberOfChapters: count
     };
   });
+  booksCache.set(translationId, books);
+  return books;
 }
 
 export async function getChapter(translationId, bookId, chapterNumber) {
@@ -123,11 +131,20 @@ export async function getChapter(translationId, bookId, chapterNumber) {
   pushVerse();
   
   const books = await listBooks(translationId);
-  const book = books.find(b => String(b.id) === String(bookId)) || { name: bookId, commonName: bookId };
+  const targetId = String(bookId).toUpperCase();
+  const book = books.find(b => String(b.id).toUpperCase() === targetId) || { name: bookId, commonName: bookId };
   
-  // Fetch copyright attribution
-  const versionData = await fetchYv(`/bibles/${translationId}`);
-  const copyright = versionData.data?.copyright || "Public Domain";
+  // Fetch copyright attribution (cached)
+  let copyright = "Public Domain";
+  try {
+    if (versionCache.has(translationId)) {
+      copyright = versionCache.get(translationId);
+    } else {
+      const versionData = await fetchYv(`/bibles/${translationId}`);
+      copyright = versionData.data?.copyright || "Public Domain";
+      versionCache.set(translationId, copyright);
+    }
+  } catch {}
   
   return {
     book: {

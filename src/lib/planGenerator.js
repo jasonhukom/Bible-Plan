@@ -13,10 +13,15 @@
 //   "inorder"  -- finish one group before starting the next.
 // ============================================================================
 
-import { listBooks } from "./bible";
-import { classifyBook, BOOK_NAMES } from "./bibleBooks";
+import { listBooks } from "./bible.js";
+import { classifyBook, BOOK_NAMES } from "./bibleBooks.js";
 
 const GROUP_ORDER = ["ot", "nt"];
+
+function todayDateString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
 
 /**
  * @param {string} translationId
@@ -92,27 +97,29 @@ function addDays(dateStr, n) {
  *   (one row per entry) -- NOT yet grouped into display refs.
  */
 export async function generateSchedule({ translationId, startDate, days, groups, orderMode, excludeBooks = [] }) {
+  const safeStartDate = startDate && /^\d{4}-\d{2}-\d{2}$/.test(startDate) ? startDate : todayDateString();
+  const numDays = Math.max(1, Math.min(1000, parseInt(days, 10) || 360));
   const filteredGroups = (groups || []).filter((g) => g !== "dc");
   const orderedGroups = GROUP_ORDER.filter((g) => filteredGroups.includes(g));
   const pools = await buildGroupPools(translationId, orderedGroups, excludeBooks);
 
-  const dayEntries = Array.from({ length: days }, () => []);
+  const dayEntries = Array.from({ length: numDays }, () => []);
 
   if (orderMode === "inorder") {
     const combined = orderedGroups.flatMap((g) => pools[g]);
-    const chunks = chunkEvenly(combined, days);
+    const chunks = chunkEvenly(combined, numDays);
     chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
   } else {
     // overlap: each group contributes its own chunk to every day.
     for (const group of orderedGroups) {
-      const chunks = chunkEvenly(pools[group], days);
+      const chunks = chunkEvenly(pools[group], numDays);
       chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
     }
   }
 
   return dayEntries.map((entries, i) => ({
     dayIndex: i,
-    date: addDays(startDate, i),
+    date: addDays(safeStartDate, i),
     entries
   }));
 }
