@@ -286,7 +286,7 @@ export const BIBLE_TRANSLATIONS: BibleTranslationMeta[] = [
   },
   {
     "id": "AWA",
-    "name": "Awadhi Bible",
+    "name": "Awadi Bible",
     "language": "awa",
     "license": "public-domain-or-open"
   },

@@ -36,7 +36,7 @@ export const LANGUAGES: LanguageMeta[] = [
   },
   {
     "code": "zh",
-    "englishName": "Mandarin Chinese",
+    "englishName": "Mandarin",
     "nativeName": "中文",
     "dir": "ltr",
     "bibleTranslationId": "CUV",
@@ -380,11 +380,11 @@ export const LANGUAGES: LanguageMeta[] = [
   },
   {
     "code": "awa",
-    "englishName": "Awadhi",
+    "englishName": "Awadi",
     "nativeName": "अवधी",
     "dir": "ltr",
     "bibleTranslationId": "AWA",
-    "bibleName": "Awadhi Bible"
+    "bibleName": "Awadi Bible"
   },
   {
     "code": "nl",
@@ -556,7 +556,7 @@ export const LANGUAGES: LanguageMeta[] = [
   },
   {
     "code": "dcc",
-    "englishName": "Deccani Urdu",
+    "englishName": "Deccan",
     "nativeName": "دکنی",
     "dir": "rtl",
     "bibleTranslationId": "DCC",
