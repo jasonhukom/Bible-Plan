@@ -4,7 +4,13 @@
 // ============================================================================
 
 import assert from "node:assert";
-import { buildMonthGrid, monthLabel, WEEKDAY_SHORT_LABELS, WEEKDAY_FULL_LABELS } from "../src/lib/calendarGrid.js";
+import {
+  buildMonthGrid,
+  createWheelMonthNavigator,
+  monthLabel,
+  WEEKDAY_SHORT_LABELS,
+  WEEKDAY_FULL_LABELS
+} from "../src/lib/calendarGrid.js";
 import { classifyBook, getLongBookName, getShortBookName, groupBooks, OT_IDS, NT_IDS } from "../src/lib/bibleBooks.js";
 import { groupIntoRefs } from "../src/lib/planGenerator.js";
 
@@ -115,6 +121,22 @@ console.log("Running Calendar & Plan Unit Tests...");
     endChapter: 5
   });
   console.log("✓ Test 6: groupIntoRefs merges contiguous chapters and splits non-contiguous runs");
+}
+
+// Test 7: Desktop mouse wheel month navigation
+{
+  const step = createWheelMonthNavigator({ threshold: 35, cooldownMs: 260, idleResetMs: 180 });
+  // Scroll up (negative deltaY) -> next month; inertia events within cooldown are ignored
+  assert.strictEqual(step({ deltaY: -100, now: 1000 }), "next");
+  assert.strictEqual(step({ deltaY: -100, now: 1100 }), null);
+  // After cooldown, scroll down (positive deltaY) -> previous month
+  assert.strictEqual(step({ deltaY: 120, now: 1400 }), "prev");
+  // Firefox line-mode scroll (deltaMode === 1, deltaY = -3 -> -120)
+  assert.strictEqual(step({ deltaY: -3, deltaMode: 1, now: 1800 }), "next");
+  // Small trackpad increments accumulate to threshold
+  assert.strictEqual(step({ deltaY: 15, now: 2200 }), null);
+  assert.strictEqual(step({ deltaY: 25, now: 2250 }), "prev");
+  console.log("✓ Test 7: createWheelMonthNavigator maps scroll up -> next month, down -> prev month with cooldown");
 }
 
 console.log("\nALL CALENDAR & PLAN TESTS PASSED!");

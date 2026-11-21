@@ -1,8 +1,14 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getPreferredTranslation } from "../lib/bible";
 import { GROUP_COLORS, BOOK_NAMES, getLongBookName, getShortBookName } from "../lib/bibleBooks";
-import { buildMonthGrid, monthLabel, WEEKDAY_SHORT_LABELS, WEEKDAY_FULL_LABELS } from "../lib/calendarGrid";
+import {
+  buildMonthGrid,
+  createWheelMonthNavigator,
+  monthLabel,
+  WEEKDAY_SHORT_LABELS,
+  WEEKDAY_FULL_LABELS
+} from "../lib/calendarGrid";
 import { useCalendarView } from "../context/CalendarViewContext";
 import { usePlan } from "../context/PlanContext";
 import { useTheme } from "../context/ThemeContext";
@@ -100,6 +106,10 @@ export default function PlanPage() {
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [isSwiping, setIsSwiping] = useState(false);
 
+  const planMainRef = useRef(null);
+  const monthNavRef = useRef({ goToPrevMonth, goToNextMonth });
+  monthNavRef.current = { goToPrevMonth, goToNextMonth };
+
   useEffect(() => {
     function handleResize() {
       setIsMobile(window.innerWidth < 720);
@@ -142,6 +152,24 @@ export default function PlanPage() {
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
   }, [goToPrevMonth, goToNextMonth]);
+
+  useEffect(() => {
+    const el = planMainRef.current;
+    if (!el || isMobile || showOnboarding) return;
+
+    const stepWheel = createWheelMonthNavigator();
+    function handleWheel(e) {
+      if (e.ctrlKey || e.metaKey) return;
+      if (!e.deltaY || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+      e.preventDefault();
+      const direction = stepWheel({ deltaY: e.deltaY, deltaMode: e.deltaMode });
+      if (direction === "next") monthNavRef.current.goToNextMonth();
+      else if (direction === "prev") monthNavRef.current.goToPrevMonth();
+    }
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [isMobile, showOnboarding]);
 
   const cells = buildMonthGrid(viewYear, viewMonth);
 
@@ -405,7 +433,7 @@ export default function PlanPage() {
         </div>
       )}
 
-      <section className="plan-main">
+      <section className="plan-main" ref={planMainRef}>
         <div className="phone-calendar-heading">
           <h1>{monthLabel(viewYear, viewMonth, false)}</h1>
           <div className="phone-calendar-arrows">

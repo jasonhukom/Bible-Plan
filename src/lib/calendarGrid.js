@@ -54,3 +54,45 @@ export function monthLabel(year, month, short = false) {
     year: "numeric"
   });
 }
+
+/**
+ * Stateful wheel-event debouncer/accumulator for desktop month navigation.
+ * Scroll up (negative deltaY) advances to the next month; scroll down
+ * (positive deltaY) returns to the previous month. Cooldown prevents
+ * trackpad inertia bursts from skipping multiple months at once.
+ */
+export function createWheelMonthNavigator({
+  threshold = 35,
+  cooldownMs = 260,
+  idleResetMs = 180
+} = {}) {
+  let accum = 0;
+  let lastEventAt = 0;
+  let lastNavAt = -Infinity;
+
+  return function handleWheelDelta({ deltaY, deltaMode = 0, now = Date.now() }) {
+    const normalizedY = deltaMode === 1 ? deltaY * 40 : deltaMode === 2 ? deltaY * 100 : deltaY;
+    if (!normalizedY) return null;
+
+    if (now - lastNavAt < cooldownMs) {
+      lastEventAt = now;
+      return null;
+    }
+
+    if (now - lastEventAt > idleResetMs) {
+      accum = 0;
+    }
+
+    lastEventAt = now;
+    accum += normalizedY;
+
+    if (Math.abs(accum) >= threshold) {
+      const direction = accum < 0 ? "next" : "prev";
+      accum = 0;
+      lastNavAt = now;
+      return direction;
+    }
+
+    return null;
+  };
+}
