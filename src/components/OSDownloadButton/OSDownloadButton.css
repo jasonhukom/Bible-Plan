@@ -1,0 +1,25 @@
+.os-download-button {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  color: #fff;
+  background: #315d43;
+  border: 1px solid #47795b;
+  border-radius: 10px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.os-download-button:hover {
+  background: #3b7051;
+  border-color: #5b966f;
+}
+
+.os-download-button:focus-visible {
+  outline: 2px solid #a9dbb7;
+  outline-offset: 3px;
+}
