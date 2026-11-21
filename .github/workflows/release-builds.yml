@@ -1,0 +1,98 @@
+name: Release Builds (EXE & APK)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to create or update"
+        required: true
+        default: "Alpha0.0.1"
+  push:
+    tags:
+      - "Alpha*"
+
+permissions:
+  contents: write
+
+jobs:
+  build-exe-and-release:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository (with submodules)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust build cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop-tauri -> target
+
+      - name: Install frontend dependencies & test
+        run: |
+          npm ci
+          npm test
+
+      - name: Generate Tauri icons from brand logo
+        working-directory: desktop-tauri
+        run: npx --yes @tauri-apps/cli@2 icon ../public/assets/brand/logo-favicon.png
+
+      - name: Build Windows NSIS installer (.exe)
+        working-directory: desktop-tauri
+        run: npx --yes @tauri-apps/cli@2 build --bundles nsis
+
+      - name: Collect Windows .exe build into builds/
+        shell: pwsh
+        run: |
+          $tag = "${{ inputs.tag || github.ref_name }}"
+          if (-not $tag -or $tag -eq "main") { $tag = "Alpha0.0.1" }
+          New-Item -ItemType Directory -Force -Path builds | Out-Null
+          $nsisExe = Get-ChildItem -Path desktop-tauri/target/release/bundle/nsis -Filter "*.exe" | Select-Object -First 1
+          if (-not $nsisExe) {
+            $nsisExe = Get-Item "desktop-tauri/target/release/bible-plan-desktop.exe"
+          }
+          Copy-Item -Force $nsisExe.FullName "builds/bible-plan-alpha0.0.1.exe"
+          Get-ChildItem builds | Format-Table Name, Length
+
+      - name: Commit builds/bible-plan-alpha0.0.1.exe to main
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f builds/bible-plan-alpha0.0.1.exe
+          if ((git diff --cached --name-only).Length -gt 0) {
+            git commit -m "chore(release): add compiled Windows Alpha0.0.1 .exe build [skip ci]"
+            git push origin HEAD:main
+          }
+
+      - name: Publish GitHub Release with .exe and .apk
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $tag = "${{ inputs.tag || github.ref_name }}"
+          if (-not $tag -or $tag -eq "main") { $tag = "Alpha0.0.1" }
+          gh release view $tag *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag `
+              builds/bible-plan-alpha0.0.1.exe `
+              builds/bible-plan-alpha0.0.1.apk `
+              --title "Bible Plan $tag" `
+              --notes "Bible Plan $tag release including Windows desktop installer (.exe) and native Android app (.apk)."
+          } else {
+            gh release upload $tag `
+              builds/bible-plan-alpha0.0.1.exe `
+              builds/bible-plan-alpha0.0.1.apk `
+              --clobber
+          }
