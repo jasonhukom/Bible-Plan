@@ -1,11 +1,14 @@
 ﻿import Fastify from "fastify";
 import cors from "@fastify/cors";
+import fastifyStatic from "@fastify/static";
+import path from "node:path";
 import { fromNodeHeaders } from "better-auth/node";
 import { auth } from "./auth.js";
 
 const app = Fastify({ logger: true });
 const allowedOrigin = process.env.CLIENT_ORIGIN ?? "http://localhost:5173";
 await app.register(cors, { origin: allowedOrigin, credentials: true, methods: ["GET", "POST", "OPTIONS"] });
+await app.register(fastifyStatic, { root: path.join(process.cwd(), "public"), serve: false });
 
 app.route({
   method: ["GET", "POST"],
@@ -56,6 +59,13 @@ app.post<{ Body: { prompt?: unknown } }>("/api/search-gemini", async (request, r
     return reply.status(502).send({ error: "Gemini search request failed" });
   }
   return reply.send(payload);
+});
+
+app.get("/", async (_request, reply) => reply.sendFile("index.html"));
+app.get("/*", async (request, reply) => {
+  const pathname = new URL(request.url, "http://localhost").pathname.slice(1);
+  if (/\.[a-zA-Z0-9]+$/.test(pathname)) return reply.sendFile(pathname);
+  return reply.sendFile("index.html");
 });
 
 await app.listen({ host: "0.0.0.0", port: Number(process.env.PORT ?? 3000) });
