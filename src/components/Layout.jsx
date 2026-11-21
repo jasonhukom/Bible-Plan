@@ -1,11 +1,12 @@
 import { Outlet, useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import OSDownloadButton from "./OSDownloadButton/OSDownloadButton";
 import { CalendarViewProvider } from "../context/CalendarViewContext";
 import { PlanProvider } from "../context/PlanContext";
 
 export default function Layout() {
   const location = useLocation();
-  const isCalendarRoute = location.pathname === "/plan";
+  const isCalendarRoute = location.pathname === "/plan" || location.pathname === "/planning";
   const isBibleRoute = location.pathname.startsWith("/bible");
 
   return (
@@ -14,6 +15,9 @@ export default function Layout() {
         <div className="app-shell">
           <Sidebar />
           <main className={`main-content${isCalendarRoute ? " main-content-flush" : ""}${isBibleRoute ? " main-content-bible" : ""}`}>
+            <div className="app-download-slot" style={{ position: "fixed", top: 10, right: 14, zIndex: 45 }}>
+              <OSDownloadButton />
+            </div>
             <Outlet />
           </main>
         </div>
