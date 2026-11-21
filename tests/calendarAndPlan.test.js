@@ -126,17 +126,17 @@ console.log("Running Calendar & Plan Unit Tests...");
 // Test 7: Desktop mouse wheel month navigation
 {
   const step = createWheelMonthNavigator({ threshold: 35, cooldownMs: 260, idleResetMs: 180 });
-  // Scroll up (negative deltaY) -> next month; inertia events within cooldown are ignored
-  assert.strictEqual(step({ deltaY: -100, now: 1000 }), "next");
+  // Scroll up (negative deltaY) -> previous month (left); inertia events within cooldown are ignored
+  assert.strictEqual(step({ deltaY: -100, now: 1000 }), "prev");
   assert.strictEqual(step({ deltaY: -100, now: 1100 }), null);
-  // After cooldown, scroll down (positive deltaY) -> previous month
-  assert.strictEqual(step({ deltaY: 120, now: 1400 }), "prev");
+  // After cooldown, scroll down (positive deltaY) -> next month (right)
+  assert.strictEqual(step({ deltaY: 120, now: 1400 }), "next");
   // Firefox line-mode scroll (deltaMode === 1, deltaY = -3 -> -120)
-  assert.strictEqual(step({ deltaY: -3, deltaMode: 1, now: 1800 }), "next");
+  assert.strictEqual(step({ deltaY: -3, deltaMode: 1, now: 1800 }), "prev");
   // Small trackpad increments accumulate to threshold
   assert.strictEqual(step({ deltaY: 15, now: 2200 }), null);
-  assert.strictEqual(step({ deltaY: 25, now: 2250 }), "prev");
-  console.log("✓ Test 7: createWheelMonthNavigator maps scroll up -> next month, down -> prev month with cooldown");
+  assert.strictEqual(step({ deltaY: 25, now: 2250 }), "next");
+  console.log("✓ Test 7: createWheelMonthNavigator maps scroll up -> prev month, down -> next month with cooldown");
 }
 
 console.log("\nALL CALENDAR & PLAN TESTS PASSED!");

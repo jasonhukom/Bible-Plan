@@ -46,7 +46,7 @@
   - **In-Order Mode**: Sequential, book-by-book reading.
   - **Chronological Order**: Follow historical chronological sequence backed by [Bible-CSV](https://github.com/jasonhukom/Bible-CSV).
   - **Daily Psalms & Daily Proverbs**: Optionally append a daily Psalm and/or Proverb to every day of your plan.
-- **PC Mouse Wheel Calendar Navigation**: Scroll up on the calendar to advance to the next month, or scroll down to return to the previous month.
+- **PC Mouse Wheel Calendar Navigation**: Scroll up on the calendar to go to the previous month (left), or scroll down to advance to the next month (right).
 
 ### 📖 Integrated Multi-API Bible Reader
 - **Dual API Scripture Providers**:

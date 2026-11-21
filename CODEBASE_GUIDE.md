@@ -131,7 +131,7 @@ The main Google-Calendar-style monthly reading tracker.
   - Each chapter item has a completion toggle checkmark and a "Direct to Bible" button navigating to `/bible/${getPreferredTranslation()}/${row.book}/${row.chapter}`.
 - **Navigation Inputs**:
   - **Keyboard**: `ArrowLeft` -> previous month; `ArrowRight` -> next month (ignored inside `INPUT`/`TEXTAREA`/`SELECT`).
-  - **PC Mouse Scroll**: Non-passive `wheel` listener on `.plan-main` (active when `!isMobile && !showOnboarding`, ignores `ctrlKey`/`metaKey` zoom and horizontal gestures) powered by `createWheelMonthNavigator()`: **scroll up** (`deltaY < 0`) -> **next month**, **scroll down** (`deltaY > 0`) -> **previous month**, with threshold & cooldown preventing multi-month trackpad jumps.
+  - **PC Mouse Scroll**: Non-passive `wheel` listener on `.plan-main` (active when `!isMobile && !showOnboarding`, ignores `ctrlKey`/`metaKey` zoom and horizontal gestures) powered by `createWheelMonthNavigator()`: **scroll up** (`deltaY < 0`) -> **previous month (left)**, **scroll down** (`deltaY > 0`) -> **next month (right)**, with threshold & cooldown preventing multi-month trackpad jumps.
   - **Mobile Touch Swipe**: Horizontal touch swipe (`handleTouchStart`, `handleTouchMove`, `handleTouchEnd`) on `.calendar-grid-wrap` with spring-back transform.
 - **Bottom Bar**: Quick dark/light theme toggle, live clock (12h/24h toggle persisted in `localStorage["bible-plan-time-format"]`), month arrows, and `Today` button.
 - **Onboarding**: Shows `<OnboardingModal />` if `localStorage["bible-plan-onboarded"]` is unset.
@@ -218,7 +218,7 @@ Static copyright/public-domain notices (NIV, BSB, KJV/ASV/WEB) and API provider 
 - **`src/lib/calendarGrid.js`**:
   - `buildMonthGrid(year, month)`: Always returns 42 `{ date, day, isCurrentMonth }` cells (Sunday-start).
   - `monthLabel(year, month, short)` & weekday label constants.
-  - `createWheelMonthNavigator({ threshold, cooldownMs, idleResetMs })`: Converts desktop `wheel` deltas (`deltaY < 0` -> `"next"`, `deltaY > 0` -> `"prev"`) with line/page `deltaMode` normalization and cooldown protection.
+  - `createWheelMonthNavigator({ threshold, cooldownMs, idleResetMs })`: Converts desktop `wheel` deltas (`deltaY < 0` -> `"prev"`, `deltaY > 0` -> `"next"`) with line/page `deltaMode` normalization and cooldown protection.
 - **`src/lib/cropImage.js`**: `getCroppedImg(imageSrc, pixelCrop, rotation, flip)` renders cropped canvas to a JPEG `Blob`.
 
 ### Bible APIs & Book Metadata
