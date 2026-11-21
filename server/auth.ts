@@ -11,7 +11,7 @@ const required = (name: string): string => {
 export const auth = betterAuth({
   database: authPool,
   secret: required("BETTER_AUTH_SECRET"),
-  baseURL: required("BETTER_AUTH_URL"),
+  baseURL: required("BETTER_AUTH_URL"),`r`n  trustedOrigins: [process.env.CLIENT_ORIGIN ?? "http://localhost:5173"],
   advanced: { database: { generateId: "uuid" } },
   user: {
     modelName: "users",
@@ -70,3 +70,4 @@ export const auth = betterAuth({
     }),
   ],
 });
+
