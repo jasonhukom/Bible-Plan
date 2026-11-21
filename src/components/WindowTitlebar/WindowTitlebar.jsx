@@ -25,7 +25,7 @@ export default function WindowTitlebar() {
   }
 
   return (
-    <div className="window-titlebar" aria-label="Window controls">
+    <div className="window-titlebar" data-tauri-drag-region aria-label="Window controls">
       {error && <span className="window-titlebar-error" role="status">{error}</span>}
       <button
         className="window-titlebar-button"
