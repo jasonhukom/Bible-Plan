@@ -24,3 +24,4 @@ COPY --from=server-builder /app/server/dist ./dist
 COPY --from=web-builder /app/dist ./public
 EXPOSE 3000
 CMD ["node", "dist/index.js"]
+
