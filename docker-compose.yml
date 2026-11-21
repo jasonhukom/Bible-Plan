@@ -1,0 +1,54 @@
+﻿services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bible-data
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Set POSTGRES_DB in .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD:?Set APP_DB_PASSWORD in .env}
+    volumes:
+      - bible-data:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d:ro
+    networks:
+      - bible-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    container_name: bible-plan
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      PORT: 3000
+      APP_VERSION: ${APP_VERSION:-Alpha0.0.1}
+      BUILD_HASH: ${BUILD_HASH:-local}
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@bible-data:5432/${POSTGRES_DB}
+      APP_DATABASE_URL: postgres://bible_app_user:${APP_DB_PASSWORD}@bible-data:5432/${POSTGRES_DB}
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks:
+      - bible-internal
+      - bible-egress
+
+volumes:
+  bible-data:
+    name: bible-data
+
+networks:
+  bible-internal:
+    name: bible-internal
+    internal: true
+  bible-egress:
+    name: bible-egress
