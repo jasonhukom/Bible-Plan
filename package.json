@@ -2,16 +2,15 @@
   "name": "bible-plan",
   "version": "2.0.0",
   "private": true,
-  "description": "Calendar-based Bible reading tracker, Bible reader (HelloAO API) and saved verses, with Supabase accounts.",
+  "description": "Calendar-based Bible reading tracker, Bible reader (HelloAO & API.Bible), and saved verses stored on device.",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/extraBooksPlacement.test.js && node tests/calendarAndPlan.test.js"
+    "test": "node tests/extraBooksPlacement.test.js && node tests/calendarAndPlan.test.js && node tests/deviceStorage.test.js"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.4",
     "@youversion/platform-core": "^2.15.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

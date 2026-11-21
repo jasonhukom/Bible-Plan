@@ -2000,44 +2000,6 @@ h3 {
 }
 
 /* --------------------------------------------------------------------------
-   LOGIN
-   -------------------------------------------------------------------------- */
-
-.login-shell {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-}
-
-.login-card {
-  width: min(380px, 100%);
-}
-
-.login-tabs {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 20px;
-}
-
-.login-tab {
-  flex: 1;
-  padding: 8px;
-  text-align: center;
-  border-radius: 8px;
-  font-size: 13px;
-  background: var(--night);
-  border: 1px solid var(--night-line);
-}
-
-.login-tab.active {
-  background: var(--gold);
-  color: var(--night);
-  border-color: var(--gold);
-}
-
-/* --------------------------------------------------------------------------
    SCROLLBAR STYLES
    -------------------------------------------------------------------------- */
 ::-webkit-scrollbar {

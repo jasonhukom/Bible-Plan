@@ -6,7 +6,7 @@ import { buildMonthGrid, monthLabel, WEEKDAY_SHORT_LABELS, WEEKDAY_FULL_LABELS }
 import { useCalendarView } from "../context/CalendarViewContext";
 import { usePlan } from "../context/PlanContext";
 import { useTheme } from "../context/ThemeContext";
-import { dataApi } from "../lib/dataApi";
+import { deviceStorage } from "../lib/deviceStorage";
 import OnboardingModal from "../components/OnboardingModal";
 
 const MAX_VISIBLE_PILLS = 3;
@@ -87,7 +87,9 @@ export default function PlanPage() {
   const [dragOverDate, setDragOverDate] = useState(null);
   const [now, setNow] = useState(new Date());
   const [timeFormat, setTimeFormat] = useState(() => localStorage.getItem(TIME_FORMAT_KEY) || "12h");
-  const [numberPosition, setNumberPosition] = useState("right");
+  const [numberPosition, setNumberPosition] = useState(
+    () => deviceStorage.getSettings().preferences?.dateNumberPosition || "right"
+  );
   const [showOnboarding, setShowOnboarding] = useState(() => !localStorage.getItem("bible-plan-onboarded"));
   const [sidebarWidth, setSidebarWidth] = useState(300);
   const [isMobile, setIsMobile] = useState(() => window.innerWidth < 720);
@@ -112,9 +114,12 @@ export default function PlanPage() {
   }
 
   useEffect(() => {
-    dataApi.getSettings().then(({ data }) => {
-      if (data?.preferences?.dateNumberPosition) setNumberPosition(data.preferences.dateNumberPosition);
-    });
+    function onSettingsChanged(e) {
+      const nextPos = e.detail?.preferences?.dateNumberPosition;
+      if (nextPos) setNumberPosition(nextPos);
+    }
+    window.addEventListener("bible-settings-changed", onSettingsChanged);
+    return () => window.removeEventListener("bible-settings-changed", onSettingsChanged);
   }, []);
 
   useEffect(() => {

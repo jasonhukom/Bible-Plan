@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { dataApi } from "../lib/dataApi";
+import { deviceStorage } from "../lib/deviceStorage";
 
 export default function SavesPage() {
-  const [verses, setVerses] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [verses, setVerses] = useState(() => deviceStorage.listSavedVerses());
 
   useEffect(() => {
-    dataApi.listSavedVerses().then(({ data }) => {
-      setVerses(data || []);
-      setLoading(false);
-    });
+    function onSavedVersesChanged(e) {
+      setVerses(e.detail || deviceStorage.listSavedVerses());
+    }
+    window.addEventListener("bible-saved-verses-changed", onSavedVersesChanged);
+    return () => window.removeEventListener("bible-saved-verses-changed", onSavedVersesChanged);
   }, []);
 
-  async function remove(id) {
-    setVerses((v) => v.filter((verse) => verse.id !== id));
-    await dataApi.unsaveVerse(id);
+  function remove(id) {
+    const next = deviceStorage.unsaveVerse(id);
+    setVerses(next);
   }
 
   return (
@@ -29,9 +29,7 @@ export default function SavesPage() {
         </div>
       </div>
 
-      {loading ? (
-        <p className="reader-loading">Loading…</p>
-      ) : verses.length === 0 ? (
+      {verses.length === 0 ? (
         <div className="empty-state">
           <p>No saved verses yet.</p>
           <p className="hint-text">

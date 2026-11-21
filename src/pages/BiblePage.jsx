@@ -10,8 +10,7 @@ import {
   getTranslationShortName
 } from "../lib/bible";
 import { groupBooks, GROUP_LABELS, getLongBookName } from "../lib/bibleBooks";
-import { useAuth } from "../context/AuthContext";
-import { dataApi } from "../lib/dataApi";
+import { deviceStorage } from "../lib/deviceStorage";
 import {
   isExtraBook,
   getExtraBookMeta,
@@ -30,7 +29,6 @@ import AdditionalBooksSheet from "../components/AdditionalBooksSheet";
 export default function BiblePage() {
   const { translationId: routeTranslation, bookId: routeBook, chapter: routeChapter } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
 
   const [preferredTrans, setPreferredTrans] = useState(() => getPreferredTranslation());
   const translationId = routeTranslation || preferredTrans || DEFAULT_TRANSLATION_ID;
@@ -252,12 +250,8 @@ export default function BiblePage() {
 
   // Saved verses (for highlighting already-saved verses in the reader).
   const refreshSaved = useCallback(() => {
-    if (!user) {
-      setSavedVerses([]);
-      return;
-    }
-    dataApi.listSavedVerses().then(({ data }) => setSavedVerses(data || []));
-  }, [user]);
+    setSavedVerses(deviceStorage.listSavedVerses());
+  }, []);
 
   useEffect(() => {
     refreshSaved();
@@ -266,9 +260,7 @@ export default function BiblePage() {
   function goToTranslation(nextTranslation) {
     setPreferredTranslation(nextTranslation);
     setPreferredTrans(nextTranslation);
-    if (user) {
-      dataApi.saveSettings({ translation: nextTranslation }).catch(() => {});
-    }
+    deviceStorage.saveSettings({ translation: nextTranslation });
     if (routeBook && routeChapter) {
       navigate(`/bible/${nextTranslation}/${routeBook}/${routeChapter}`);
     } else {
@@ -375,11 +367,7 @@ export default function BiblePage() {
     } catch {}
   }
 
-  async function toggleVerse(verseNumber, verseText) {
-    if (!user) {
-      setSaveNotice("Sign in to save verses.");
-      return;
-    }
+  function toggleVerse(verseNumber, verseText) {
     const existing = savedVerses.find(
       (v) =>
         v.translation === translationId &&
@@ -388,10 +376,10 @@ export default function BiblePage() {
         v.verse === verseNumber
     );
     if (existing) {
-      await dataApi.unsaveVerse(existing.id);
+      deviceStorage.unsaveVerse(existing.id);
       setSaveNotice("Verse removed from saved.");
     } else {
-      await dataApi.saveVerse({
+      deviceStorage.saveVerse({
         translation: translationId,
         book: routeBook,
         book_name: currentBook?.commonName || currentBook?.name || routeBook,
@@ -707,11 +695,6 @@ export default function BiblePage() {
           }}
         >
           <span>{saveNotice}</span>
-          {!user && (
-            <Link to="/login" style={{ color: "var(--gold-bright)", textDecoration: "underline", fontWeight: 600 }}>
-              Sign in
-            </Link>
-          )}
         </div>
       )}
 
@@ -1057,7 +1040,7 @@ export default function BiblePage() {
                         key={i}
                         className={`verse${saved ? " saved" : ""}`}
                         onClick={() => item.number != null && toggleVerse(item.number, item.text)}
-                        title={user ? "Tap to save this verse" : "Sign in to save verses"}
+                        title={saved ? "Tap to remove from saved" : "Tap to save this verse"}
                       >
                         {item.number != null && <sup className="verse-num">{item.number}</sup>}
                         {item.text}{" "}

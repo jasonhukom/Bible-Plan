@@ -1,59 +1,37 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
-import { dataApi } from "../lib/dataApi";
-import { DEFAULT_TRANSLATION_ID, listTranslations, getPreferredTranslation, setPreferredTranslation } from "../lib/bible";
+import { deviceStorage } from "../lib/deviceStorage";
+import { listTranslations, getPreferredTranslation, setPreferredTranslation } from "../lib/bible";
 
 export default function SettingsPage() {
-  const { user, signOut, isConfigured } = useAuth();
   const { mode, setMode, themes } = useTheme();
-  const navigate = useNavigate();
 
   const [translations, setTranslations] = useState([]);
   const [defaultTranslation, setDefaultTranslation] = useState(() => getPreferredTranslation());
-  const [numberPosition, setNumberPosition] = useState("right");
-  const [preferences, setPreferences] = useState({});
+  const [preferences, setPreferences] = useState(() => deviceStorage.getSettings().preferences || {});
+  const [numberPosition, setNumberPosition] = useState(
+    () => deviceStorage.getSettings().preferences?.dateNumberPosition || "right"
+  );
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     listTranslations().then(setTranslations).catch(() => setTranslations([]));
   }, []);
 
-  useEffect(() => {
-    if (!user) return;
-    dataApi.getSettings().then(({ data }) => {
-      if (data?.translation) {
-        setDefaultTranslation(data.translation);
-        setPreferredTranslation(data.translation);
-      }
-      if (data?.preferences) {
-        setPreferences(data.preferences);
-        if (data.preferences.dateNumberPosition) setNumberPosition(data.preferences.dateNumberPosition);
-      }
-    });
-  }, [user]);
-
-  async function handleNumberPositionChange(position) {
+  function handleNumberPositionChange(position) {
     setNumberPosition(position);
     const nextPreferences = { ...preferences, dateNumberPosition: position };
     setPreferences(nextPreferences);
-    if (user) await dataApi.saveSettings({ preferences: nextPreferences });
+    deviceStorage.saveSettings({ preferences: nextPreferences });
   }
 
-  async function handleTranslationChange(id) {
+  function handleTranslationChange(id) {
     setDefaultTranslation(id);
     setPreferredTranslation(id);
-    if (user) {
-      await dataApi.saveSettings({ translation: id });
-    }
+    deviceStorage.saveSettings({ translation: id });
     setMessage("Saved.");
     setTimeout(() => setMessage(""), 2000);
-  }
-
-  async function handleSignOut() {
-    await signOut();
-    navigate("/login");
   }
 
   return (
@@ -109,7 +87,7 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="card" style={{ marginBottom: 20 }}>
+        <div className="card">
           <h2 style={{ fontSize: 15, marginBottom: 14 }}>Default translation</h2>
           <select
             value={defaultTranslation}
@@ -126,28 +104,10 @@ export default function SettingsPage() {
             ))}
           </select>
           <p className="hint-text" style={{ marginTop: 10 }}>
-            To view copyright and licensing information for the translations used in this app, 
+            To view copyright and licensing information for the translations used in this app,
             please see the <Link to="/licenses" style={{ textDecoration: "underline" }}>Licenses page</Link>.
           </p>
           {message && <p className="hint-text">{message}</p>}
-        </div>
-
-        <div className="card">
-          <h2 style={{ fontSize: 15, marginBottom: 10 }}>Account</h2>
-          {user ? (
-            <>
-              <p className="hint-text" style={{ marginBottom: 14 }}>
-                Signed in as {user.email}
-              </p>
-              <button className="btn btn-danger" onClick={handleSignOut} type="button">
-                Sign out
-              </button>
-            </>
-          ) : (
-            <p className="hint-text">
-              {isConfigured ? "You're not signed in." : "Supabase isn't configured for this deployment."}
-            </p>
-          )}
         </div>
       </div>
     </div>

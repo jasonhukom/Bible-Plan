@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import MiniCalendar from "./MiniCalendar";
-import { useAuth } from "../context/AuthContext";
 import { usePlan } from "../context/PlanContext";
-import { dataApi } from "../lib/dataApi";
-import LoginModal from "./LoginModal";
+import { deviceStorage } from "../lib/deviceStorage";
 
 const SIDEBAR_STORAGE_KEY = "bible-plan-sidebar-open";
 
@@ -47,14 +45,14 @@ const navIcons = {
     <svg viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.7" />
       <path
-        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
         stroke="currentColor"
         strokeWidth="1.4"
         strokeLinejoin="round"
       />
     </svg>
   ),
-  account: (
+  profile: (
     <svg viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.7" />
       <path d="M20 19.5C20 19.78 19.78 20 19.5 20H4.5C4.22 20 4 19.78 4 19.5V16H20V19.5Z" stroke="currentColor" strokeWidth="1.7" />
@@ -63,18 +61,16 @@ const navIcons = {
 };
 
 export default function Sidebar() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const { plan, generating, error, regenerate } = usePlan();
   const [open, setOpen] = useState(() => localStorage.getItem(SIDEBAR_STORAGE_KEY) !== "closed");
   const [plansExpanded, setPlansExpanded] = useState(true);
-  const [profile, setProfile] = useState(null);
+  const [profile, setProfile] = useState(() => deviceStorage.getProfile());
 
   const [startDate, setStartDate] = useState("");
   const [days, setDays] = useState(360);
   const [groups, setGroups] = useState(["ot", "nt"]);
   const [orderMode, setOrderMode] = useState("overlap");
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [showMobilePlan, setShowMobilePlan] = useState(false);
 
   useEffect(() => {
@@ -82,12 +78,12 @@ export default function Sidebar() {
   }, [open]);
 
   useEffect(() => {
-    if (!user) {
-      setProfile(null);
-      return;
+    function onProfileChanged(e) {
+      setProfile(e.detail || deviceStorage.getProfile());
     }
-    dataApi.getProfile().then(({ data }) => setProfile(data || null));
-  }, [user]);
+    window.addEventListener("bible-profile-changed", onProfileChanged);
+    return () => window.removeEventListener("bible-profile-changed", onProfileChanged);
+  }, []);
 
   useEffect(() => {
     if (!plan) return;
@@ -112,14 +108,6 @@ export default function Sidebar() {
     };
     regenerate(config);
     setShowMobilePlan(false);
-  }
-
-  function handleLoginModalClose() {
-    setShowLoginModal(false);
-  }
-
-  function handleLoginModalSuccess() {
-    setShowLoginModal(false);
   }
 
   const renderPlanForm = (isMobile) => (
@@ -233,59 +221,58 @@ export default function Sidebar() {
           </button>
         </div>
 
+        <div className="sidebar-scroll-area">
+          <MiniCalendar />
 
-          <div className="sidebar-scroll-area">
-            <MiniCalendar />
-
-            <nav className="sidebar-nav">
-              <NavLink to="/plan" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
-                {navIcons.calendar}
-                <span className="sidebar-nav-label">Calendar</span>
-              </NavLink>
-              <NavLink to="/bible" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
-                {navIcons.bible}
-                <span className="sidebar-nav-label">Bible</span>
-              </NavLink>
-              <NavLink to="/saves" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
-                {navIcons.save}
-                <span className="sidebar-nav-label">Save</span>
-              </NavLink>
-
-              <button
-                className="sidebar-nav-btn reading-plans-toggle"
-                type="button"
-                onClick={() => setPlansExpanded((v) => !v)}
-                aria-expanded={plansExpanded}
-              >
-                {navIcons.readingPlans}
-                <span className="sidebar-nav-label">Reading Plans</span>
-                <span className={`reading-plans-chevron${plansExpanded ? " open" : ""}`}>{navIcons.chevron}</span>
-              </button>
-            </nav>
-
-            {plansExpanded && renderPlanForm(false)}
-          </div>
-
-          <div className="sidebar-footer">
-            <button
-              className="sidebar-nav-btn"
-              type="button"
-              onClick={() => navigate("/profile")}
-            >
-              {profile?.avatar_url ? (
-                <img className="sidebar-avatar" src={profile.avatar_url} alt="" />
-              ) : (
-                navIcons.account
-              )}
-              <span className="sidebar-nav-label">
-                {user && !user?.is_anonymous ? (profile?.display_name || "Profile") : "Profile"}
-              </span>
-            </button>
-            <NavLink to="/settings" className="sidebar-icon-btn" title="Settings">
-              {navIcons.settings}
+          <nav className="sidebar-nav">
+            <NavLink to="/plan" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
+              {navIcons.calendar}
+              <span className="sidebar-nav-label">Calendar</span>
             </NavLink>
-          </div>
-        </aside>
+            <NavLink to="/bible" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
+              {navIcons.bible}
+              <span className="sidebar-nav-label">Bible</span>
+            </NavLink>
+            <NavLink to="/saves" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
+              {navIcons.save}
+              <span className="sidebar-nav-label">Save</span>
+            </NavLink>
+
+            <button
+              className="sidebar-nav-btn reading-plans-toggle"
+              type="button"
+              onClick={() => setPlansExpanded((v) => !v)}
+              aria-expanded={plansExpanded}
+            >
+              {navIcons.readingPlans}
+              <span className="sidebar-nav-label">Reading Plans</span>
+              <span className={`reading-plans-chevron${plansExpanded ? " open" : ""}`}>{navIcons.chevron}</span>
+            </button>
+          </nav>
+
+          {plansExpanded && renderPlanForm(false)}
+        </div>
+
+        <div className="sidebar-footer">
+          <button
+            className="sidebar-nav-btn"
+            type="button"
+            onClick={() => navigate("/profile")}
+          >
+            {profile?.avatar_url ? (
+              <img className="sidebar-avatar" src={profile.avatar_url} alt="" />
+            ) : (
+              navIcons.profile
+            )}
+            <span className="sidebar-nav-label">
+              {profile?.display_name || "Profile"}
+            </span>
+          </button>
+          <NavLink to="/settings" className="sidebar-icon-btn" title="Settings">
+            {navIcons.settings}
+          </NavLink>
+        </div>
+      </aside>
 
       <nav className="mobile-bottom-nav">
         <button className="mobile-nav-btn" onClick={() => setShowMobilePlan(true)} aria-label="Reading Plans">
@@ -294,7 +281,7 @@ export default function Sidebar() {
         <NavLink to="/saves" className="mobile-nav-btn" aria-label="Saved">
           {navIcons.save}
         </NavLink>
-        
+
         <NavLink to="/plan" className="mobile-nav-brand-btn" aria-label="Home">
           <svg className="mobile-logo" viewBox="0 0 32 32">
             <line x1="16" y1="6" x2="16" y2="27" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
@@ -305,15 +292,15 @@ export default function Sidebar() {
         <NavLink to="/bible" className="mobile-nav-btn" aria-label="Bible">
           {navIcons.bible}
         </NavLink>
-        <button 
-          className="mobile-nav-btn" 
+        <button
+          className="mobile-nav-btn"
           onClick={() => navigate("/profile")}
           aria-label="Profile"
         >
           {profile?.avatar_url ? (
             <img className="sidebar-avatar" src={profile.avatar_url} alt="" />
           ) : (
-            navIcons.account
+            navIcons.profile
           )}
         </button>
       </nav>
@@ -324,10 +311,6 @@ export default function Sidebar() {
             {renderPlanForm(true)}
           </div>
         </div>
-      )}
-
-      {showLoginModal && (
-        <LoginModal onClose={handleLoginModalClose} onSuccess={handleLoginModalSuccess} />
       )}
     </>
   );

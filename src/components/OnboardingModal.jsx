@@ -1,24 +1,18 @@
 import { useState } from "react";
 import { BOOK_NAMES } from "../lib/bibleBooks";
 import { usePlan } from "../context/PlanContext";
-import { useAuth } from "../context/AuthContext";
-import LoginModal from "./LoginModal";
 
 export default function OnboardingModal({ onClose }) {
   const [step, setStep] = useState(1);
   const [readBooks, setReadBooks] = useState(new Set());
   const [removeBooks, setRemoveBooks] = useState(false);
-  
+
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split("T")[0]);
   const [days, setDays] = useState(360);
   const [groups, setGroups] = useState(["ot", "nt"]);
   const [orderMode, setOrderMode] = useState("overlap");
 
   const { regenerate, generating, error } = usePlan();
-  const { user } = useAuth();
-  
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [pendingPlan, setPendingPlan] = useState(null);
 
   function toggleBook(id) {
     setReadBooks(prev => {
@@ -50,37 +44,10 @@ export default function OnboardingModal({ onClose }) {
       book_groups: groups,
       order_mode: orderMode
     };
-    
-    if (user?.is_anonymous) {
-      setPendingPlan({ config, excludeBooks, preCompletedBooks });
-      setShowLoginModal(true);
-    } else {
-      regenerate(config, { excludeBooks, preCompletedBooks }).then(() => onClose());
-    }
-  }
 
-  function handleLoginModalClose() {
-    setShowLoginModal(false);
-    if (pendingPlan) {
-      regenerate(pendingPlan.config, { 
-        excludeBooks: pendingPlan.excludeBooks, 
-        preCompletedBooks: pendingPlan.preCompletedBooks 
-      }).then(() => onClose());
-    } else {
-      onClose();
-    }
-  }
-
-  function handleLoginModalSuccess() {
-    setShowLoginModal(false);
-    if (pendingPlan) {
-      regenerate(pendingPlan.config, { 
-        excludeBooks: pendingPlan.excludeBooks, 
-        preCompletedBooks: pendingPlan.preCompletedBooks 
-      }).then(() => onClose());
-    } else {
-      onClose();
-    }
+    regenerate(config, { excludeBooks, preCompletedBooks }).then((res) => {
+      if (!res?.error) onClose();
+    });
   }
 
   if (step === 1) {
@@ -92,10 +59,10 @@ export default function OnboardingModal({ onClose }) {
           </div>
           <div className="popup-book-list" style={{ maxHeight: "40vh", overflowY: "auto", padding: "4px" }}>
             {Object.entries(BOOK_NAMES).map(([id, name]) => (
-               <label key={id} style={{ display: "flex", justifyContent: "space-between", padding: "10px", borderBottom: "1px solid var(--night-line)", cursor: "pointer", alignItems: "center" }}>
-                 <span>{name}</span>
-                 <input type="checkbox" checked={readBooks.has(id)} onChange={() => toggleBook(id)} style={{ width: 18, height: 18 }} />
-               </label>
+              <label key={id} style={{ display: "flex", justifyContent: "space-between", padding: "10px", borderBottom: "1px solid var(--night-line)", cursor: "pointer", alignItems: "center" }}>
+                <span>{name}</span>
+                <input type="checkbox" checked={readBooks.has(id)} onChange={() => toggleBook(id)} style={{ width: 18, height: 18 }} />
+              </label>
             ))}
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 20, flexWrap: "wrap", gap: 10 }}>
@@ -125,7 +92,7 @@ export default function OnboardingModal({ onClose }) {
 
           <label className="plan-field-label">Length (days)</label>
           <input className="plan-field-input" type="number" min={1} max={730} value={days} onChange={e => setDays(e.target.value)} />
-          
+
           <div className="plan-field-label">Books</div>
           <div className="plan-checkbox-row">
             <label><input type="checkbox" checked={groups.includes("ot")} onChange={() => toggleGroup("ot")} /> Old Testament</label>
@@ -139,15 +106,12 @@ export default function OnboardingModal({ onClose }) {
           </select>
           {error && <p className="error-text">{error}</p>}
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
-             <button className="btn" type="submit" disabled={generating || groups.length === 0}>
-               {generating ? "Generating…" : "Apply Plan"}
-             </button>
+            <button className="btn" type="submit" disabled={generating || groups.length === 0}>
+              {generating ? "Generating…" : "Apply Plan"}
+            </button>
           </div>
         </form>
       </div>
-      {showLoginModal && (
-        <LoginModal onClose={handleLoginModalClose} onSuccess={handleLoginModalSuccess} />
-      )}
     </div>
   );
 }

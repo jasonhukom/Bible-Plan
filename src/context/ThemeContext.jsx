@@ -1,6 +1,4 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { useAuth } from "./AuthContext";
-import { dataApi } from "../lib/dataApi";
 
 const ThemeContext = createContext(null);
 const STORAGE_KEY = "bible-plan-theme";
@@ -28,25 +26,24 @@ export const THEMES = [
 ];
 
 export function ThemeProvider({ children }) {
-  const { user } = useAuth();
-  const [mode, setModeState] = useState(() => localStorage.getItem(STORAGE_KEY) || "dark");
+  const [mode, setModeState] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY) || "dark";
+    } catch {
+      return "dark";
+    }
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", mode);
-    localStorage.setItem(STORAGE_KEY, mode);
+    try {
+      localStorage.setItem(STORAGE_KEY, mode);
+    } catch {}
   }, [mode]);
-
-  useEffect(() => {
-    if (!user) return;
-    dataApi.getSettings().then(({ data }) => {
-      if (data?.theme && THEMES.some((theme) => theme.id === data.theme)) setModeState(data.theme);
-    }).catch(() => {});
-  }, [user]);
 
   const setMode = (next) => {
     if (!THEMES.some((theme) => theme.id === next)) return;
     setModeState(next);
-    if (user) dataApi.saveSettings({ theme: next });
   };
 
   const value = useMemo(() => ({ mode, setMode, themes: THEMES }), [mode]);
