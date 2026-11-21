@@ -26,7 +26,11 @@ app.route({
       });
       const response = await auth.handler(webRequest);
       reply.status(response.status);
-      response.headers.forEach((value, key) => reply.header(key, value));
+      response.headers.forEach((value, key) => {
+        if (key.toLowerCase() !== "set-cookie") reply.header(key, value);
+      });
+      const cookies = response.headers.getSetCookie();
+      if (cookies.length) reply.header("set-cookie", cookies);
       return reply.send(response.body ? await response.text() : null);
     } catch (error) {
       request.log.error(error, "Better Auth request failed");
@@ -69,3 +73,4 @@ app.get("/*", async (request, reply) => {
 });
 
 await app.listen({ host: "0.0.0.0", port: Number(process.env.PORT ?? 3000) });
+
