@@ -41,9 +41,12 @@
 - **Flexible Length & Start Date**: Generate schedules from 1 to 730 days starting on any specified date.
 - **Customizable Book Selection**: Select Old Testament and New Testament books.
 - **Onboarding Filter**: Mark books you have already read to immediately exclude them from your schedule.
-- **Pacing Modes**:
-  - **Overlap Mode**: Balanced daily reading across selected testaments.
+- **Pacing & Plan Modes**:
+  - **Overlap Mode**: Balanced daily reading across Old and New Testaments.
   - **In-Order Mode**: Sequential, book-by-book reading.
+  - **Chronological Order**: Follow historical chronological sequence backed by [Bible-CSV](https://github.com/jasonhukom/Bible-CSV).
+  - **Daily Psalms & Daily Proverbs**: Optionally append a daily Psalm and/or Proverb to every day of your plan.
+- **PC Mouse Wheel Calendar Navigation**: Scroll up on the calendar to advance to the next month, or scroll down to return to the previous month.
 
 ### 📖 Integrated Multi-API Bible Reader
 - **Dual API Scripture Providers**:
@@ -81,10 +84,12 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/jasonhukom/Bible-Plan.git
+git clone --recurse-submodules https://github.com/jasonhukom/Bible-Plan.git
 cd Bible-Plan
 npm install
 ```
+
+> For a full walkthrough of every page, component, context, storage key, and module (especially helpful for AI agents and contributors), see [CODEBASE_GUIDE.md](CODEBASE_GUIDE.md).
 
 ### 2. Configure Environment Variables (Optional)
 Copy `.env.example` to `.env.local` if you want to enable API.Bible translations (NLT, NIV, CSB):
