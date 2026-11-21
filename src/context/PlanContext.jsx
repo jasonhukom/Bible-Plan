@@ -17,9 +17,12 @@ function newId() {
 const DEFAULT_CONFIG = {
   name: "My reading plan",
   start_date: todayDateString(),
-  days: 360,
+  days: 365,
   book_groups: ["ot", "nt"],
-  order_mode: "overlap"
+  order_mode: "overlap",
+  chronological: false,
+  daily_psalms: false,
+  daily_proverbs: false
 };
 
 /** Turns generator output (per-day flat chapter entries) into flat
@@ -70,6 +73,9 @@ export function PlanProvider({ children }) {
         days: config.days,
         book_groups: config.book_groups,
         order_mode: config.order_mode,
+        chronological: Boolean(config.chronological),
+        daily_psalms: Boolean(config.daily_psalms),
+        daily_proverbs: Boolean(config.daily_proverbs),
         is_active: true,
         updated_at: new Date().toISOString()
       };
@@ -80,6 +86,9 @@ export function PlanProvider({ children }) {
         days: savedPlan.days,
         groups: savedPlan.book_groups,
         orderMode: savedPlan.order_mode,
+        chronological: savedPlan.chronological,
+        dailyPsalms: savedPlan.daily_psalms,
+        dailyProverbs: savedPlan.daily_proverbs,
         excludeBooks: options.excludeBooks || []
       });
       const newRows = scheduleToRows(scheduleDays, options.preCompletedBooks || []);

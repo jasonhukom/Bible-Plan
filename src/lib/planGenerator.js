@@ -1,20 +1,28 @@
 // ============================================================================
 // planGenerator.js
 // ----------------------------------------------------------------------------
-// Turns a plan config (start date, length, which book groups) into a
-// day-by-day list of chapter references, using live chapter counts from the
-// HelloAO API rather than a hardcoded table -- so it's accurate for whatever
-// translation is set as default, deuterocanonical included if present.
+// Generates a day-by-day list of chapter references from plan options:
+//   - orderMode: "overlap" (OT & NT progress together) | "inorder" (sequential)
+//   - chronological: follow historical chronological order from Bible-CSV
+//   - dailyPsalms: append a daily Psalm (cycling 1-150) each day
+//   - dailyProverbs: append a daily Proverb (cycling 1-31) each day
 //
-// Two order modes, matching the original app's plan panel:
-//   "overlap"  -- every selected group progresses in parallel (a bit of OT
-//                 *and* a bit of NT each day) -- this is the default, and
-//                 how the original 121-day plan read.
-//   "inorder"  -- finish one group before starting the next.
+// When days === 365, both OT and NT are selected, and no books are excluded,
+// schedules are loaded directly from the verse-balanced Bible-CSV submodule.
+// Custom day counts, single-testament plans, and excluded books reuse the
+// Bible-CSV chronological order (or live translation chapter counts) and chunk
+// chapters evenly across the requested days.
 // ============================================================================
 
 import { listBooks } from "./bible.js";
 import { classifyBook, BOOK_NAMES } from "./bibleBooks.js";
+import {
+  addDaysToDateString,
+  extractChronologicalStreams,
+  getCsvPlanFilename,
+  parseCsvPlanText
+} from "./csvPlanParser.js";
+import { loadCsvPlanText } from "./csvLoader.js";
 
 const GROUP_ORDER = ["ot", "nt"];
 
@@ -27,8 +35,7 @@ function todayDateString() {
  * @param {string} translationId
  * @param {string[]} groups e.g. ["ot", "nt"]
  * @param {string[]} excludeBooks e.g. ["GEN", "EXO"]
- * @returns {Promise<Record<string, Array<{bookId: string, bookName: string, chapter: number}>>>}
- *   one flat chapter list per requested group, in canonical order
+ * @returns {Promise<Record<string, Array<{bookId: string, bookName: string, chapter: number, category: string}>>>}
  */
 async function buildGroupPools(translationId, groups, excludeBooks = []) {
   const books = await listBooks(translationId);
@@ -84,42 +91,143 @@ export function groupIntoRefs(entries) {
   return refs;
 }
 
-function addDays(dateStr, n) {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  const dt = new Date(y, m - 1, d + n);
-  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+function appendDailyWisdom(dayEntries, { dailyPsalms, dailyProverbs }) {
+  if (!dailyPsalms && !dailyProverbs) return dayEntries;
+  let psCounter = 0;
+  let proCounter = 0;
+
+  return dayEntries.map((entries) => {
+    const next = [...entries];
+    if (dailyPsalms) {
+      const ch = (psCounter % 150) + 1;
+      psCounter++;
+      if (!next.some((e) => e.bookId === "PSA" && e.chapter === ch)) {
+        next.push({
+          bookId: "PSA",
+          bookName: BOOK_NAMES.PSA,
+          chapter: ch,
+          category: "ot"
+        });
+      }
+    }
+    if (dailyProverbs) {
+      const ch = (proCounter % 31) + 1;
+      proCounter++;
+      if (!next.some((e) => e.bookId === "PRO" && e.chapter === ch)) {
+        next.push({
+          bookId: "PRO",
+          bookName: BOOK_NAMES.PRO,
+          chapter: ch,
+          category: "ot"
+        });
+      }
+    }
+    return next;
+  });
 }
 
 /**
- * @param {{translationId: string, startDate: string, days: number, groups: string[], orderMode: "overlap"|"inorder", excludeBooks?: string[]}} config
+ * @param {{
+ *   translationId: string,
+ *   startDate: string,
+ *   days: number,
+ *   groups: string[],
+ *   orderMode: "overlap"|"inorder",
+ *   chronological?: boolean,
+ *   dailyPsalms?: boolean,
+ *   dailyProverbs?: boolean,
+ *   excludeBooks?: string[]
+ * }} config
  * @returns {Promise<Array<{dayIndex: number, date: string, entries: Array<{bookId,bookName,chapter,category}>}>>}
- *   flat per-chapter entries per day, ready to insert into reading_schedule
- *   (one row per entry) -- NOT yet grouped into display refs.
  */
-export async function generateSchedule({ translationId, startDate, days, groups, orderMode, excludeBooks = [] }) {
+export async function generateSchedule({
+  translationId,
+  startDate,
+  days,
+  groups,
+  orderMode,
+  chronological = false,
+  dailyPsalms = false,
+  dailyProverbs = false,
+  excludeBooks = []
+}) {
   const safeStartDate = startDate && /^\d{4}-\d{2}-\d{2}$/.test(startDate) ? startDate : todayDateString();
-  const numDays = Math.max(1, Math.min(1000, parseInt(days, 10) || 360));
+  const numDays = Math.max(1, Math.min(1000, parseInt(days, 10) || 365));
   const filteredGroups = (groups || []).filter((g) => g !== "dc");
   const orderedGroups = GROUP_ORDER.filter((g) => filteredGroups.includes(g));
-  const pools = await buildGroupPools(translationId, orderedGroups, excludeBooks);
+  const isFullBible =
+    orderedGroups.includes("ot") && orderedGroups.includes("nt") && (!excludeBooks || excludeBooks.length === 0);
 
-  const dayEntries = Array.from({ length: numDays }, () => []);
+  // Direct match with pre-balanced 365-day Bible-CSV plans
+  if (numDays === 365 && isFullBible) {
+    if (dailyPsalms === dailyProverbs) {
+      const filename = getCsvPlanFilename({ orderMode, chronological, dailyPsalms, dailyProverbs });
+      const csvText = await loadCsvPlanText(filename);
+      return parseCsvPlanText(csvText, safeStartDate);
+    }
 
-  if (orderMode === "inorder") {
-    const combined = orderedGroups.flatMap((g) => pools[g]);
-    const chunks = chunkEvenly(combined, numDays);
-    chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
-  } else {
-    // overlap: each group contributes its own chunk to every day.
-    for (const group of orderedGroups) {
-      const chunks = chunkEvenly(pools[group], numDays);
-      chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
+    // Only one of Daily Psalms / Daily Proverbs selected on a 365-day full-Bible plan:
+    // use the matching base CSV and append the requested daily wisdom chapter.
+    const baseFilename = getCsvPlanFilename({
+      orderMode,
+      chronological,
+      dailyPsalms: false,
+      dailyProverbs: false
+    });
+    const csvText = await loadCsvPlanText(baseFilename);
+    const baseDays = parseCsvPlanText(csvText, safeStartDate);
+    const enriched = appendDailyWisdom(
+      baseDays.map((d) => d.entries),
+      { dailyPsalms, dailyProverbs }
+    );
+    return baseDays.map((d, i) => ({ ...d, entries: enriched[i] }));
+  }
+
+  let dayEntries = Array.from({ length: numDays }, () => []);
+
+  if (orderedGroups.length > 0) {
+    if (chronological) {
+      const chronCsv = await loadCsvPlanText("order-chronological.csv");
+      const streams = extractChronologicalStreams(chronCsv);
+      const excludeSet = new Set(excludeBooks || []);
+      const groupSet = new Set(orderedGroups);
+
+      if (orderMode === "inorder") {
+        const filtered = streams.combined.filter(
+          (e) => groupSet.has(e.category) && !excludeSet.has(e.bookId)
+        );
+        const chunks = chunkEvenly(filtered, numDays);
+        chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
+      } else {
+        for (const group of orderedGroups) {
+          const pool = (group === "ot" ? streams.ot : streams.nt).filter(
+            (e) => !excludeSet.has(e.bookId)
+          );
+          const chunks = chunkEvenly(pool, numDays);
+          chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
+        }
+      }
+    } else {
+      const pools = await buildGroupPools(translationId, orderedGroups, excludeBooks);
+
+      if (orderMode === "inorder") {
+        const combined = orderedGroups.flatMap((g) => pools[g]);
+        const chunks = chunkEvenly(combined, numDays);
+        chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
+      } else {
+        for (const group of orderedGroups) {
+          const chunks = chunkEvenly(pools[group], numDays);
+          chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
+        }
+      }
     }
   }
 
+  dayEntries = appendDailyWisdom(dayEntries, { dailyPsalms, dailyProverbs });
+
   return dayEntries.map((entries, i) => ({
     dayIndex: i,
-    date: addDays(safeStartDate, i),
+    date: addDaysToDateString(safeStartDate, i),
     entries
   }));
 }

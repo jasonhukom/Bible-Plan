@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { BOOK_NAMES } from "../lib/bibleBooks";
 import { usePlan } from "../context/PlanContext";
+import PlanOptionsFields from "./PlanOptionsFields";
 
 export default function OnboardingModal({ onClose }) {
   const [step, setStep] = useState(1);
@@ -8,9 +9,12 @@ export default function OnboardingModal({ onClose }) {
   const [removeBooks, setRemoveBooks] = useState(false);
 
   const [startDate, setStartDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [days, setDays] = useState(360);
+  const [days, setDays] = useState(365);
   const [groups, setGroups] = useState(["ot", "nt"]);
   const [orderMode, setOrderMode] = useState("overlap");
+  const [chronological, setChronological] = useState(false);
+  const [dailyPsalms, setDailyPsalms] = useState(false);
+  const [dailyProverbs, setDailyProverbs] = useState(false);
 
   const { regenerate, generating, error } = usePlan();
 
@@ -42,7 +46,10 @@ export default function OnboardingModal({ onClose }) {
       start_date: startDate,
       days: Number(days),
       book_groups: groups,
-      order_mode: orderMode
+      order_mode: orderMode,
+      chronological,
+      daily_psalms: dailyPsalms,
+      daily_proverbs: dailyProverbs
     };
 
     regenerate(config, { excludeBooks, preCompletedBooks }).then((res) => {
@@ -87,26 +94,30 @@ export default function OnboardingModal({ onClose }) {
           <h2>Plan Settings</h2>
         </div>
         <form onSubmit={handleApply} style={{ padding: 4 }}>
-          <label className="plan-field-label">Start Date</label>
-          <input className="plan-field-input" type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-
-          <label className="plan-field-label">Length (days)</label>
-          <input className="plan-field-input" type="number" min={1} max={730} value={days} onChange={e => setDays(e.target.value)} />
-
-          <div className="plan-field-label">Books</div>
-          <div className="plan-checkbox-row">
-            <label><input type="checkbox" checked={groups.includes("ot")} onChange={() => toggleGroup("ot")} /> Old Testament</label>
-            <label><input type="checkbox" checked={groups.includes("nt")} onChange={() => toggleGroup("nt")} /> New Testament</label>
-          </div>
-
-          <label className="plan-field-label">Order</label>
-          <select className="plan-field-input" value={orderMode} onChange={e => setOrderMode(e.target.value)}>
-            <option value="overlap">Overlap (a bit of each book each day)</option>
-            <option value="inorder">In order (finish one, then the next)</option>
-          </select>
+          <PlanOptionsFields
+            idPrefix="onboarding"
+            startDate={startDate}
+            onStartDateChange={setStartDate}
+            days={days}
+            onDaysChange={setDays}
+            groups={groups}
+            onToggleGroup={toggleGroup}
+            orderMode={orderMode}
+            onOrderModeChange={setOrderMode}
+            chronological={chronological}
+            onChronologicalChange={setChronological}
+            dailyPsalms={dailyPsalms}
+            onDailyPsalmsChange={setDailyPsalms}
+            dailyProverbs={dailyProverbs}
+            onDailyProverbsChange={setDailyProverbs}
+          />
           {error && <p className="error-text">{error}</p>}
           <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 20 }}>
-            <button className="btn" type="submit" disabled={generating || groups.length === 0}>
+            <button
+              className="btn"
+              type="submit"
+              disabled={generating || (groups.length === 0 && !dailyPsalms && !dailyProverbs)}
+            >
               {generating ? "Generating…" : "Apply Plan"}
             </button>
           </div>

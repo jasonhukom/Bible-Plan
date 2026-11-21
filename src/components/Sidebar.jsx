@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import MiniCalendar from "./MiniCalendar";
+import PlanOptionsFields from "./PlanOptionsFields";
 import { usePlan } from "../context/PlanContext";
 import { deviceStorage } from "../lib/deviceStorage";
 
@@ -68,9 +69,12 @@ export default function Sidebar() {
   const [profile, setProfile] = useState(() => deviceStorage.getProfile());
 
   const [startDate, setStartDate] = useState("");
-  const [days, setDays] = useState(360);
+  const [days, setDays] = useState(365);
   const [groups, setGroups] = useState(["ot", "nt"]);
   const [orderMode, setOrderMode] = useState("overlap");
+  const [chronological, setChronological] = useState(false);
+  const [dailyPsalms, setDailyPsalms] = useState(false);
+  const [dailyProverbs, setDailyProverbs] = useState(false);
   const [showMobilePlan, setShowMobilePlan] = useState(false);
 
   useEffect(() => {
@@ -91,6 +95,9 @@ export default function Sidebar() {
     setDays(plan.days);
     setGroups(plan.book_groups ? plan.book_groups.filter((g) => g !== "dc") : ["ot", "nt"]);
     setOrderMode(plan.order_mode);
+    setChronological(Boolean(plan.chronological));
+    setDailyPsalms(Boolean(plan.daily_psalms));
+    setDailyProverbs(Boolean(plan.daily_proverbs));
   }, [plan]);
 
   function toggleGroup(group) {
@@ -104,7 +111,10 @@ export default function Sidebar() {
       start_date: startDate,
       days: Number(days),
       book_groups: groups,
-      order_mode: orderMode
+      order_mode: orderMode,
+      chronological,
+      daily_psalms: dailyPsalms,
+      daily_proverbs: dailyProverbs
     };
     regenerate(config);
     setShowMobilePlan(false);
@@ -123,58 +133,31 @@ export default function Sidebar() {
           </button>
         )}
 
-        <label className="plan-field-label" htmlFor={`plan-start-${isMobile}`}>
-          Start date
-        </label>
-        <input
-          id={`plan-start-${isMobile}`}
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-          className="plan-field-input"
+        <PlanOptionsFields
+          idPrefix={`plan-${isMobile ? "mobile" : "desktop"}`}
+          startDate={startDate}
+          onStartDateChange={setStartDate}
+          days={days}
+          onDaysChange={setDays}
+          groups={groups}
+          onToggleGroup={toggleGroup}
+          orderMode={orderMode}
+          onOrderModeChange={setOrderMode}
+          chronological={chronological}
+          onChronologicalChange={setChronological}
+          dailyPsalms={dailyPsalms}
+          onDailyPsalmsChange={setDailyPsalms}
+          dailyProverbs={dailyProverbs}
+          onDailyProverbsChange={setDailyProverbs}
         />
-
-        <label className="plan-field-label" htmlFor={`plan-days-${isMobile}`}>
-          Length (days)
-        </label>
-        <input
-          id={`plan-days-${isMobile}`}
-          type="number"
-          min={1}
-          max={730}
-          value={days}
-          onChange={(e) => setDays(e.target.value)}
-          className="plan-field-input"
-        />
-
-        <div className="plan-field-label">Books</div>
-        <div className="plan-checkbox-row">
-          <label>
-            <input type="checkbox" checked={groups.includes("ot")} onChange={() => toggleGroup("ot")} />
-            Old Testament
-          </label>
-          <label>
-            <input type="checkbox" checked={groups.includes("nt")} onChange={() => toggleGroup("nt")} />
-            New Testament
-          </label>
-        </div>
-
-        <label className="plan-field-label" htmlFor={`plan-order-${isMobile}`}>
-          Order
-        </label>
-        <select
-          id={`plan-order-${isMobile}`}
-          className="plan-field-input"
-          value={orderMode}
-          onChange={(e) => setOrderMode(e.target.value)}
-        >
-          <option value="overlap">Overlap (a bit of each book each day)</option>
-          <option value="inorder">In order (finish one, then the next)</option>
-        </select>
 
         {error && <p className="error-text">{error}</p>}
 
-        <button className="btn" type="submit" disabled={generating || groups.length === 0}>
+        <button
+          className="btn"
+          type="submit"
+          disabled={generating || (groups.length === 0 && !dailyPsalms && !dailyProverbs)}
+        >
           {generating ? "Generating…" : "Apply plan"}
         </button>
       </div>

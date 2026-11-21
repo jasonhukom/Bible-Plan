@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node tests/extraBooksPlacement.test.js && node tests/calendarAndPlan.test.js && node tests/deviceStorage.test.js"
+    "test": "node tests/extraBooksPlacement.test.js && node tests/calendarAndPlan.test.js && node tests/deviceStorage.test.js && node tests/csvPlanGenerator.test.js"
   },
   "dependencies": {
     "@youversion/platform-core": "^2.15.0",
