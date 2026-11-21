@@ -330,13 +330,22 @@ export function LuminessBot({
     };
   }, [refreshData]);
 
+  const scheduleSyncKey = `${feed.todayDate}:${feed.completedForToday}/${feed.totalForToday}:${feed.readings.length}`;
+
   // Keep local desktop Luminess Assist synchronized while floating web companion is active
   useEffect(() => {
     if (mode !== 'floating' || !isDesktop) return undefined;
     if (!isLuminessExtensionActive(extState)) return undefined;
     void syncLuminessDesktopHandshake();
     return undefined;
-  }, [mode, isDesktop, extState.enabled, extState.installedFromBiblePlan, extState.appVersion]);
+  }, [
+    mode,
+    isDesktop,
+    extState.enabled,
+    extState.installedFromBiblePlan,
+    extState.appVersion,
+    scheduleSyncKey,
+  ]);
 
   const remainingChapters = Math.max(0, feed.totalForToday - feed.completedForToday);
   const unreadReadings = feed.readings.filter((r) => !r.completed);
