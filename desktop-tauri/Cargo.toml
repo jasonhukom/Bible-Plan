@@ -1,0 +1,14 @@
+[package]
+name = "bible-plan-desktop"
+version = "0.0.1"
+description = "Bible Plan desktop application"
+authors = ["Bible Plan"]
+edition = "2021"
+build = "build.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-autostart = "2"
