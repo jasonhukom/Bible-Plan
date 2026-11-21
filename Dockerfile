@@ -2,7 +2,7 @@
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
-COPY index.html vite.config.js tsconfig.json ./
+COPY index.html vite.config.js ./
 COPY src ./src
 COPY public ./public
 RUN npm run build
@@ -24,4 +24,5 @@ COPY --from=server-builder /app/server/dist ./dist
 COPY --from=web-builder /app/dist ./public
 EXPOSE 3000
 CMD ["node", "dist/index.js"]
+
 
