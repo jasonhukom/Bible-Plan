@@ -70,6 +70,13 @@
   margin: 0 auto;
 }
 
+.startup-picker-error {
+  width: min(100%, 1120px);
+  margin: -20px auto 20px;
+  color: #ffb4a9;
+  font-size: 13px;
+}
+
 .startup-picker-account {
   padding: 20px;
   background: rgba(36, 39, 37, 0.88);
