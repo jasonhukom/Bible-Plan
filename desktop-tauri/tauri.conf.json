@@ -4,9 +4,9 @@
   "version": "0.0.1",
   "identifier": "id.my.jasonhukom.bible-plan",
   "build": {
-    "beforeDevCommand": "npm --prefix .. run dev -- --host 127.0.0.1",
+    "beforeDevCommand": "npm run dev -- --host 127.0.0.1",
     "devUrl": "http://localhost:5173",
-    "beforeBuildCommand": "npm --prefix .. run build",
+    "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },
   "app": {
