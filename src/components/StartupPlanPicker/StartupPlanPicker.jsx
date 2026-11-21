@@ -33,6 +33,7 @@ export default function StartupPlanPicker({
     () => getSavedPreference() ?? isDesktopOrAndroid()
   );
   const [open, setOpen] = useState(() => forceOpen || (isDesktopOrAndroid() && getSavedPreference() !== false));
+  const [selectionError, setSelectionError] = useState("");
   const accountList = Array.isArray(accounts) ? accounts : getLocalAccount();
 
   function setPickerEnabled(nextEnabled) {
@@ -41,6 +42,21 @@ export default function StartupPlanPicker({
       preferences: { showPlanPickerOnStartup: nextEnabled }
     });
     setOpen(nextEnabled);
+  }
+
+  async function selectPlan(account, plan) {
+    setSelectionError("");
+    if (typeof onSelect !== "function") {
+      setSelectionError("Plan selection is unavailable.");
+      return;
+    }
+
+    try {
+      await onSelect(account, plan);
+      setOpen(false);
+    } catch (error) {
+      setSelectionError(error.message || "Could not open this reading plan.");
+    }
   }
 
   if (!open) return null;
@@ -63,9 +79,10 @@ export default function StartupPlanPicker({
         </label>
       </header>
 
+      {selectionError && <p className="startup-picker-error" role="alert">{selectionError}</p>}
       <div className="startup-picker-grid">
         {accountList.map((account) => (
-          <section className="startup-picker-account" key={account.id}>
+          <section className="startup-picker-account" key={account.id || account.name}>
             <div className="startup-picker-account-heading">
               {account.avatarUrl
                 ? <img className="startup-picker-avatar" src={account.avatarUrl} alt="" />
@@ -78,9 +95,9 @@ export default function StartupPlanPicker({
               {(account.plans || []).map((plan) => (
                 <button
                   className="startup-picker-plan"
-                  key={plan.id}
+                  key={plan.id || plan.name}
                   type="button"
-                  onClick={() => onSelect?.(account, plan)}
+                  onClick={() => selectPlan(account, plan)}
                 >
                   <span className="startup-picker-plan-name">{plan.name || "Reading plan"}</span>
                   <span className="startup-picker-plan-meta">
