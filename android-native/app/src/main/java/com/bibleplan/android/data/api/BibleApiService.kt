@@ -20,7 +20,7 @@ class BibleApiService {
         .build()
     private val gson = Gson()
 
-    susMAIN_API_BASE: String = "https://bible-plan.vercel.app"
+    private val mainApiBase: String = "https://bible-plan.vercel.app"
 
     suspend fun searchGemini(query: String): GeminiSearchResult = withContext(Dispatchers.IO) {
         try {
@@ -29,7 +29,7 @@ class BibleApiService {
             }
             val requestBody = jsonBody.toString().toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
-                .url("$susMAIN_API_BASE/api/search-gemini")
+                .url("$mainApiBase/api/search-gemini")
                 .post(requestBody)
                 .build()
 
@@ -60,7 +60,7 @@ class BibleApiService {
             }
             val requestBody = jsonBody.toString().toRequestBody("application/json".toMediaType())
             val request = Request.Builder()
-                .url("$susMAIN_API_BASE/api/auth/google")
+                .url("$mainApiBase/api/auth/google")
                 .post(requestBody)
                 .build()
 

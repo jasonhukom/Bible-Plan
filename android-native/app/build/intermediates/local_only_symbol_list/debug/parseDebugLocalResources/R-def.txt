@@ -1,0 +1,14 @@
+R_DEF: Internal format may change without notice
+local
+color accent_blue
+color accent_gold
+color accent_green
+color accent_purple
+color bg_card
+color bg_dark
+color bg_surface
+color border
+color text_primary
+color text_secondary
+string app_name
+style Theme.BiblePlan
