@@ -66,10 +66,11 @@ export const auth = betterAuth({
   plugins: [
     anonymous({
       onLinkAccount: async ({ anonymousUser, newUser }) => {
-        await migrateGuestData(anonymousUser.id, newUser.id);
+        await migrateGuestData(anonymousUser.user.id, newUser.user.id);
       },
     }),
   ],
 });
+
 
 
