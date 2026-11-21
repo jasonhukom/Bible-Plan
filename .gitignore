@@ -6,3 +6,13 @@ dist/
 .DS_Store
 *.log
 .agents/
+.gradle/
+android-native/build/
+android-native/app/build/
+android-native/.gradle/
+.idea/
+builds/.idea/
+*.properties.local
+local.properties
+android-native/local.properties
+

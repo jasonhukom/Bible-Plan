@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="accent_blue">#1F6FEB</color>
+    <color name="accent_gold">#D29922</color>
+    <color name="accent_green">#238636</color>
+    <color name="accent_purple">#A371F7</color>
+    <color name="bg_card">#21262D</color>
+    <color name="bg_dark">#0D1117</color>
+    <color name="bg_surface">#161B22</color>
+    <color name="border">#30363D</color>
+    <color name="text_primary">#E6EDF3</color>
+    <color name="text_secondary">#8B949E</color>
+    <string name="app_name">Bible-Plan</string>
+    <style name="Theme.BiblePlan" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">#0D1117</item>
+        <item name="android:windowBackground">#0D1117</item>
+    </style>
+</resources>
