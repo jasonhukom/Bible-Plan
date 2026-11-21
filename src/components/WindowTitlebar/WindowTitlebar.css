@@ -1,0 +1,51 @@
+.window-titlebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  height: 46px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+}
+
+.window-titlebar-button {
+  display: grid;
+  width: 34px;
+  height: 30px;
+  place-items: center;
+  padding: 0;
+  color: var(--window-control-color, #e8e8e8);
+  background: var(--window-control-background, rgba(28, 28, 30, 0.72));
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.window-titlebar-button:hover {
+  background: var(--window-control-hover, rgba(90, 90, 94, 0.84));
+}
+
+.window-titlebar-button img {
+  width: 16px;
+  height: 16px;
+  filter: brightness(0) invert(1);
+}
+
+.window-titlebar-close:hover {
+  color: #fff;
+  background: #c42b1c;
+}
+
+.window-titlebar-error {
+  max-width: 280px;
+  padding: 6px 9px;
+  color: #fff;
+  background: #8d1c13;
+  border-radius: 6px;
+  font-size: 12px;
+}

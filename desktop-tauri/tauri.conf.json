@@ -22,10 +22,7 @@
         "center": true,
         "decorations": false
       }
-    ],
-    "security": {
-      "csp": null
-    }
+    ]
   },
   "bundle": {
     "active": true,
