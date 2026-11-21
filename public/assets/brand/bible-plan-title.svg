@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="144" viewBox="0 0 720 144" role="img" aria-labelledby="title desc">
+  <title id="title">Bible Plan</title>
+  <desc id="desc">An open Bible connected to a constellation, alongside the Bible Plan wordmark.</desc>
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f2d8a2"/><stop offset="1" stop-color="#b98d4e"/></linearGradient>
+  </defs>
+  <circle cx="72" cy="72" r="54" fill="#161b22" stroke="url(#gold)" stroke-width="3"/>
+  <path d="M72 50 48 34 30 48M72 50 96 34 114 48" fill="none" stroke="#d3b070" stroke-width="2.5" stroke-linecap="round"/>
+  <g fill="#f2d8a2"><circle cx="30" cy="48" r="4"/><circle cx="72" cy="25" r="4"/><circle cx="114" cy="48" r="4"/></g>
+  <path d="M72 52v51M69 58c-10-9-24-10-37-5v40c14-5 26-3 40 7M75 58c10-9 24-10 37-5v40c-14-5-26-3-40 7" fill="none" stroke="url(#gold)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="150" y="79" fill="#f5f1e6" font-family="Georgia, 'Times New Roman', serif" font-size="56" font-weight="700" letter-spacing="1">BIBLE</text>
+  <text x="365" y="78" fill="#f2d8a2" font-family="Arial, Helvetica, sans-serif" font-size="51" font-weight="700" letter-spacing="2">PLAN</text>
+  <path d="M151 98H565" stroke="#d3b070" stroke-opacity=".72" stroke-width="2"/>
+  <text x="152" y="122" fill="#ab9f89" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="600" letter-spacing="3">READ · CONNECT · PLAN</text>
+</svg>
