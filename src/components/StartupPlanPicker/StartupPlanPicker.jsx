@@ -4,7 +4,7 @@ import "./StartupPlanPicker.css";
 
 function isDesktopOrAndroid() {
   if (typeof window !== "undefined" && window.__TAURI__) return true;
-  return typeof navigator !== "undefined" && /android|mobile/i.test(navigator.userAgent);
+  return typeof navigator !== "undefined" && /android/i.test(navigator.userAgent);
 }
 
 function getLocalAccount() {
