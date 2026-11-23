@@ -3,13 +3,17 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { ThemeProvider } from "./context/ThemeContext";
+import { I18nProvider } from "./context/I18nContext";
 import "./styles/global.css";
+import "./styles/features.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
       <ThemeProvider>
-        <App />
+        <I18nProvider>
+          <App />
+        </I18nProvider>
       </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>

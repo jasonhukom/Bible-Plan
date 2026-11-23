@@ -4,6 +4,7 @@ import MiniCalendar from "./MiniCalendar";
 import PlanOptionsFields from "./PlanOptionsFields";
 import { usePlan } from "../context/PlanContext";
 import { deviceStorage } from "../lib/deviceStorage";
+import { useI18n } from "../context/I18nContext";
 
 const SIDEBAR_STORAGE_KEY = "bible-plan-sidebar-open";
 
@@ -37,6 +38,25 @@ const navIcons = {
       <rect x="5.6" y="5.9" width="12.8" height="3.4" rx="1" stroke="currentColor" strokeWidth="1.7" />
     </svg>
   ),
+  connections: (
+    <svg viewBox="0 0 24 24" fill="none">
+      <circle cx="5" cy="17" r="1.8" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="12" cy="17" r="1.8" stroke="currentColor" strokeWidth="1.7" />
+      <circle cx="19" cy="17" r="1.8" stroke="currentColor" strokeWidth="1.7" />
+      <path d="M5 15.2C5 7 12 7 12 15.2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      <path d="M12 15.2C12 4.5 19 4.5 19 15.2" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+    </svg>
+  ),
+  extensions: (
+    <svg viewBox="0 0 24 24" fill="none">
+      <path
+        d="M10 4.5a2 2 0 1 1 4 0V6h3.5c.28 0 .5.22.5.5V10h1.5a2 2 0 1 1 0 4H18v3.5c0 .28-.22.5-.5.5H14v-1.5a2 2 0 1 0-4 0V18H6.5a.5.5 0 0 1-.5-.5V14h1.5a2 2 0 1 0 0-4H6V6.5c0-.28.22-.5.5-.5H10V4.5Z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  ),
   chevron: (
     <svg viewBox="0 0 24 24" fill="none">
       <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
@@ -62,6 +82,7 @@ const navIcons = {
 };
 
 export default function Sidebar() {
+  const { t } = useI18n();
   const navigate = useNavigate();
   const { plan, generating, error, regenerate } = usePlan();
   const [open, setOpen] = useState(() => localStorage.getItem(SIDEBAR_STORAGE_KEY) !== "closed");
@@ -210,15 +231,23 @@ export default function Sidebar() {
           <nav className="sidebar-nav">
             <NavLink to="/plan" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
               {navIcons.calendar}
-              <span className="sidebar-nav-label">Calendar</span>
+              <span className="sidebar-nav-label">{t("nav.calendar")}</span>
             </NavLink>
             <NavLink to="/bible" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
               {navIcons.bible}
-              <span className="sidebar-nav-label">Bible</span>
+              <span className="sidebar-nav-label">{t("nav.bible")}</span>
             </NavLink>
             <NavLink to="/saves" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
               {navIcons.save}
-              <span className="sidebar-nav-label">Save</span>
+              <span className="sidebar-nav-label">{t("nav.save")}</span>
+            </NavLink>
+            <NavLink to="/planning" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
+              {navIcons.connections}
+              <span className="sidebar-nav-label">{t("nav.connections")}</span>
+            </NavLink>
+            <NavLink to="/extensions" className={({ isActive }) => `sidebar-nav-btn${isActive ? " active" : ""}`}>
+              {navIcons.extensions}
+              <span className="sidebar-nav-label">{t("nav.extensions")}</span>
             </NavLink>
 
             <button
@@ -228,7 +257,7 @@ export default function Sidebar() {
               aria-expanded={plansExpanded}
             >
               {navIcons.readingPlans}
-              <span className="sidebar-nav-label">Reading Plans</span>
+              <span className="sidebar-nav-label">{t("plans.title")}</span>
               <span className={`reading-plans-chevron${plansExpanded ? " open" : ""}`}>{navIcons.chevron}</span>
             </button>
           </nav>
@@ -248,20 +277,20 @@ export default function Sidebar() {
               navIcons.profile
             )}
             <span className="sidebar-nav-label">
-              {profile?.display_name || "Profile"}
+              {profile?.display_name || t("nav.profile")}
             </span>
           </button>
-          <NavLink to="/settings" className="sidebar-icon-btn" title="Settings">
+          <NavLink to="/settings" className="sidebar-icon-btn" title={t("nav.settings")} aria-label={t("nav.settings")}>
             {navIcons.settings}
           </NavLink>
         </div>
       </aside>
 
       <nav className="mobile-bottom-nav">
-        <button className="mobile-nav-btn" onClick={() => setShowMobilePlan(true)} aria-label="Reading Plans">
+        <button className="mobile-nav-btn" onClick={() => setShowMobilePlan(true)} aria-label={t("plans.title")}>
           {navIcons.readingPlans}
         </button>
-        <NavLink to="/saves" className="mobile-nav-btn" aria-label="Saved">
+        <NavLink to="/saves" className="mobile-nav-btn" aria-label={t("nav.save")}>
           {navIcons.save}
         </NavLink>
 
@@ -272,13 +301,13 @@ export default function Sidebar() {
           </svg>
         </NavLink>
 
-        <NavLink to="/bible" className="mobile-nav-btn" aria-label="Bible">
+        <NavLink to="/bible" className="mobile-nav-btn" aria-label={t("nav.bible")}>
           {navIcons.bible}
         </NavLink>
         <button
           className="mobile-nav-btn"
           onClick={() => navigate("/profile")}
-          aria-label="Profile"
+          aria-label={t("nav.profile")}
         >
           {profile?.avatar_url ? (
             <img className="sidebar-avatar" src={profile.avatar_url} alt="" />

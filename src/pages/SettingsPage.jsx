@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
+import { useI18n } from "../context/I18nContext";
+import LanguageSettings from "../components/LanguageSettings";
 import { deviceStorage } from "../lib/deviceStorage";
 import { listTranslations, getPreferredTranslation, setPreferredTranslation } from "../lib/bible";
 
 export default function SettingsPage() {
   const { mode, setMode, themes } = useTheme();
+  const { t } = useI18n();
 
   const [translations, setTranslations] = useState([]);
   const [defaultTranslation, setDefaultTranslation] = useState(() => getPreferredTranslation());
@@ -38,7 +41,7 @@ export default function SettingsPage() {
     <div className="page-shell">
       <div className="page-header page-header-sticky">
         <div className="page-header-title-row">
-          <h1 className="page-title">Settings</h1>
+          <h1 className="page-title">{t("nav.settings")}</h1>
           <p className="page-subtitle">Appearance and preferences</p>
         </div>
         <div className="page-header-actions">
@@ -66,6 +69,8 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        <LanguageSettings />
+
         <div className="card" style={{ marginBottom: 20 }}>
           <h2 style={{ fontSize: 15, marginBottom: 14 }}>Calendar</h2>
           <p className="hint-text" style={{ marginBottom: 10 }}>Where each day's date number sits in its cell</p>
@@ -85,6 +90,22 @@ export default function SettingsPage() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 15, marginBottom: 8 }}>{t("conn.title")}</h2>
+          <p className="hint-text" style={{ marginBottom: 12 }}>{t("conn.subtitle")}</p>
+          <Link className="btn" to="/planning" style={{ display: "inline-block", textDecoration: "none" }}>
+            {t("nav.connections")}
+          </Link>
+        </div>
+
+        <div className="card" style={{ marginBottom: 20 }}>
+          <h2 style={{ fontSize: 15, marginBottom: 8 }}>{t("ext.title")}</h2>
+          <p className="hint-text" style={{ marginBottom: 12 }}>{t("ext.hint")}</p>
+          <Link className="btn" to="/extensions" style={{ display: "inline-block", textDecoration: "none" }}>
+            {t("ext.open")}
+          </Link>
         </div>
 
         <div className="card">

@@ -1,0 +1,549 @@
+/* ==========================================================================
+   Feature styles: language picker, AI search, Bible Connections page.
+   Everything here uses the theme variables from global.css so all themes work.
+   ========================================================================== */
+
+:root {
+  --conn-ot: #f2b822;
+  --conn-nt: #5aa9ee;
+}
+
+/* ---------- Top-right slot (AI search + download button) ---------------- */
+
+.app-download-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ai-search-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 13px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--cream);
+  background: var(--night-2);
+  border: 1px solid var(--night-line);
+  border-radius: 999px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.ai-search-button:hover {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+
+.ai-search-button svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+/* ---------- AI search modal --------------------------------------------- */
+
+.ai-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.ai-modal {
+  width: min(660px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  padding: 20px;
+  color: var(--cream);
+  background: var(--night-2);
+  border: 1px solid var(--night-line);
+  border-radius: 16px;
+  box-shadow: 0 24px 64px var(--shadow);
+}
+
+.ai-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.ai-modal-head h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  color: var(--gold-bright);
+}
+
+.ai-modal-head h2 svg {
+  width: 20px;
+  height: 20px;
+}
+
+.ai-close {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--night-line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.ai-close:hover {
+  border-color: var(--gold);
+}
+
+.ai-close svg {
+  width: 16px;
+  height: 16px;
+}
+
+.ai-form textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  color: inherit;
+  resize: vertical;
+  background: var(--night);
+  border: 1px solid var(--night-line);
+  border-radius: 10px;
+}
+
+.ai-form textarea:focus {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 1px;
+}
+
+.ai-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
+.ai-body {
+  margin-top: 16px;
+  min-height: 24px;
+}
+
+.ai-examples {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.ai-example {
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+  text-align: start;
+  background: transparent;
+  border: 1px solid var(--night-line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.ai-example:hover {
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+
+.ai-answer {
+  font-size: 14.5px;
+  line-height: 1.6;
+}
+
+.ai-answer p {
+  margin: 0 0 10px;
+}
+
+.ai-answer ul {
+  margin: 0 0 10px;
+  padding-inline-start: 20px;
+}
+
+.ai-answer-heading {
+  font-weight: 700;
+  color: var(--gold-bright);
+}
+
+.ai-disclaimer {
+  margin-top: 14px;
+}
+
+@media (max-width: 640px) {
+  .ai-search-label {
+    display: none;
+  }
+
+  .ai-search-button {
+    padding: 8px;
+  }
+}
+
+/* ---------- Language picker (Settings) ----------------------------------- */
+
+.language-settings-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.language-search {
+  width: 100%;
+  padding: 10px;
+  font: inherit;
+  color: inherit;
+  background: var(--night);
+  border: 1px solid var(--night-line);
+  border-radius: 8px;
+}
+
+.language-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 6px;
+  max-height: 300px;
+  margin-top: 10px;
+  padding-inline-end: 4px;
+  overflow-y: auto;
+}
+
+.language-option {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+  padding: 8px 10px;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  background: transparent;
+  border: 1px solid var(--night-line);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.language-option:hover:not(:disabled) {
+  border-color: var(--gold);
+}
+
+.language-option.active {
+  color: var(--gold-bright);
+  background: rgba(219, 181, 88, 0.1);
+  border-color: var(--gold);
+}
+
+.language-option:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.language-native {
+  overflow: hidden;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.language-english {
+  overflow: hidden;
+  font-size: 11.5px;
+  opacity: 0.7;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.language-empty {
+  grid-column: 1 / -1;
+}
+
+.language-status {
+  min-height: 18px;
+  margin-top: 10px;
+}
+
+/* ---------- Bible Connections page --------------------------------------- */
+
+.conn-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-bottom: 16px;
+}
+
+.conn-controls-label {
+  font-size: 12.5px;
+  color: var(--gold-bright);
+}
+
+.conn-note {
+  flex-basis: 100%;
+}
+
+.conn-segmented {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--night-line);
+  border-radius: 999px;
+}
+
+.conn-segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font: inherit;
+  font-size: 13px;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.conn-segmented button:hover {
+  color: var(--gold-bright);
+}
+
+.conn-segmented button.active {
+  color: var(--gold-bright);
+  background: rgba(219, 181, 88, 0.18);
+}
+
+.conn-auto-tag {
+  padding: 1px 6px;
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  opacity: 0.8;
+}
+
+.conn-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 20px;
+  align-items: start;
+  padding-bottom: 40px;
+}
+
+.conn-canvas {
+  direction: ltr; /* book names and SVG text are always left-to-right */
+  padding: 10px;
+  background: var(--night-2);
+  border: 1px solid var(--night-line);
+  border-radius: var(--radius);
+}
+
+.conn-canvas.is-horizontal {
+  overflow-x: auto;
+}
+
+.conn-canvas.is-vertical .conn-svg {
+  display: block;
+  margin: 0 auto;
+  height: auto;
+}
+
+.conn-svg {
+  font-family: var(--font-body);
+}
+
+.conn-label {
+  font-size: 12px;
+  fill: var(--cream);
+}
+
+.is-horizontal .conn-label {
+  font-size: 11px;
+}
+
+.conn-node {
+  cursor: pointer;
+  outline: none;
+  transition: opacity 0.15s;
+}
+
+.conn-node.dim {
+  opacity: 0.3;
+}
+
+.conn-node.active .conn-label {
+  font-weight: 700;
+  fill: var(--gold-bright);
+}
+
+.conn-node.ot .conn-dot {
+  fill: var(--conn-ot);
+}
+
+.conn-node.nt .conn-dot {
+  fill: var(--conn-nt);
+}
+
+.conn-node:focus-visible .conn-dot {
+  stroke: var(--gold-bright);
+  stroke-width: 3;
+}
+
+.conn-node:not(.has-links) .conn-label {
+  opacity: 0.7;
+}
+
+.conn-node-hit {
+  fill: transparent;
+}
+
+.conn-arc-line {
+  fill: none;
+  stroke: var(--gold-bright);
+  stroke-opacity: 0.38;
+  stroke-width: 1.4;
+  transition: stroke-opacity 0.15s;
+  pointer-events: none;
+}
+
+.conn-arc.active .conn-arc-line {
+  stroke-opacity: 1;
+  stroke-width: 2.4;
+}
+
+.conn-arc.dim .conn-arc-line {
+  stroke-opacity: 0.08;
+}
+
+.conn-arc-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 12;
+  cursor: pointer;
+  outline: none;
+  pointer-events: stroke;
+}
+
+.conn-arc-hit:focus-visible {
+  stroke: var(--gold-bright);
+  stroke-opacity: 0.35;
+}
+
+.conn-panel {
+  position: sticky;
+  top: 12px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+}
+
+.conn-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 14px;
+  font-size: 12.5px;
+}
+
+.conn-legend-item::before {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-inline-end: 6px;
+  vertical-align: middle;
+  content: "";
+  border-radius: 50%;
+}
+
+.conn-legend-item.ot::before {
+  background: var(--conn-ot);
+}
+
+.conn-legend-item.nt::before {
+  background: var(--conn-nt);
+}
+
+.conn-detail h2 {
+  margin-bottom: 4px;
+  font-size: 16px;
+  color: var(--gold-bright);
+}
+
+.conn-detail-refs {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.conn-list {
+  padding: 0;
+  margin: 12px 0 0;
+  list-style: none;
+}
+
+.conn-list li {
+  padding: 12px 0;
+  border-top: 1px solid var(--night-line);
+}
+
+.conn-theme {
+  margin-bottom: 2px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.conn-list-refs {
+  margin-bottom: 8px;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.conn-link-button {
+  padding: 0;
+  font: inherit;
+  color: var(--gold-bright);
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.conn-read-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.conn-read-row .btn {
+  padding: 6px 10px;
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+.conn-curated {
+  margin-top: 14px;
+}
+
+@media (max-width: 900px) {
+  .conn-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Keep the details visible above the tall canvas on phones. */
+  .conn-panel {
+    order: -1;
+    top: 6px;
+    z-index: 5;
+    max-height: 42vh;
+  }
+}

@@ -64,7 +64,12 @@ export async function listTranslations() {
   let haoMapped = [];
   try {
     const haoAll = await helloao.listTranslations();
-    const haoEng = haoAll.filter(t => t.language === 'eng' || t.englishName?.includes('English'));
+    // English translations, plus the one currently selected (which may be a
+    // non-English one chosen automatically when the app language changed).
+    const preferredId = getPreferredTranslation();
+    const haoEng = haoAll.filter(
+      t => t.language === 'eng' || t.englishName?.includes('English') || t.id === preferredId
+    );
     haoMapped = haoEng.map(t => ({
       id: t.id,
       label: t.englishName,
