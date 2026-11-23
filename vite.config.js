@@ -22,7 +22,12 @@ function copyBuildsPlugin() {
 export default defineConfig({
   plugins: [react(), copyBuildsPlugin()],
   server: {
-    port: 5173
+    port: 5173,
+    // Forward /api/* to the Fastify server (npm run dev in /server, port 3000)
+    // when it is running locally. On Vercel, /api/* is served by api/*.js.
+    proxy: {
+      "/api": { target: "http://localhost:3000", changeOrigin: true }
+    }
   },
   build: {
     outDir: "dist",
