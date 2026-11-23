@@ -5,7 +5,7 @@ data class UserAccount(
     val name: String,
     val email: String,
     val avatarUrl: String = "",
-    val activePlanId: String = "chronological_1yr"
+    val activePlanId: String = "chronological"
 )
 
 data class ReadingPlan(

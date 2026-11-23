@@ -60,46 +60,6 @@ export default function PlanOptionsFields({
         </label>
       </div>
 
-      <label className="plan-field-label" htmlFor={`${idPrefix}-order`}>
-        Order
-      </label>
-      <select
-        id={`${idPrefix}-order`}
-        className="plan-field-input"
-        value={orderMode}
-        onChange={(e) => onOrderModeChange(e.target.value)}
-      >
-        <option value="overlap">Overlap (OT &amp; NT together each day)</option>
-        <option value="inorder">In order (finish one, then the next)</option>
-      </select>
-
-      <div className="plan-field-label">Plan options</div>
-      <div className="plan-checkbox-row">
-        <label>
-          <input
-            type="checkbox"
-            checked={chronological}
-            onChange={(e) => onChronologicalChange(e.target.checked)}
-          />
-          Chronological order
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={dailyPsalms}
-            onChange={(e) => onDailyPsalmsChange(e.target.checked)}
-          />
-          Daily Psalms
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={dailyProverbs}
-            onChange={(e) => onDailyProverbsChange(e.target.checked)}
-          />
-          Daily Proverbs
-        </label>
-      </div>
     </>
   );
 }
