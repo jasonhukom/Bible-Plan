@@ -143,11 +143,9 @@ export function getCsvPlanFilename({
   dailyPsalms = false,
   dailyProverbs = false
 } = {}) {
-  const prefix = orderMode === "inorder" ? "order" : "overlap";
-  const parts = [prefix];
-  if (dailyPsalms && dailyProverbs) parts.push("psalm-proverbs");
-  if (chronological) parts.push("chronological");
-  return `${parts.join("-")}.csv`;
+  // Date-balanced and wisdom presets are intentionally not used.  Every plan
+  // is spread from the single shortened chronological book chronology.
+  return "order-chronological.csv";
 }
 
 /**

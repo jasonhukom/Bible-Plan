@@ -31,7 +31,7 @@ class SessionManager(context: Context) {
         set(value) = prefs.edit().putString(KEY_ACTIVE_ACCOUNT_ID, value).apply()
 
     var activePlanId: String
-        get() = prefs.getString(KEY_ACTIVE_PLAN_ID, "chronological_1yr") ?: "chronological_1yr"
+        get() = prefs.getString(KEY_ACTIVE_PLAN_ID, "chronological") ?: "chronological"
         set(value) = prefs.edit().putString(KEY_ACTIVE_PLAN_ID, value).apply()
 
     var sessionToken: String
@@ -71,13 +71,13 @@ class SessionManager(context: Context) {
                 id = "default_account",
                 name = "Discipleship Profile",
                 email = "user@bibleplan.app",
-                activePlanId = "chronological_1yr"
+                activePlanId = "chronological"
             ),
             UserAccount(
                 id = "academic_account",
                 name = "Theological / Academic Profile",
                 email = "scholar@bibleplan.app",
-                activePlanId = "canonical_365"
+                activePlanId = "chronological"
             )
         )
     }

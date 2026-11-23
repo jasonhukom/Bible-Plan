@@ -12,7 +12,7 @@ export default function OnboardingModal({ onClose }) {
   const [days, setDays] = useState(365);
   const [groups, setGroups] = useState(["ot", "nt"]);
   const [orderMode, setOrderMode] = useState("overlap");
-  const [chronological, setChronological] = useState(false);
+  const [chronological, setChronological] = useState(true);
   const [dailyPsalms, setDailyPsalms] = useState(false);
   const [dailyProverbs, setDailyProverbs] = useState(false);
 

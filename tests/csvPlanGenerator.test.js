@@ -18,14 +18,8 @@ console.log("Running Bible-CSV & Plan Options Unit Tests...");
 
 // Test 1: getCsvPlanFilename maps option combinations to Bible-CSV filenames
 {
-  assert.strictEqual(getCsvPlanFilename({ orderMode: "inorder", chronological: false, dailyPsalms: false, dailyProverbs: false }), "order.csv");
-  assert.strictEqual(getCsvPlanFilename({ orderMode: "inorder", chronological: false, dailyPsalms: true, dailyProverbs: true }), "order-psalm-proverbs.csv");
-  assert.strictEqual(getCsvPlanFilename({ orderMode: "inorder", chronological: true, dailyPsalms: false, dailyProverbs: false }), "order-chronological.csv");
-  assert.strictEqual(getCsvPlanFilename({ orderMode: "inorder", chronological: true, dailyPsalms: true, dailyProverbs: true }), "order-psalm-proverbs-chronological.csv");
-  assert.strictEqual(getCsvPlanFilename({ orderMode: "overlap", chronological: false, dailyPsalms: false, dailyProverbs: false }), "overlap.csv");
-  assert.strictEqual(getCsvPlanFilename({ orderMode: "overlap", chronological: false, dailyPsalms: true, dailyProverbs: true }), "overlap-psalm-proverbs.csv");
-  assert.strictEqual(getCsvPlanFilename({ orderMode: "overlap", chronological: true, dailyPsalms: false, dailyProverbs: false }), "overlap-chronological.csv");
-  assert.strictEqual(getCsvPlanFilename({ orderMode: "overlap", chronological: true, dailyPsalms: true, dailyProverbs: true }), "overlap-psalm-proverbs-chronological.csv");
+  assert.strictEqual(getCsvPlanFilename({ orderMode: "inorder", chronological: false, dailyPsalms: false, dailyProverbs: false }), "order-chronological.csv");
+  assert.strictEqual(getCsvPlanFilename({ orderMode: "overlap", chronological: true, dailyPsalms: true, dailyProverbs: true }), "order-chronological.csv");
   console.log("✓ Test 1: getCsvPlanFilename maps every plan option combination");
 }
 
@@ -67,10 +61,8 @@ console.log("Running Bible-CSV & Plan Options Unit Tests...");
     dailyProverbs: true
   });
   assert.strictEqual(overlapChronPsPro.length, 365);
-  assert.deepStrictEqual(
-    overlapChronPsPro[0].entries.map((e) => `${e.bookId}:${e.chapter}`),
-    ["GEN:1", "GEN:2", "LUK:1", "PSA:1", "PRO:1"]
-  );
+  assert.strictEqual(overlapChronPsPro[0].entries.some((e) => e.bookId === "PSA"), false);
+  assert.strictEqual(overlapChronPsPro[0].entries.some((e) => e.bookId === "PRO"), false);
 
   const orderChron = await generateSchedule({
     translationId: "BSB",
@@ -83,15 +75,15 @@ console.log("Running Bible-CSV & Plan Options Unit Tests...");
     dailyProverbs: false
   });
   assert.strictEqual(orderChron.length, 365);
-  // Day 4 in chronological order switches from Gen 10-11 to Job 1-2!
+  // Day 4 in the evenly spread 365-day chronology includes Gen 11 through Job 2.
   assert.deepStrictEqual(
     orderChron[3].entries.map((e) => `${e.bookId}:${e.chapter}`),
-    ["GEN:10", "GEN:11", "JOB:1", "JOB:2"]
+    ["GEN:11", "JOB:1", "JOB:2"]
   );
   console.log("✓ Test 4: generateSchedule produces authentic Bible-CSV schedules (overlap/order + chronological + Ps/Pro)");
 }
 
-// Test 5: Individual Psalms-only and Proverbs-only toggles work on 365-day & custom plans
+// Test 5: Legacy wisdom toggles are ignored; selected durations use one chronological stream
 {
   const psOnly = await generateSchedule({
     translationId: "BSB",
@@ -104,10 +96,7 @@ console.log("Running Bible-CSV & Plan Options Unit Tests...");
     dailyProverbs: false
   });
   assert.strictEqual(psOnly.length, 365);
-  assert.deepStrictEqual(
-    psOnly[0].entries.map((e) => `${e.bookId}:${e.chapter}`),
-    ["GEN:1", "GEN:2", "LUK:1", "PSA:1"]
-  );
+  assert.strictEqual(psOnly[0].entries.some((e) => e.bookId === "PSA"), false);
 
   const proOnlyCustom = await generateSchedule({
     translationId: "BSB",
@@ -120,9 +109,8 @@ console.log("Running Bible-CSV & Plan Options Unit Tests...");
     dailyProverbs: true
   });
   assert.strictEqual(proOnlyCustom.length, 40);
-  assert.strictEqual(proOnlyCustom[0].entries.some((e) => e.bookId === "PRO" && e.chapter === 1), true);
-  // Day 32 wraps Proverbs back to chapter 1 (31 % 31 + 1 = 1)
-  assert.strictEqual(proOnlyCustom[31].entries.some((e) => e.bookId === "PRO" && e.chapter === 1), true);
+  assert.strictEqual(proOnlyCustom[0].entries.some((e) => e.bookId === "PRO"), false);
+  assert.strictEqual(proOnlyCustom[31].entries.some((e) => e.bookId === "PRO"), false);
   // Chronological NT starts with Luke 1 or James 1? Let's verify NT chronological stream starts with Luke/John/etc.
   const chronCsv = fs.readFileSync(path.resolve("Bible-CSV/order-chronological.csv"), "utf8");
   const streams = extractChronologicalStreams(chronCsv);

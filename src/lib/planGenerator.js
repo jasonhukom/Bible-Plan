@@ -3,15 +3,9 @@
 // ----------------------------------------------------------------------------
 // Generates a day-by-day list of chapter references from plan options:
 //   - orderMode: "overlap" (OT & NT progress together) | "inorder" (sequential)
-//   - chronological: follow historical chronological order from Bible-CSV
-//   - dailyPsalms: append a daily Psalm (cycling 1-150) each day
-//   - dailyProverbs: append a daily Proverb (cycling 1-31) each day
-//
-// When days === 365, both OT and NT are selected, and no books are excluded,
-// schedules are loaded directly from the verse-balanced Bible-CSV submodule.
-// Custom day counts, single-testament plans, and excluded books reuse the
-// Bible-CSV chronological order (or live translation chapter counts) and chunk
-// chapters evenly across the requested days.
+// There is one plan source: Bible-CSV's shortened chronological book order.
+// The selected start date and day count are applied in JavaScript, spreading
+// the chronological chapter stream evenly across the requested duration.
 // ============================================================================
 
 import { listBooks } from "./bible.js";
@@ -155,75 +149,20 @@ export async function generateSchedule({
   const numDays = Math.max(1, Math.min(1000, parseInt(days, 10) || 365));
   const filteredGroups = (groups || []).filter((g) => g !== "dc");
   const orderedGroups = GROUP_ORDER.filter((g) => filteredGroups.includes(g));
-  const isFullBible =
-    orderedGroups.includes("ot") && orderedGroups.includes("nt") && (!excludeBooks || excludeBooks.length === 0);
-
-  // Direct match with pre-balanced 365-day Bible-CSV plans
-  if (numDays === 365 && isFullBible) {
-    if (dailyPsalms === dailyProverbs) {
-      const filename = getCsvPlanFilename({ orderMode, chronological, dailyPsalms, dailyProverbs });
-      const csvText = await loadCsvPlanText(filename);
-      return parseCsvPlanText(csvText, safeStartDate);
-    }
-
-    // Only one of Daily Psalms / Daily Proverbs selected on a 365-day full-Bible plan:
-    // use the matching base CSV and append the requested daily wisdom chapter.
-    const baseFilename = getCsvPlanFilename({
-      orderMode,
-      chronological,
-      dailyPsalms: false,
-      dailyProverbs: false
-    });
-    const csvText = await loadCsvPlanText(baseFilename);
-    const baseDays = parseCsvPlanText(csvText, safeStartDate);
-    const enriched = appendDailyWisdom(
-      baseDays.map((d) => d.entries),
-      { dailyPsalms, dailyProverbs }
-    );
-    return baseDays.map((d, i) => ({ ...d, entries: enriched[i] }));
-  }
 
   let dayEntries = Array.from({ length: numDays }, () => []);
 
   if (orderedGroups.length > 0) {
-    if (chronological) {
-      const chronCsv = await loadCsvPlanText("order-chronological.csv");
-      const streams = extractChronologicalStreams(chronCsv);
-      const excludeSet = new Set(excludeBooks || []);
-      const groupSet = new Set(orderedGroups);
-
-      if (orderMode === "inorder") {
-        const filtered = streams.combined.filter(
-          (e) => groupSet.has(e.category) && !excludeSet.has(e.bookId)
-        );
-        const chunks = chunkEvenly(filtered, numDays);
-        chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
-      } else {
-        for (const group of orderedGroups) {
-          const pool = (group === "ot" ? streams.ot : streams.nt).filter(
-            (e) => !excludeSet.has(e.bookId)
-          );
-          const chunks = chunkEvenly(pool, numDays);
-          chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
-        }
-      }
-    } else {
-      const pools = await buildGroupPools(translationId, orderedGroups, excludeBooks);
-
-      if (orderMode === "inorder") {
-        const combined = orderedGroups.flatMap((g) => pools[g]);
-        const chunks = chunkEvenly(combined, numDays);
-        chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
-      } else {
-        for (const group of orderedGroups) {
-          const chunks = chunkEvenly(pools[group], numDays);
-          chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
-        }
-      }
-    }
+    const chronCsv = await loadCsvPlanText(getCsvPlanFilename());
+    const streams = extractChronologicalStreams(chronCsv);
+    const excludeSet = new Set(excludeBooks || []);
+    const groupSet = new Set(orderedGroups);
+    const filtered = streams.combined.filter(
+      (e) => groupSet.has(e.category) && !excludeSet.has(e.bookId)
+    );
+    const chunks = chunkEvenly(filtered, numDays);
+    chunks.forEach((chunk, i) => dayEntries[i].push(...chunk));
   }
-
-  dayEntries = appendDailyWisdom(dayEntries, { dailyPsalms, dailyProverbs });
 
   return dayEntries.map((entries, i) => ({
     dayIndex: i,
