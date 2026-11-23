@@ -84,7 +84,7 @@
 
 ### 1. Clone the Repository
 ```bash
-git clone --recurse-submodules https://github.com/jasonhukom/Bible-Plan.git
+git clone https://github.com/jasonhukom/Bible-Plan.git
 cd Bible-Plan
 npm install
 ```

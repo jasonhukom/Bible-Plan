@@ -14,7 +14,7 @@ This document explains every directory, route, page, component, context, library
   - **API.Bible** (`https://rest.api.bible/v1` / fallback `https://api.scripture.api.bible/v1`) — requires optional `VITE_API_BIBLE_KEY` (`NIV`, `NLT`, `NLT-UK`, `CSB`).
   - **YouVersion Platform Core** (`@youversion/platform-core`) — with automatic fallback to HelloAO on failure.
   - **Static Extra Books** (`/public/extra-books/{BOOK_ID}/{chapter}.json`) — self-hosted JSON for Deuterocanonical, Orthodox, Ethiopian Orthodox, OT Pseudepigrapha, and NT Apocrypha collections, with a graceful "Coming soon" fallback for unpopulated chapters.
-- **Reading Plan Data**: `Bible-CSV/` git submodule (`https://github.com/jasonhukom/Bible-CSV.git`) bundled at build time via Vite `?raw` imports (`src/lib/bibleCsvBundle.js`), plus dynamic translation-aware generation (`src/lib/planGenerator.js`).
+- **Reading Plan Data**: `Bible-CSV/` folder (vendored copy of `https://github.com/jasonhukom/Bible-CSV.git`, no submodule needed) bundled at build time via Vite `?raw` imports (`src/lib/bibleCsvBundle.js`), plus dynamic translation-aware generation (`src/lib/planGenerator.js`).
 
 ---
 
@@ -40,7 +40,6 @@ Bible-Plan/
 │   └── lib/                   # Persistence, plan generator, CSV parser/loader, Bible APIs, image cropper
 ├── tests/                     # Node native-ESM unit tests (`npm test`)
 ├── .env.example               # Optional VITE_API_BIBLE_KEY template
-├── .gitmodules                # Tracks Bible-CSV submodule
 ├── CODEBASE_GUIDE.md          # This guide
 ├── index.html                 # HTML entry loading Spectral & Karla Google Fonts
 ├── jhn3.html                  # Sample YouVersion HTML response fixture (reference)
