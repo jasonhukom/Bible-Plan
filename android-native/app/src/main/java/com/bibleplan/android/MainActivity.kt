@@ -99,10 +99,7 @@ class MainActivity : ComponentActivity() {
 
         val availablePlans = remember {
             listOf(
-                ReadingPlan("chronological_1yr", "Chronological 1-Year Plan", "Complete Genesis through Revelation in historical timeline order", 365),
-                ReadingPlan("canonical_365", "Canonical 365-Day Plan", "Read Old and New Testament passages daily in canonical order", 365),
-                ReadingPlan("discipleship_90", "Discipleship 90-Day Plan", "Intensive focus on Gospels, Epistles, and Psalms", 90),
-                ReadingPlan("nt_30", "New Testament 30-Day Blitz", "Complete New Testament in 30 days", 30)
+                ReadingPlan("chronological", "Shortened Book Chronology", "Read the Bible in shortened book chronology", 365)
             )
         }
         val activePlan = availablePlans.find { it.id == activePlanId } ?: availablePlans.first()

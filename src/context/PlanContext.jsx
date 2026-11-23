@@ -20,7 +20,7 @@ const DEFAULT_CONFIG = {
   days: 365,
   book_groups: ["ot", "nt"],
   order_mode: "overlap",
-  chronological: false,
+  chronological: true,
   daily_psalms: false,
   daily_proverbs: false
 };
