@@ -296,6 +296,15 @@
   flex-basis: 100%;
 }
 
+.conn-orientation {
+  margin-inline-start: auto;
+}
+
+/* Leave room for the fixed AI Search / Download buttons in the top corner. */
+.conn-page .page-header-sticky {
+  padding-right: 150px;
+}
+
 .conn-segmented {
   display: inline-flex;
   overflow: hidden;
@@ -545,5 +554,15 @@
     top: 6px;
     z-index: 5;
     max-height: 42vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .conn-page .page-header-sticky {
+    padding-right: 232px !important;
+  }
+
+  .conn-orientation {
+    margin-inline-start: 0;
   }
 }

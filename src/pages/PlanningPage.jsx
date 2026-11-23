@@ -90,21 +90,6 @@ export default function PlanningPage() {
           <h1 className="page-title">{t("conn.title")}</h1>
           <p className="page-subtitle">{t("conn.subtitle")}</p>
         </div>
-        <div className="page-header-actions">
-          <div className="conn-segmented" role="group" aria-label="Layout">
-            {["vertical", "horizontal"].map((key) => (
-              <button
-                key={key}
-                type="button"
-                className={orientation === key ? "active" : ""}
-                aria-pressed={orientation === key}
-                onClick={() => setOrientation(key)}
-              >
-                {t(`conn.${key}`)}
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
 
       <div className="conn-controls">
@@ -121,6 +106,19 @@ export default function PlanningPage() {
             >
               {t(`conn.${mode}`)}
               {mode === autoOrder && <span className="conn-auto-tag">{t("conn.auto")}</span>}
+            </button>
+          ))}
+        </div>
+        <div className="conn-segmented conn-orientation" role="group" aria-label={t("conn.layout")}>
+          {["vertical", "horizontal"].map((key) => (
+            <button
+              key={key}
+              type="button"
+              className={orientation === key ? "active" : ""}
+              aria-pressed={orientation === key}
+              onClick={() => setOrientation(key)}
+            >
+              {t(`conn.${key}`)}
             </button>
           ))}
         </div>

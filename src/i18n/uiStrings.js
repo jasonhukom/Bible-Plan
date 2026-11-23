@@ -49,6 +49,7 @@ export const UI_STRINGS = {
     "conn.title": "Bible Connections",
     "conn.subtitle": "How the books of the Bible speak to each other",
     "conn.order": "Order",
+    "conn.layout": "Layout",
     "conn.chronological": "Chronological",
     "conn.composition": "Composition",
     "conn.canon": "Canon",
