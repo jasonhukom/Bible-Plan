@@ -43,9 +43,9 @@ jobs:
           npm ci
           npm test
 
-      - name: Generate Tauri icons from brand logo
+      - name: Generate Tauri icons from the cross app icon
         working-directory: desktop-tauri
-        run: npx --yes @tauri-apps/cli@2 icon ../public/assets/brand/logo-favicon.png
+        run: npx --yes @tauri-apps/cli@2 icon app-icon.png
 
       - name: Build Windows NSIS installer (.exe)
         working-directory: desktop-tauri
